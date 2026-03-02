@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Message For You | Love Bites</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .view-container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ffb3c1 0%, #ff4d6d 100%);
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background: #fff;
+            position: relative;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: -150px;
+            left: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-bottom: 150px solid #fff;
+            z-index: 2;
+            transition: transform 0.5s ease;
+            transform-origin: bottom;
+        }
+
+        .open .envelope::before {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+
+        .letter {
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+            width: 280px;
+            height: 180px;
+            background: #fff0f3;
+            padding: 20px;
+            transition: transform 0.8s ease;
+            z-index: 1;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .open .letter {
+            transform: translateY(-120px);
+            height: auto;
+            min-height: 300px;
+        }
+
+        .reveal-content {
+            opacity: 0;
+            transition: opacity 0.5s ease 0.5s;
+        }
+
+        .open .reveal-content {
+            opacity: 1;
+        }
+
+        #partnerMessage {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            font-style: italic;
+            margin: 15px 0;
+        }
+
+        #partnerMemory {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--primary-light);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="heart-container"></div>
+
+    <div class="view-container">
+        <!-- Envelope Surprise -->
+        <div id="envelopeWrapper" class="envelope-wrapper surprise-element" style="display: none;">
+            <div class="envelope">
+                <div class="letter glass-panel">
+                    <div class="reveal-content">
+                        <h2 class="romantic-font displayPartnerName">Hello.</h2>
+                        <p class="partnerMessage"></p>
+                        <p class="partnerMemory"></p>
+                        <p style="font-weight: 600; color: var(--primary); margin-top: 15px;">Forever Yours. ❤</p>
+                    </div>
+                </div>
+            </div>
+            <p class="instruction" style="text-align: center; margin-top: 20px; color: white; font-weight: 600;">Tap to
+                open your surprise</p>
+        </div>
+
+        <!-- Scratch Card Surprise -->
+        <div id="scratchWrapper" class="scratch-container surprise-element" style="display: none;">
+            <div class="scratch-content">
+                <h2 class="romantic-font displayPartnerName"></h2>
+                <p class="partnerMessage"></p>
+                <p class="partnerMemory"></p>
+                <p style="font-weight: 600; color: var(--primary); margin-top: 15px;">Forever Yours. ❤</p>
+            </div>
+            <canvas id="scratch-canvas" width="320" height="450"></canvas>
+            <p class="instruction" style="text-align: center; margin-top: 20px; color: white; font-weight: 600;">Scratch
+                to
+                reveal my heart</p>
+        </div>
+
+        <!-- Photo Gallery Surprise -->
+        <div id="galleryWrapper" class="gallery-container surprise-element" style="display: none;">
+            <div id="photoStack">
+                <!-- polaroids added via JS -->
+            </div>
+            <p class="instruction" style="text-align: center; margin-top: 50px; color: white; font-weight: 600;">Swipe
+                the
+                photos away...</p>
+        </div>
+    </div>
+
+    <script>
+        // Load Data
+        const urlParams = new URLSearchParams(window.location.search);
+        const codeId = urlParams.get('id');
+        const data = JSON.parse(localStorage.getItem(`loveCode_${codeId}`));
+
+        if (data) {
+            document.querySelectorAll('.displayPartnerName').forEach(el => el.innerText = `To ${data.name},`);
+            document.querySelectorAll('.partnerMessage').forEach(el => el.innerText = data.message);
+            document.querySelectorAll('.partnerMemory').forEach(el => el.innerText = data.memory ? `Remember: ${data.memory}` : "");
+
+            // Show appropriate surprise
+            const surpriseType = data.surprise || 'letter';
+            if (surpriseType === 'letter' || surpriseType === 'petals') {
+                document.getElementById('envelopeWrapper').style.display = 'block';
+            } else if (surpriseType === 'scratch') {
+                document.getElementById('scratchWrapper').style.display = 'block';
+                initScratchCard();
+            } else if (surpriseType === 'gallery' || surpriseType === 'hearts') {
+                document.getElementById('galleryWrapper').style.display = 'block';
+                initGallery();
+            }
+        } else {
+            document.body.innerHTML = '<div class="view-container"><h1 class="romantic-font" style="color:white;">Oops! This Love Code has expired or doesn\'t exist.</h1></div>';
+        }
+
+        // --- ENVELOPE LOGIC ---
+        const envelope = document.getElementById('envelopeWrapper');
+        envelope.addEventListener('click', () => {
+            envelope.classList.add('open');
+            envelope.querySelector('.instruction').style.display = 'none';
+            playHearts();
+        });
+
+        // --- SCRATCH CARD LOGIC ---
+        function initScratchCard() {
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+
+            // Fill with silver/scratch color
+            ctx.fillStyle = '#C0C0C0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add some "scratch here" texture
+            ctx.fillStyle = '#A0A0A0';
+            for (let i = 0; i < 100; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 30, 0, Math.PI * 2);
+                ctx.fill();
+
+                checkScratchPercent();
+            }
+
+            function checkScratchPercent() {
+                const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                let transparentPixels = 0;
+                for (let i = 0; i < pixels.length; i += 4) {
+                    if (pixels[i + 3] < 128) transparentPixels++;
+                }
+                const percent = (transparentPixels / (canvas.width * canvas.height)) * 100;
+                if (percent > 40) {
+                    canvas.style.transition = 'opacity 1s';
+                    canvas.style.opacity = '0';
+                    setTimeout(() => {
+                        canvas.remove();
+                        const instr = document.querySelector('#scratchWrapper .instruction');
+                        if (instr) instr.style.display = 'none';
+                        playHearts();
+                    }, 1000);
+                }
+            }
+
+            canvas.addEventListener('mousedown', () => isDrawing = true);
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); });
+            window.addEventListener('mouseup', () => isDrawing = false);
+            window.addEventListener('touchend', () => isDrawing = false);
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); });
+        }
+
+        // --- GALLERY LOGIC ---
+        function initGallery() {
+            const stack = document.getElementById('photoStack');
+            const photos = [
+                'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=300&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1516589174184-c68526514283?q=80&w=300&h=400&fit=crop',
+                'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=300&h=400&fit=crop'
+            ];
+
+            photos.forEach((src, index) => {
+                const div = document.createElement('div');
+                div.className = 'polaroid';
+                div.style.zIndex = photos.length - index;
+                div.innerHTML = `
+                    <img src="${src}" alt="Memory">
+                    <p class="romantic-font" style="margin-top:10px; color:var(--text-muted)">Memory #${photos.length - index}</p>
+                `;
+
+                div.addEventListener('click', () => {
+                    div.classList.add('swiped');
+                    if (index === photos.length - 1) {
+                        setTimeout(() => {
+                            const instr = document.querySelector('#galleryWrapper .instruction');
+                            if (instr) instr.innerHTML = "End of memories, but start of us. ❤";
+                            playHearts();
+                        }, 500);
+                    }
+                });
+
+                stack.appendChild(div);
+            });
+        }
+
+        // Hearts Animation
+        function playHearts() {
+            const interval = setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '❤';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.fontSize = Math.random() * 20 + 20 + 'px';
+                heart.style.animationDuration = Math.random() * 2 + 3 + 's';
+                heart.style.opacity = '0.8';
+                heart.style.color = '#ff4d6d';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 5000);
+            }, 100);
+            setTimeout(() => clearInterval(interval), 10000);
+        }
+    </script>
+</body>
+
+</html>

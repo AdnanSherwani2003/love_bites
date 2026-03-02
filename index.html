@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Bites | Create Your Digital Love Message</title>
+    <meta name="description"
+        content="Generate a unique Love Code for your partner. A personalized digital experience with heartfelt messages and surprises.">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav id="navbar" class="top">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    class="heart-icon">
+                    <defs>
+                        <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--rose-light)" />
+                            <stop offset="100%" style="stop-color:var(--rose)" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="url(#heartGrad)" />
+                </svg>
+                <span class="logo-text">Love <i>Bites</i><span class="dot"></span></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#occasions">Occasions</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#ai" class="ai-magic">AI Magic <span class="badge">New</span></a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="#" class="btn-ghost">Sign In</a>
+                <a href="#create" class="btn-primary-sm">Create Love Code</a>
+            </div>
+
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav><!-- FULLSCREEN MOBILE MENU -->
+    <div class="fullscreen-menu" id="fullscreenMenu">
+
+        <!-- Top bar -->
+        <div class="menu-topbar">
+            <div class="menu-logo">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="menuHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--rose-light)" />
+                            <stop offset="100%" style="stop-color:var(--rose)" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="url(#menuHeartGrad)" />
+                </svg>
+                <span class="menu-logo-text">Love<em>Bites</em><span class="menu-logo-dot"></span></span>
+            </div>
+            <button class="menu-close-btn" id="menuCloseBtn">✕</button>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="menu-items">
+            <div class="menu-section-label">Explore</div>
+
+            <a href="#how-it-works" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-rose">✨</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">How It Works</span>
+                        <span class="menu-item-sub">See the magic behind the code</span>
+                    </div>
+                </div>
+                <span class="menu-arrow">›</span>
+            </a>
+
+            <a href="#examples" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-pink">💝</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Examples</span>
+                        <span class="menu-item-sub">Get inspired by real love codes</span>
+                    </div>
+                </div>
+                <span class="menu-arrow">›</span>
+            </a>
+
+            <a href="#occasions" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-gold">🎂</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Occasions</span>
+                        <span class="menu-item-sub">Birthdays, proposals & more</span>
+                    </div>
+                </div>
+                <span class="menu-arrow">›</span>
+            </a>
+
+            <a href="#pricing" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-blue">💳</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Pricing</span>
+                        <span class="menu-item-sub">Simple & affordable plans</span>
+                    </div>
+                </div>
+                <span class="menu-arrow">›</span>
+            </a>
+
+            <a href="#ai-magic" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-green">🤖</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">AI Magic</span>
+                        <span class="menu-item-sub">Powered by advanced AI</span>
+                    </div>
+                </div>
+                <div class="menu-item-right">
+                    <span class="menu-badge">New</span>
+                    <span class="menu-arrow">›</span>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="menu-footer">
+            <button class="menu-btn-create" id="menuBtnCreate">♥ Create Your Love Code</button>
+            <button class="menu-btn-signin" id="menuBtnSignin">Sign In</button>
+        </div>
+
+    </div>
+
+    <div id="heart-container"></div>
+    <div id="hero-particles"></div>
+
+    <main>
+        <!-- Option 5: Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Hero Section -->
+        <section id="hero">
+            <!-- Floating background words -->
+            <div class="bg-words" id="bgWords"></div>
+
+            <!-- Floating soft shapes -->
+            <div class="bg-shapes" id="bgShapes"></div>
+
+            <!-- Background layer -->
+            <div class="hero-bg"></div>
+            <div class="hero-overlay"></div>
+
+            <!-- Option 1: Floating Phrases -->
+            <div class="floating-phrases" id="floatingPhrases"></div>
+
+            <!-- Option 3: Chat Bubbles -->
+            <div class="chat-bubbles" id="chatBubbles"></div>
+
+            <!-- Content -->
+            <div class="hero-content container">
+
+                <!-- Eyebrow -->
+                <div class="hero-eyebrow reveal-up">
+                    <span class="eyebrow-dot">♥</span>
+                    The world's most personal digital gift
+                </div>
+
+                <!-- Headline -->
+                <h1 class="hero-title reveal-up" style="transition-delay: 0.1s;">
+                    Turn Feelings Into <em>Unforgettable</em> Moments.
+                </h1>
+
+                <!-- Subtext -->
+                <p class="hero-sub reveal-up" style="transition-delay: 0.2s;">
+                    Create a private Love Code your partner unlocks — filled with
+                    animations, memories, and emotions they'll never forget.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="hero-actions reveal-up" style="transition-delay: 0.3s;">
+                    <a href="#create" class="btn-primary hero-cta">
+                        <span>♥</span> Create Your Love Code
+                    </a>
+                    <a href="#examples" class="btn-outline-hero">
+                        View Demo
+                    </a>
+                </div>
+
+                <!-- Trust badges -->
+                <div class="hero-trust reveal-up" style="transition-delay: 0.4s;">
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rose-light)"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z">
+                            </path>
+                        </svg>
+                        500+ Love Codes Sent
+                    </span>
+                    <span class="trust-dot">·</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rose-light)"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                            </path>
+                        </svg>
+                        4.9 Star Rating
+                    </span>
+                    <span class="trust-dot">·</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                            style="color: var(--rose-light);">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        End-To-End-Encrypted
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Storytelling Section (Imagery) -->
+        <section id="story-section" class="story-section">
+            <div class="story-grid-container container">
+                <div class="story-grid">
+                    <div class="story-item"><img src="story1.png" alt="Story 1"></div>
+                    <div class="story-item"><img src="story2.png" alt="Story 2"></div>
+                    <div class="story-item"><img src="story3.png" alt="Story 3"></div>
+                    <div class="story-item"><img src="il_1080xN.5419394416_5lnp.webp" alt="Story 4"></div>
+                    <div class="story-item"><img src="story5.jpg" alt="Story 5"></div>
+                    <div class="story-item"><img src="story6.jpg" alt="Story 6"></div>
+                    <div class="story-item"><img src="story7.jpg" alt="Story 7"></div>
+                    <div class="story-item"><img src="story8.webp" alt="Story 8"></div>
+                    <div class="story-item"><img src="story9.jpg" alt="Story 9"></div>
+                    <div class="story-item"><img src="story11.webp" alt="Story 11"></div>
+                    <div class="story-item"><img src="story13.webp" alt="Story 13"></div>
+                </div>
+
+                <div id="transition-particles"></div>
+
+                <div class="story-text-overlay">
+                    <div class="romantic-quote-container scroll-reveal">
+                        <p class="romantic-quote">"In all the world, there is no heart for me like yours. In all the
+                            world, there is no love for you like mine."</p>
+                        <span class="quote-author">— Maya Angelou</span>
+                    </div>
+                    <h2 class="romantic-font">A Journey of a Thousand Memories...</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Creation Section -->
+        <section id="create" class="creation-section container">
+            <div class="creation-card glass-panel">
+                <h2 class="romantic-font"
+                    style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 30px; text-align: center;">Craft
+                    Your Message</h2>
+
+                <form id="loveForm">
+                    <div class="form-group">
+                        <label for="partnerName">Your Partner's Name</label>
+                        <input type="text" id="partnerName" placeholder="e.g. My Dearest Sophie" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mainMessage">A Heartfelt Message</label>
+                        <textarea id="mainMessage" rows="4" placeholder="Something sweet and personal..."
+                            required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="specialMemory">A Shared Memory</label>
+                        <textarea id="specialMemory" rows="3" placeholder="That day we first met at..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="surpriseType">Choose a Digital Surprise</label>
+                        <select id="surpriseType"
+                            style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.5); font-family: inherit;">
+                            <option value="letter">The Waxed Letter (Classic)</option>
+                            <option value="scratch">Digital Scratch Card</option>
+                            <option value="gallery">Romantic Photo Gallery</option>
+                            <option value="petals">Falling Rose Petals</option>
+                        </select>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 40px;">
+                        <button type="submit" class="btn-primary">Generate Love Code</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Share Modal (Hidden by default) -->
+        <div id="shareModal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center;">
+            <div class="creation-card glass-panel" style="max-width: 500px; text-align: center;">
+                <h3 class="romantic-font" style="font-size: 2rem; color: var(--secondary); margin-bottom: 20px;">Your
+                    Love Code is Ready!</h3>
+                <p style="margin-bottom: 25px;">Share this secret link with your partner:</p>
+                <div id="generatedLink"
+                    style="padding: 15px; background: white; border-radius: 10px; margin-bottom: 25px; word-break: break-all; font-weight: 600; color: var(--primary);">
+                </div>
+
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button onclick="copyLink()" class="btn-primary" style="padding: 12px 25px;">Copy Link</button>
+                    <a id="whatsappLink" href="#" target="_blank" class="btn-primary"
+                        style="padding: 12px 25px; background: #25D366;">WhatsApp</a>
+                </div>
+                <button onclick="closeModal()"
+                    style="margin-top: 20px; background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline;">Close</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
