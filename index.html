@@ -8,6 +8,9 @@
     <meta name="description"
         content="Generate a unique Love Code for your partner. A personalized digital experience with heartfelt messages and surprises.">
     <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
 </head>
 
 <body>
@@ -39,7 +42,7 @@
 
             <div class="nav-actions">
                 <a href="#" class="btn-ghost">Sign In</a>
-                <a href="#create" class="btn-primary-sm">Create Love Code</a>
+                <a href="create.html" class="btn-primary-sm">Create Love Code</a>
             </div>
 
             <button class="hamburger" id="hamburger">
@@ -136,7 +139,9 @@
 
         <!-- Footer -->
         <div class="menu-footer">
-            <button class="menu-btn-create" id="menuBtnCreate">♥ Create Your Love Code</button>
+            <a href="create.html" class="menu-btn-create" id="menuBtnCreate"
+                style="text-decoration: none; display: flex; align-items: center; justify-content: center;">♥ Create
+                Your Love Code</a>
             <button class="menu-btn-signin" id="menuBtnSignin">Sign In</button>
         </div>
 
@@ -189,7 +194,7 @@
 
                 <!-- CTA Buttons -->
                 <div class="hero-actions reveal-up" style="transition-delay: 0.3s;">
-                    <a href="#create" class="btn-primary hero-cta">
+                    <a href="create.html" class="btn-primary hero-cta">
                         <span>♥</span> Create Your Love Code
                     </a>
                     <a href="#examples" class="btn-outline-hero">
@@ -234,34 +239,196 @@
 
         </section>
 
-        <!-- Storytelling Section (Imagery) -->
-        <section id="story-section" class="story-section">
-            <div class="story-grid-container container">
-                <div class="story-grid">
-                    <div class="story-item"><img src="story1.png" alt="Story 1"></div>
-                    <div class="story-item"><img src="story2.png" alt="Story 2"></div>
-                    <div class="story-item"><img src="story3.png" alt="Story 3"></div>
-                    <div class="story-item"><img src="il_1080xN.5419394416_5lnp.webp" alt="Story 4"></div>
-                    <div class="story-item"><img src="story5.jpg" alt="Story 5"></div>
-                    <div class="story-item"><img src="story6.jpg" alt="Story 6"></div>
-                    <div class="story-item"><img src="story7.jpg" alt="Story 7"></div>
-                    <div class="story-item"><img src="story8.webp" alt="Story 8"></div>
-                    <div class="story-item"><img src="story9.jpg" alt="Story 9"></div>
-                    <div class="story-item"><img src="story11.webp" alt="Story 11"></div>
-                    <div class="story-item"><img src="story13.webp" alt="Story 13"></div>
-                </div>
+        <!-- ═══════════════════════════════════════════
+             JOURNEY SECTION — replace existing section
+        ═══════════════════════════════════════════ -->
+        <section id="journey">
 
-                <div id="transition-particles"></div>
+            <div id="jrn-pts"></div>
 
-                <div class="story-text-overlay">
-                    <div class="romantic-quote-container scroll-reveal">
-                        <p class="romantic-quote">"In all the world, there is no heart for me like yours. In all the
-                            world, there is no love for you like mine."</p>
-                        <span class="quote-author">— Maya Angelou</span>
+            <!-- GATEWAY TRANSITION -->
+            <div class="jrn-gateway">
+                <p class="jrn-gw-q" id="jrn-gq">
+                    "Every love story is beautiful.<br />
+                    But yours should be <em>unforgettable.</em>"
+                </p>
+                <div class="jrn-gw-line"></div>
+                <p class="jrn-gw-s">Scroll to experience it</p>
+            </div>
+
+            <!-- SECTION HEADER -->
+            <div class="jrn-head" id="jrn-sh">
+                <div class="jrn-eyebrow">♥ A Journey Through Love</div>
+                <h2 class="jrn-title">Feel Every <em>Chapter</em><br />of Your Story</h2>
+                <p class="jrn-sub">Real moments. Real emotions. The kind of love that deserves to be remembered forever.
+                </p>
+            </div>
+
+            <!-- PAIR 1 — img_1.jpg + Arjun's story -->
+            <div class="jrn-wrap">
+                <div class="jrn-pair">
+                    <div class="jrn-img">
+                        <img src="images/gallery/img_1.jpg" alt="Couple laughing in park" />
+                        <div class="jrn-img-cap">
+                            <div class="jrn-img-tag">🌿 Joy &amp; Laughter</div>
+                            <div class="jrn-img-q">"The way you laugh is my favourite sound in the world."</div>
+                        </div>
                     </div>
-                    <h2 class="romantic-font">A Journey of a Thousand Memories...</h2>
+                    <div class="jrn-story">
+                        <div class="jrn-story-name">Arjun S. · Mumbai</div>
+                        <div class="jrn-story-title">"She cried for 10 minutes straight."</div>
+                        <div class="jrn-story-body">"I'd been planning it for 3 weeks. Collected every photo from her
+                            camera roll, our old WhatsApp chats, even a selfie from our first date she thought she'd
+                            deleted. When she opened the Love Code that night, she sat there silently at first — then
+                            the tears came. She didn't say a word. She just turned her phone around and showed me the
+                            screen. Best decision of my life."</div>
+                        <div class="jrn-story-meta">Sent on their 2nd anniversary · via WhatsApp</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- PAIR 2 — img_2.jpg + Vikram's story (FLIPPED) -->
+            <div class="jrn-wrap">
+                <div class="jrn-pair flip">
+                    <div class="jrn-img">
+                        <img src="images/gallery/img_2.jpg" alt="Couple dancing in rain" />
+                        <div class="jrn-img-cap">
+                            <div class="jrn-img-tag">🌧️ Spontaneous Love</div>
+                            <div class="jrn-img-q">"Some of the best moments were never planned."</div>
+                        </div>
+                    </div>
+                    <div class="jrn-story">
+                        <div class="jrn-story-name">Vikram K. · New Delhi</div>
+                        <div class="jrn-story-title">"She called me crying at 2am."</div>
+                        <div class="jrn-story-body">"She's in Dubai. I'm in Delhi. Long distance for 14 months. On our
+                            anniversary I sent her a Love Code with every video from our FaceTime calls, screenshots of
+                            our late-night chats, and a voice note I'd recorded just for her. She called me at 2am
+                            completely broken down. Said it felt like I was right there with her. We're getting married
+                            next year."</div>
+                        <div class="jrn-story-meta">Long distance · Delhi &amp; Dubai · via Email</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAGS CARD -->
+            <div class="jrn-tags-wrap">
+                <div class="jrn-tc" id="jrn-tc">
+                    <div class="jrn-tc-l">Celebrate Every Moment</div>
+                    <div class="jrn-tags">
+                        <span class="jrn-tag">💍 Proposals</span>
+                        <span class="jrn-tag">🎂 Birthdays</span>
+                        <span class="jrn-tag">💌 Long Distance</span>
+                        <span class="jrn-tag">🌅 Anniversaries</span>
+                        <span class="jrn-tag">🕯️ Just Because</span>
+                        <span class="jrn-tag">🌙 Midnight Surprises</span>
+                        <span class="jrn-tag">✈️ Reunions</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAIR 3 — img_3.jpg + Priya's story -->
+            <div class="jrn-wrap">
+                <div class="jrn-pair">
+                    <div class="jrn-img">
+                        <img src="images/gallery/img_3.jpg" alt="Indian couple with candles" />
+                        <div class="jrn-img-cap">
+                            <div class="jrn-img-tag">🕯️ Intimacy</div>
+                            <div class="jrn-img-q">"In the warmth of us, I found my forever."</div>
+                        </div>
+                    </div>
+                    <div class="jrn-story">
+                        <div class="jrn-story-name">Priya R. · Bengaluru</div>
+                        <div class="jrn-story-title">"I couldn't breathe."</div>
+                        <div class="jrn-story-body">"Our anniversary. Candlelight dinner at home — the kind we used to
+                            do when we were broke and happy. He handed me his phone mid-dinner, no explanation. The Love
+                            Code started playing — our entire journey together, set to the song from our first road
+                            trip. I couldn't breathe. I still watch it when I miss him, even though he's right next to
+                            me."</div>
+                        <div class="jrn-story-meta">3rd anniversary · Bengaluru · via WhatsApp</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STORY BREAK -->
+            <div class="jrn-sb" id="jrn-sb1">
+                <div class="jrn-sb-line"></div>
+                <p class="jrn-sb-q">"She opened the link at midnight.<br />She hasn't stopped <em>smiling</em> since."
+                </p>
+                <p class="jrn-sb-sub">— A real Love Bites story · Mumbai, India</p>
+                <div class="jrn-sb-line" style="margin-top:1.5rem;margin-bottom:0;"></div>
+            </div>
+
+            <!-- PAIR 4 — img_4.jpg + Rohit's story (FLIPPED) -->
+            <div class="jrn-wrap">
+                <div class="jrn-pair flip">
+                    <div class="jrn-img">
+                        <img src="images/gallery/img_4.jpg" alt="Anniversary dinner" />
+                        <div class="jrn-img-cap">
+                            <div class="jrn-img-tag">🥂 Anniversaries</div>
+                            <div class="jrn-img-q">"To us. To every year we choose each other again."</div>
+                        </div>
+                    </div>
+                    <div class="jrn-story">
+                        <div class="jrn-story-name">Rohit M. · Hyderabad</div>
+                        <div class="jrn-story-title">"She said yes before I even finished."</div>
+                        <div class="jrn-story-body">"I created the Love Code 2 hours before I proposed — uploaded every
+                            photo from the last 3 years, wrote a message in the voice I never use out loud. At the
+                            restaurant I handed her my phone before getting down on one knee. She watched the whole
+                            thing, then looked up at me with tears streaming — and said yes before I'd even reached into
+                            my pocket for the ring."</div>
+                        <div class="jrn-story-meta">Proposal night · Hyderabad · via Love Code link</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOW IT REACHES THEM -->
+            <div class="jrn-how" id="jrn-how">
+                <div class="jrn-how-lbl">♥ How Love Bites Reaches Them</div>
+                <div class="jrn-how-grid">
+
+                    <!-- Step 01: image_5.jpeg = WhatsApp phone mockup -->
+                    <div class="jrn-hw">
+                        <img src="images/gallery/image_5.jpeg" alt="WhatsApp notification" />
+                        <div class="jrn-hw-info">
+                            <div class="jrn-hw-step">Step 01</div>
+                            <div class="jrn-hw-title">WhatsApp Notification</div>
+                            <div class="jrn-hw-desc">Your partner gets a message from Love Bites' verified business
+                                account — personal and instant.</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 02: image_6.jpeg = Email mockup -->
+                    <div class="jrn-hw">
+                        <img src="images/gallery/image_6.jpeg" alt="Love Bites email" />
+                        <div class="jrn-hw-info">
+                            <div class="jrn-hw-step">Step 02</div>
+                            <div class="jrn-hw-title">Beautiful Email Delivery</div>
+                            <div class="jrn-hw-desc">A cinematic email lands in their inbox — personal, not promotional.
+                                Designed to feel special from the very first glance.</div>
+                        </div>
+                    </div>
+
+                    <!-- Step 03: image_7.png = Birthday laptop -->
+                    <div class="jrn-hw">
+                        <img src="images/gallery/image_7.png" alt="Love Code experience" />
+                        <div class="jrn-hw-info">
+                            <div class="jrn-hw-step">Step 03</div>
+                            <div class="jrn-hw-title">They Feel Every Moment</div>
+                            <div class="jrn-hw-desc">Animations, music, and your memories create an experience they will
+                                never, ever forget.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- FINAL CTA -->
+            <div class="jrn-cta" id="jrn-cta">
+                <p class="jrn-cta-e">Your love story deserves to be remembered</p>
+                <h2 class="jrn-cta-t">"Ready to create a moment<br />they'll never forget?"</h2>
+                <a href="create.html" class="jrn-cta-btn">♥ Create Your Love Code</a>
+            </div>
+
         </section>
 
         <!-- Creation Section -->

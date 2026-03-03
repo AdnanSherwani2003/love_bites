@@ -460,105 +460,55 @@ if (bgShapesContainer) {
   setInterval(spawnSparkle, 2400);
 }
 
-// ══════════════════════════════════════
-// JOURNEY SECTION - ALL INTERACTIONS
-// ══════════════════════════════════════
-const journeyObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, {
-  threshold: 0.1,
-  rootMargin: '0px 0px -30px 0px'
-});
+// ═══════════════════════════════════════
+// JOURNEY SECTION — scroll animations + interactions
+// ═══════════════════════════════════════
+(function () {
+  const io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) e.target.classList.add('v');
+    });
+  }, { threshold: .08, rootMargin: '0px 0px -10px 0px' });
 
-document.querySelectorAll(
-  '.gallery-item, .story-card, .emotion-card, ' +
-  '.story-break, .section-header, .journey-cta, ' +
-  '.gateway-quote'
-).forEach(el => journeyObserver.observe(el));
+  document.querySelectorAll(
+    '.jrn-pair, .jrn-tc, .jrn-head, .jrn-sb, .jrn-how, .jrn-cta, .jrn-gw-q'
+  ).forEach(function (el) { io.observe(el); });
 
-// 3D TILT
-document.querySelectorAll('.tilt-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    card.style.transition = 'none';
-    card.style.transform = `perspective(800px) rotateY(${x * 20}deg) rotateX(${y * -20}deg) scale(1.03)`;
+  // 3D tilt on image cards
+  document.querySelectorAll('.jrn-img').forEach(function (c) {
+    c.addEventListener('mousemove', function (e) {
+      const r = c.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5;
+      const y = (e.clientY - r.top) / r.height - .5;
+      c.style.transform = `perspective(800px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg) scale(1.02)`;
+      c.style.transition = 'none';
+    });
+    c.addEventListener('mouseleave', function () {
+      c.style.transform = '';
+      c.style.transition = 'transform .6s ease';
+    });
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transition = 'transform 0.5s ease';
-    card.style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg) scale(1)';
-  });
-});
 
-// PARALLAX
-const galleryImages = document.querySelectorAll('.gallery-item img');
-window.addEventListener('scroll', () => {
-  galleryImages.forEach((img, i) => {
-    const parent = img.closest('.gallery-item');
-    if (!parent) return;
-    const rect = parent.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      const speed = i % 3 === 0 ? 0.04 : i % 3 === 1 ? 0.06 : 0.03;
-      const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * speed;
-      img.style.transform = `translateY(${offset}px) scale(1.08)`;
-    }
-  });
-}, { passive: true });
-
-// GATEWAY PARTICLES
-const gatewayParticles = document.getElementById('gatewayParticles');
-if (gatewayParticles) {
-  for (let i = 0; i < 8; i++) {
-    const p = document.createElement('div');
-    p.className = 'gp';
-    const size = Math.random() * 200 + 100;
-    p.style.cssText = `
-      width: ${size}px;
-      height: ${size}px;
-      left: ${Math.random() * 100}%;
-      top: ${Math.random() * 100}%;
-      animation-duration: ${Math.random() * 10 + 10}s;
-      animation-delay: ${Math.random() * 5}s;
-    `;
-    gatewayParticles.appendChild(p);
+  // Floating particles
+  const pts = document.getElementById('jrn-pts');
+  if (pts) {
+    ['♥', '♡', '·', '⋆'].forEach(function (ch) {
+      for (let i = 0; i < 5; i++) {
+        const el = document.createElement('div');
+        el.className = 'pt';
+        el.textContent = ch;
+        el.style.cssText = `
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          color: rgba(210, 100, 130, ${(Math.random() * .13 + .03).toFixed(2)});
+          font-size: ${(Math.random() * .6 + .4).toFixed(2)}rem;
+          animation-duration: ${(Math.random() * 12 + 8).toFixed(1)}s;
+          animation-delay: ${(Math.random() * 14).toFixed(1)}s;
+        `;
+        pts.appendChild(el);
+      }
+    });
   }
-}
+})();
 
-// SECTION FLOATING PARTICLES
-const sectionParticles = document.getElementById('sectionParticles');
-if (sectionParticles) {
-  const chars = ['♥', '💖', '✨', '🌸', '💫'];
-  for (let i = 0; i < 20; i++) {
-    const p = document.createElement('div');
-    p.className = 'sp';
-    p.textContent = chars[Math.floor(Math.random() * chars.length)];
-    p.style.cssText = `
-      left: ${Math.random() * 100}%;
-      top: ${Math.random() * 100}%;
-      color: rgba(232, 68, 90, ${Math.random() * 0.3 + 0.1});
-      animation-duration: ${Math.random() * 15 + 10}s;
-      animation-delay: ${Math.random() * 10}s;
-      font-size: ${Math.random() * 1.5 + 0.5}rem;
-    `;
-    sectionParticles.appendChild(p);
-  }
-}
 
-window.addEventListener("DOMContentLoaded", () => {
-  const gateway = document.getElementById("gateway");
-  if (gateway) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          gateway.classList.add("reveal");
-        }
-      });
-    }, { threshold: 0.15 });
-    observer.observe(gateway);
-  }
-});

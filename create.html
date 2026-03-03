@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Love Bites — Create Flow</title>
+
+    <!-- ========================================
+     FONT IMPORT
+     ======================================== -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,600&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* --- GLOBAL COLOR TOKENS --- */
+        :root {
+            --pink-bg-start: #fce4ec;
+            --pink-bg-mid: #fdf0f3;
+            --pink-bg-end: #fff5f7;
+            --crimson: #8b0a2a;
+            --rose: #c94070;
+            --cta: #c0314f;
+            --cta-hover: #a8273f;
+            --muted: #5a5a5a;
+            --watermark: rgba(210, 100, 130, 0.10);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* --- BODY BACKGROUND --- */
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--pink-bg-start) 0%, var(--pink-bg-mid) 50%, var(--pink-bg-end) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- SCREEN SYSTEM --- */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- WATERMARK BG WORDS --- */
+        .wm {
+            position: absolute;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(3rem, 7vw, 6rem);
+            font-weight: 700;
+            color: var(--watermark);
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 0;
+        }
+
+        /* --- FIXED TOP PROGRESS BAR --- */
+        .progress-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(253, 240, 243, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(192, 49, 79, 0.1);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: var(--crimson);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .steps {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(192, 49, 79, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.done {
+            background: var(--cta);
+            transform: scale(1.2);
+        }
+
+        .step-dot.active {
+            background: var(--rose);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        /* --- CONTENT WRAPPER --- */
+        .content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 680px;
+            padding: 100px 24px 60px;
+            text-align: center;
+        }
+
+        /* --- BADGE / PILL --- */
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(192, 49, 79, 0.3);
+            color: var(--cta);
+            border-radius: 50px;
+            padding: 6px 18px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        /* --- HEADINGS --- */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            color: var(--crimson);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+
+        h1 em {
+            color: var(--rose);
+            font-style: italic;
+        }
+
+        .subtext {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 48px;
+        }
+
+        /* --- MOOD CARDS --- */
+        .mood-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .mood-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1.5px solid rgba(192, 49, 79, 0.15);
+            border-radius: 20px;
+            padding: 20px 28px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            min-width: 150px;
+            text-align: center;
+            backdrop-filter: blur(6px);
+        }
+
+        .mood-card:hover {
+            border-color: var(--rose);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(192, 49, 79, 0.14);
+        }
+
+        .mood-card.selected {
+            background: linear-gradient(135deg, #fff0f3, #ffe0e8);
+            border-color: var(--cta);
+            box-shadow: 0 8px 28px rgba(192, 49, 79, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .mood-card .emoji {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .mood-card .label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--crimson);
+        }
+
+        /* --- FORM INPUTS --- */
+        .form-group {
+            margin-bottom: 22px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--rose);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1.5px solid rgba(192, 49, 79, 0.2);
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--crimson);
+            outline: none;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(6px);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(139, 10, 42, 0.3);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--rose);
+            box-shadow: 0 0 0 3px rgba(201, 64, 112, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: none;
+        }
+
+        .form-group select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        /* --- UPLOAD ZONE --- */
+        .upload-area {
+            border: 2px dashed rgba(192, 49, 79, 0.3);
+            border-radius: 20px;
+            padding: 40px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(255, 255, 255, 0.5);
+            margin-bottom: 28px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--rose);
+            background: rgba(255, 240, 243, 0.6);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .upload-area h3 {
+            color: var(--crimson);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .upload-area p {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* --- OCCASION TAGS --- */
+        .occasion-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1.5px solid rgba(192, 49, 79, 0.2);
+            border-radius: 50px;
+            padding: 7px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--rose);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag:hover,
+        .tag.selected {
+            background: var(--cta);
+            color: white;
+            border-color: var(--cta);
+        }
+
+        /* --- PHOTO GRID --- */
+        .photo-grid {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .photo-slot {
+            width: 90px;
+            height: 90px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(192, 49, 79, 0.2);
+            background: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-slot.filled {
+            border-color: var(--rose);
+            box-shadow: 0 4px 16px rgba(192, 49, 79, 0.15);
+        }
+
+        .photo-slot .photo-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(139, 10, 42, 0.7);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 3px 4px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* --- AI LOADER --- */
+        .ai-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .heart-pulse {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--cta), var(--rose));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            animation: pulse 1.2s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(192, 49, 79, 0.4);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(192, 49, 79, 0.4);
+                transform: scale(1);
+            }
+
+            50% {
+                box-shadow: 0 0 0 20px rgba(192, 49, 79, 0);
+                transform: scale(1.08);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(192, 49, 79, 0);
+                transform: scale(1);
+            }
+        }
+
+        .loading-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--crimson);
+            font-style: italic;
+        }
+
+        .loading-steps {
+            list-style: none;
+            text-align: left;
+        }
+
+        .loading-steps li {
+            color: var(--muted);
+            font-size: 0.88rem;
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .loading-steps li.done {
+            opacity: 1;
+            color: var(--rose);
+        }
+
+        .loading-steps li .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(192, 49, 79, 0.3);
+        }
+
+        .loading-steps li.done .dot {
+            background: var(--cta);
+        }
+
+        /* --- LOVE CODE PREVIEW CARD --- */
+        .love-code-card {
+            background: linear-gradient(145deg, #fff0f3, #fde8ed);
+            border: 1px solid rgba(192, 49, 79, 0.2);
+            border-radius: 28px;
+            padding: 36px 32px;
+            text-align: left;
+            box-shadow: 0 20px 60px rgba(192, 49, 79, 0.12);
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .love-code-card::before {
+            content: '♥';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            font-size: 8rem;
+            color: rgba(192, 49, 79, 0.05);
+        }
+
+        .love-code-card .to-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--rose);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .love-code-card .to-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--crimson);
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .love-code-card .message-preview {
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            font-style: italic;
+            border-left: 3px solid rgba(192, 49, 79, 0.3);
+            padding-left: 16px;
+            margin-bottom: 20px;
+        }
+
+        .photo-strip {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .photo-strip-item {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            border: 1.5px solid rgba(192, 49, 79, 0.15);
+        }
+
+        .mood-tag-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(192, 49, 79, 0.08);
+            border-radius: 50px;
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            color: var(--rose);
+            font-weight: 600;
+        }
+
+        /* --- TEMPLATE PICKER --- */
+        .template-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .template-opt {
+            min-width: 110px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1.5px solid rgba(192, 49, 79, 0.15);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .template-opt:hover,
+        .template-opt.selected {
+            border-color: var(--cta);
+            background: #fff0f3;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(192, 49, 79, 0.12);
+        }
+
+        .template-opt .t-icon {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+
+        .template-opt .t-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--crimson);
+        }
+
+        /* --- LOCK DIGIT INPUT --- */
+        .lock-input-wrap {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .lock-digit {
+            width: 56px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1.5px solid rgba(192, 49, 79, 0.25);
+            border-radius: 14px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--crimson);
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .lock-digit:focus {
+            border-color: var(--rose);
+            box-shadow: 0 0 0 3px rgba(201, 64, 112, 0.1);
+        }
+
+        .lock-hint {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(192, 49, 79, 0.15);
+            border-radius: 14px;
+            padding: 16px 20px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            text-align: left;
+            margin-bottom: 28px;
+        }
+
+        .lock-hint strong {
+            color: var(--rose);
+        }
+
+        /* --- SHARE SCREEN --- */
+        .share-link-box {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1.5px solid rgba(192, 49, 79, 0.2);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .share-link-box .link-text {
+            font-size: 0.85rem;
+            color: var(--rose);
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background: var(--cta);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--cta-hover);
+        }
+
+        .share-grid {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .share-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1.5px solid rgba(192, 49, 79, 0.15);
+            border-radius: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--crimson);
+        }
+
+        .share-btn:hover {
+            border-color: var(--rose);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(192, 49, 79, 0.12);
+        }
+
+        .share-btn .s-icon {
+            font-size: 1.5rem;
+        }
+
+        /* --- PARTNER UNLOCK SCREEN --- */
+        .unlock-screen {
+            background: linear-gradient(145deg, #1a0510, #2d0820, #3d0f28);
+        }
+
+        .unlock-screen .wm {
+            color: rgba(255, 100, 150, 0.05);
+        }
+
+        .unlock-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            color: #f9d0de;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .unlock-title em {
+            color: #ff8aaa;
+            font-style: italic;
+        }
+
+        .unlock-sub {
+            color: rgba(249, 208, 222, 0.6);
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+        }
+
+        .unlock-input-wrap {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .unlock-digit {
+            width: 56px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1.5px solid rgba(255, 138, 170, 0.3);
+            border-radius: 14px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ff8aaa;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .unlock-digit:focus {
+            border-color: #ff8aaa;
+            background: rgba(255, 138, 170, 0.1);
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(192, 49, 79, 0.2);
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: 0 8px 32px rgba(192, 49, 79, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 200;
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 280px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast .t-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cta), var(--rose));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .toast .t-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--crimson);
+        }
+
+        .toast .t-body {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        /* --- UTILITY BUTTONS --- */
+        .btn-primary {
+            background: var(--cta);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: var(--cta-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--muted);
+            border: 1.5px solid rgba(0, 0, 0, 0.1);
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--cta);
+        }
+
+        .regen-btn {
+            background: transparent;
+            border: 1.5px solid var(--rose);
+            color: var(--rose);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .regen-btn:hover {
+            background: var(--rose);
+            color: white;
+        }
+
+        /* Confetti pieces */
+        .confetti-piece {
+            position: absolute;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Loading steps animations */
+        @keyframes stepFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- FIXED PROGRESS BAR -->
+    <div class="progress-wrap" id="progressBar">
+        <div class="logo">♥ Love Bites.</div>
+        <div class="steps" id="stepDots"></div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast">
+        <div class="t-avatar">💞</div>
+        <div>
+            <div class="t-title" id="toastTitle">New reaction received!</div>
+            <div class="t-body" id="toastBody">"This made me cry happy tears 🥹"</div>
+        </div>
+    </div>
+
+    <!-- SCREEN 1 — MOOD PICKER -->
+    <div class="screen active" id="screen1">
+        <span class="wm" style="top:10%;left:-5%;transform:rotate(-12deg)">always</span>
+        <span class="wm" style="bottom:15%;right:-5%;transform:rotate(8deg)">forever</span>
+        <span class="wm" style="top:50%;left:60%;transform:rotate(-5deg);font-size:4rem">remember</span>
+        <div class="content">
+            <span class="badge">♥ Step 1 of 5</span>
+            <h1>How do you feel about<br /><em>them right now?</em></h1>
+            <p class="subtext">Pick a mood — we'll craft everything around it.</p>
+            <div class="mood-grid">
+                <div class="mood-card" onclick="selectMood(this,'Deeply in Love')"><span class="emoji">💞</span><span
+                        class="label">Deeply in love</span></div>
+                <div class="mood-card" onclick="selectMood(this,'Missing Them')"><span class="emoji">🌙</span><span
+                        class="label">Missing them</span></div>
+                <div class="mood-card" onclick="selectMood(this,'Celebrating Us')"><span class="emoji">🎉</span><span
+                        class="label">Celebrating us</span></div>
+                <div class="mood-card" onclick="selectMood(this,'Just Because')"><span class="emoji">💌</span><span
+                        class="label">Just because</span></div>
+                <div class="mood-card" onclick="selectMood(this,'Feeling Romantic')"><span class="emoji">🔥</span><span
+                        class="label">Feeling romantic</span></div>
+            </div>
+            <div class="btn-row">
+                <button class="btn-primary" id="moodNext" onclick="goTo(2)"
+                    style="opacity:0.4;pointer-events:none">Continue →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2 — PERSONALIZE -->
+    <div class="screen" id="screen2">
+        <span class="wm" style="top:8%;right:-4%;transform:rotate(10deg)">yours</span>
+        <span class="wm" style="bottom:10%;left:-3%;transform:rotate(-8deg)">always</span>
+        <div class="content">
+            <span class="badge">♥ Step 2 of 5</span>
+            <h1>Tell us about<br /><em>your person</em></h1>
+            <p class="subtext">Just three quick things — we'll handle the rest.</p>
+            <div class="form-group">
+                <label>Their name</label>
+                <input type="text" placeholder="e.g. Sofia, My love, Babe…" id="partnerNameInput" />
+            </div>
+            <div class="form-group">
+                <label>Occasion</label>
+                <select id="occasionSelect">
+                    <option>Anniversary 💍</option>
+                    <option>Birthday 🎂</option>
+                    <option>Valentine's Day 💝</option>
+                    <option>Just Because 🌸</option>
+                    <option>Long Distance 🌍</option>
+                    <option>Apology 🥺</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>One memory or thing you love about them</label>
+                <textarea placeholder="e.g. The way you laugh at your own jokes before finishing them…"
+                    id="memoryInput"></textarea>
+            </div>
+            <div class="btn-row">
+                <button class="btn-secondary" onclick="goTo(1)">← Back</button>
+                <button class="btn-primary" onclick="goTo(3)">Add Memories →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 3 — MEDIA UPLOAD -->
+    <div class="screen" id="screen3">
+        <span class="wm" style="top:12%;left:-4%;transform:rotate(-10deg)">moments</span>
+        <span class="wm" style="bottom:8%;right:-3%;transform:rotate(6deg)">cherish</span>
+        <div class="content">
+            <span class="badge">♥ Step 3 of 5</span>
+            <h1>Add Your<br /><em>Moments</em></h1>
+            <p class="subtext">Upload photos by occasion — we'll place them perfectly in your Love Code.</p>
+            <div class="upload-area" onclick="simulateUpload()">
+                <div class="upload-icon">📸</div>
+                <h3>Drop photos here or tap to upload</h3>
+                <p>JPG, PNG, HEIC · Up to 20 photos</p>
+            </div>
+            <p
+                style="font-size:0.8rem;font-weight:600;color:var(--rose);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;text-align:left;">
+                Tag by occasion</p>
+            <div class="occasion-tags">
+                <div class="tag selected" onclick="toggleTag(this)">📸 First date</div>
+                <div class="tag" onclick="toggleTag(this)">🎂 Birthday</div>
+                <div class="tag" onclick="toggleTag(this)">✈️ Trip together</div>
+                <div class="tag" onclick="toggleTag(this)">🏠 Everyday</div>
+                <div class="tag" onclick="toggleTag(this)">⭐ Custom</div>
+            </div>
+            <div class="photo-grid" id="photoGrid">
+                <div class="photo-slot filled">🌅<div class="photo-label">First date</div>
+                </div>
+                <div class="photo-slot filled">🏝️<div class="photo-label">Trip</div>
+                </div>
+                <div class="photo-slot filled">🎂<div class="photo-label">Birthday</div>
+                </div>
+                <div class="photo-slot">＋</div>
+                <div class="photo-slot">＋</div>
+            </div>
+            <div class="btn-row">
+                <button class="btn-secondary" onclick="goTo(2)">← Back</button>
+                <button class="btn-primary" onclick="goTo(4)">Generate My Love Code ♥</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4 — AI LOADING -->
+    <div class="screen" id="screen4">
+        <span class="wm" style="top:10%;right:-4%;transform:rotate(8deg)">crafting</span>
+        <div class="content" id="screen4content">
+            <div class="ai-loader" id="aiLoader">
+                <div class="heart-pulse">♥</div>
+                <p class="loading-text">Crafting your Love Code…</p>
+                <ul class="loading-steps" id="loadingSteps">
+                    <li id="ls1"><span class="dot"></span>Reading your feelings</li>
+                    <li id="ls2"><span class="dot"></span>Weaving in your memories</li>
+                    <li id="ls3"><span class="dot"></span>Placing your photos</li>
+                    <li id="ls4"><span class="dot"></span>Writing your message</li>
+                    <li id="ls5"><span class="dot"></span>Adding final magic ✨</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 4B — AI PREVIEW -->
+    <div class="screen" id="screen4b">
+        <span class="wm" style="top:8%;left:-4%;transform:rotate(-10deg)">beautiful</span>
+        <span class="wm" style="bottom:10%;right:-3%;transform:rotate(6deg)">always</span>
+        <div class="content">
+            <span class="badge">♥ Step 4 of 5 — Preview</span>
+            <h1>Your Love Code<br /><em>is ready</em></h1>
+            <div class="love-code-card">
+                <div class="to-label">To</div>
+                <div class="to-name" id="previewName">Sofia</div>
+                <div class="photo-strip">
+                    <div class="photo-strip-item">🌅</div>
+                    <div class="photo-strip-item">🏝️</div>
+                    <div class="photo-strip-item">🎂</div>
+                </div>
+                <div class="message-preview" id="previewMessage">
+                    "There's something I've never found the right words for — until now. The way you laugh at your own
+                    jokes before finishing them is the most beautiful thing I've ever known. This is for you, always."
+                </div>
+                <div class="mood-tag-display" id="previewMoodTag">💞 Deeply in Love · Anniversary</div>
+            </div>
+            <button class="regen-btn" onclick="regenerate()">↺ Regenerate message</button>
+            <div class="btn-row">
+                <button class="btn-secondary" onclick="goTo(3)">← Edit</button>
+                <button class="btn-primary" onclick="goTo(5)">Customize & Lock →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 5 — CUSTOMIZE & LOCK -->
+    <div class="screen" id="screen5">
+        <span class="wm" style="bottom:12%;left:-4%;transform:rotate(-8deg)">yours</span>
+        <div class="content">
+            <span class="badge">♥ Step 5 of 5</span>
+            <h1>Make it<br /><em>truly yours</em></h1>
+            <p class="subtext">Pick a template style for how your photos will appear.</p>
+            <div class="template-row">
+                <div class="template-opt selected" onclick="selectTemplate(this)">
+                    <div class="t-icon">🎞️</div>
+                    <div class="t-label">Film Strip</div>
+                </div>
+                <div class="template-opt" onclick="selectTemplate(this)">
+                    <div class="t-icon">📷</div>
+                    <div class="t-label">Polaroid Wall</div>
+                </div>
+                <div class="template-opt" onclick="selectTemplate(this)">
+                    <div class="t-icon">🎬</div>
+                    <div class="t-label">Slideshow</div>
+                </div>
+                <div class="template-opt" onclick="selectTemplate(this)">
+                    <div class="t-icon">📖</div>
+                    <div class="t-label">Scrapbook</div>
+                </div>
+                <div class="template-opt" onclick="selectTemplate(this)">
+                    <div class="t-icon">⏱️</div>
+                    <div class="t-label">Timeline</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Secret unlock code hint</label>
+                <input type="text" placeholder="e.g. The date we first met, our song, a special word…"
+                    id="unlockHint" />
+            </div>
+            <div class="lock-input-wrap">
+                <input class="lock-digit" maxlength="1" type="text" placeholder="•" />
+                <input class="lock-digit" maxlength="1" type="text" placeholder="•" />
+                <input class="lock-digit" maxlength="1" type="text" placeholder="•" />
+                <input class="lock-digit" maxlength="1" type="text" placeholder="•" />
+            </div>
+            <div class="lock-hint">
+                <strong>Tip:</strong> Use a date, a word, or a number only they would know — like the day you first met,
+                or your favorite song's year.
+            </div>
+            <div class="btn-row">
+                <button class="btn-secondary" onclick="goTo(4)">← Back</button>
+                <button class="btn-primary" onclick="goTo(6)">Lock & Share ♥</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 6 — SHARE -->
+    <div class="screen" id="screen6">
+        <div id="confettiContainer" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></div>
+        <span class="wm" style="top:10%;right:-4%;transform:rotate(8deg)">celebrate</span>
+        <span class="wm" style="bottom:10%;left:-4%;transform:rotate(-8deg)">cherish</span>
+        <div class="content">
+            <div class="success-icon">♥</div>
+            <span class="badge">♥ Your Love Code is Live!</span>
+            <h1>Ready to<br /><em>make them cry</em></h1>
+            <p class="subtext">Share the link. They'll see a locked screen until they enter your secret code.</p>
+            <div class="share-link-box">
+                <div class="link-text">lovebites.app/code/xK9mR2pL</div>
+                <button class="copy-btn" onclick="copyLink(this)">Copy</button>
+            </div>
+            <div class="share-grid">
+                <div class="share-btn"><span class="s-icon">💬</span>iMessage</div>
+                <div class="share-btn"><span class="s-icon">💚</span>WhatsApp</div>
+                <div class="share-btn"><span class="s-icon">✉️</span>Email</div>
+                <div class="share-btn"><span class="s-icon">📋</span>Copy</div>
+            </div>
+            <button class="btn-primary" onclick="goTo(7)">👀 Preview what they'll see</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 7 — PARTNER UNLOCK -->
+    <div class="screen unlock-screen" id="screen7">
+        <span class="wm" style="top:8%;left:-4%;transform:rotate(-10deg)">open</span>
+        <span class="wm" style="bottom:10%;right:-4%;transform:rotate(8deg)">yours</span>
+        <div class="content">
+            <div style="font-size:3rem;margin-bottom:20px;">🔒</div>
+            <h1 class="unlock-title">Someone left you<br /><em>something special</em></h1>
+            <p class="unlock-sub">Enter your secret code to unlock it</p>
+            <div class="unlock-input-wrap">
+                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
+                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
+                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
+                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
+            </div>
+            <p style="color:rgba(249,208,222,0.4);font-size:0.82rem;" id="finalHintDisplay">Hint: the date we first met
+                💌</p>
+            <div style="margin-top:40px;">
+                <button class="btn-secondary" style="border-color:rgba(255,138,170,0.4);color:#ff8aaa;"
+                    onclick="goTo(6)">← Back to share</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var currentScreen = 1;
+        var selectedMood = null;
+
+        /* Updates the dot progress bar at the top */
+        function updateProgress() {
+            var dots = document.getElementById('stepDots');
+            var bar = document.getElementById('progressBar');
+            if (!dots || !bar) return;
+            dots.innerHTML = '';
+            if (currentScreen === 7) { bar.style.display = 'none'; return; }
+            bar.style.display = 'flex';
+            for (var i = 1; i <= 6; i++) {
+                var d = document.createElement('div');
+                d.className = 'step-dot';
+                var num = currentScreen === '4b' ? 4 : currentScreen;
+                if (i < num) d.classList.add('done');
+                else if (i === num) d.classList.add('active');
+                dots.appendChild(d);
+            }
+        }
+
+        /* Main screen navigation function */
+        function goTo(n) {
+            var prev = document.getElementById('screen' + currentScreen);
+            if (prev) prev.classList.remove('active');
+            var prev4b = document.getElementById('screen4b');
+            if (prev4b) prev4b.classList.remove('active');
+
+            if (n === 4) {
+                document.getElementById('screen4').classList.add('active');
+                currentScreen = 4;
+                updateProgress();
+                runLoader();
+            } else {
+                currentScreen = n;
+                var el = document.getElementById('screen' + n);
+                if (el) el.classList.add('active');
+                updateProgress();
+            }
+
+            if (n === 6) spawnConfetti();
+            if (n === '4b' || n === 5 || n === 6 || n === 7) {
+                document.getElementById('previewName').textContent = document.getElementById('partnerNameInput').value || 'Sofia';
+                var occ = document.getElementById('occasionSelect').value;
+                document.getElementById('previewMoodTag').textContent = selectedMood + ' · ' + occ;
+                var hint = document.getElementById('unlockHint').value;
+                if (hint) document.getElementById('finalHintDisplay').textContent = 'Hint: ' + hint + ' 💌';
+            }
+            window.scrollTo(0, 0);
+        }
+
+        /* Enables Continue button after mood selected */
+        function selectMood(el, mood) {
+            var cards = document.querySelectorAll('.mood-card');
+            for (var i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
+            el.classList.add('selected');
+            selectedMood = mood;
+            var btn = document.getElementById('moodNext');
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+
+        function toggleTag(el) { el.classList.toggle('selected'); }
+
+        function selectTemplate(el) {
+            var opts = document.querySelectorAll('.template-opt');
+            for (var i = 0; i < opts.length; i++) opts[i].classList.remove('selected');
+            el.classList.add('selected');
+        }
+
+        function runLoader() {
+            var steps = ['ls1', 'ls2', 'ls3', 'ls4', 'ls5'];
+            for (var s = 0; s < steps.length; s++) {
+                var el = document.getElementById(steps[s]);
+                if (el) { el.classList.remove('done'); el.style.animation = 'none'; }
+            }
+            var i = 0;
+            var iv = setInterval(function () {
+                if (i < steps.length) {
+                    var el = document.getElementById(steps[i]);
+                    if (el) {
+                        el.classList.add('done');
+                        el.style.animation = 'stepFadeIn 0.4s forwards';
+                    }
+                    i++;
+                } else {
+                    clearInterval(iv);
+                    setTimeout(function () {
+                        document.getElementById('screen4').classList.remove('active');
+                        document.getElementById('screen4b').classList.add('active');
+                        currentScreen = '4b';
+                        updateProgress();
+                    }, 600);
+                }
+            }, 700);
+        }
+
+        function regenerate() {
+            var messages = [
+                "You're the reason I believe in magic. This Love Code holds every moment I've been too speechless to describe.",
+                "Loving you is the easiest and most extraordinary thing I've ever done. Every photo here is proof.",
+                "Some things don't need explaining — they just need to be felt. Open this, and feel everything."
+            ];
+            var el = document.getElementById('previewMessage');
+            el.style.opacity = '0';
+            var msg = messages[Math.floor(Math.random() * messages.length)];
+            setTimeout(function () {
+                el.textContent = msg;
+                el.style.transition = 'opacity 0.4s';
+                el.style.opacity = '1';
+            }, 300);
+        }
+
+        function copyLink(btn) {
+            btn.textContent = 'Copied!';
+            btn.style.background = '#2e7d32';
+            showToast('Link Exported!', 'Ready to share the magic.');
+            setTimeout(function () { btn.textContent = 'Copy'; btn.style.background = ''; }, 2000);
+        }
+
+        function showToast(title, body) {
+            var t = document.getElementById('toast');
+            if (title) document.getElementById('toastTitle').textContent = title;
+            if (body) document.getElementById('toastBody').textContent = body;
+            t.classList.add('show');
+            setTimeout(function () { t.classList.remove('show'); }, 3500);
+        }
+
+        function spawnConfetti() {
+            var container = document.getElementById('confettiContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            var colors = ['#c0314f', '#f48fb1', '#f06292', '#ad1457', '#ffd6e0'];
+            for (var i = 0; i < 40; i++) {
+                var p = document.createElement('div');
+                p.className = 'confetti-piece';
+                p.style.left = (Math.random() * 100) + '%';
+                p.style.top = (Math.random() * -10) + '%';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.animationDelay = (Math.random() * 2) + 's';
+                p.style.animationDuration = (2 + Math.random() * 2) + 's';
+                var size = (6 + Math.random() * 6) + 'px';
+                p.style.width = size;
+                p.style.height = size;
+                p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                container.appendChild(p);
+            }
+        }
+
+        function checkUnlock(el) {
+            var inputs = Array.prototype.slice.call(document.querySelectorAll('.unlock-digit'));
+            var filled = inputs.every(function (i) { return i.value.trim() !== ''; });
+            if (filled) {
+                setTimeout(function () {
+                    alert('Love Code Unlocked!\n\nIn the real app, a cinematic experience plays here — photos, message, music, and all.');
+                }, 300);
+            }
+            var idx = inputs.indexOf(el);
+            if (el.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+        }
+
+        function simulateUpload() {
+            var grid = document.getElementById('photoGrid');
+            if (!grid) return;
+            var slots = grid.querySelectorAll('.photo-slot:not(.filled)');
+            if (slots.length > 0) {
+                var emojis = ['🌸', '🌊', '🎵', '🌙', '🍂'];
+                var labels = ['Everyday', 'Trip', 'Custom', 'Moment', 'Memory'];
+                var idx = Math.floor(Math.random() * emojis.length);
+                slots[0].innerHTML = emojis[idx] + '<div class="photo-label">' + labels[idx] + '</div>';
+                slots[0].classList.add('filled');
+            }
+        }
+
+        document.querySelectorAll('.lock-digit').forEach(function (el, i, arr) {
+            el.addEventListener('input', function () {
+                if (el.value && i < arr.length - 1) arr[i + 1].focus();
+            });
+        });
+
+        updateProgress();
+    </script>
+</body>
+
+</html>
