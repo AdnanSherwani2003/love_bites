@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Magic | Love Bites</title>
+    <meta name="description"
+        content="Let our romantic AI find the perfect words for your partner. Craft heartfelt messages instantly.">
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body class="ai-magic-page">
+    <nav id="navbar" class="scrolled">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    class="heart-icon">
+                    <defs>
+                        <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--rose-light)" />
+                            <stop offset="100%" style="stop-color:var(--rose)" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="url(#heartGrad)" />
+                </svg>
+                <span class="logo-text">Love <i>Bites</i><span class="dot"></span></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="index.html#journey">Love Stories</a></li>
+                <li><a href="occasions.html">Occasions</a></li>
+                <li><a href="ai-magic.html" class="active">AI Magic <span class="badge">New</span></a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="about.html">About Us</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="#" class="btn-ghost">Sign In</a>
+                <a href="create.html" class="btn-primary-sm">Create Love Code</a>
+            </div>
+
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main style="padding-top: 80px;">
+        <!-- AI MAGIC SECTION -->
+        <section class="ai-magic-section" id="ai-magic" style="min-height: 100vh;">
+
+            <!-- Watermark BG words -->
+            <span class="wm" style="top:4%;left:-4%;transform:rotate(-10deg)">magic</span>
+            <span class="wm" style="bottom:5%;right:-4%;transform:rotate(7deg)">heartfelt</span>
+            <span class="wm" style="top:44%;left:55%;transform:rotate(-3deg);font-size:3rem">crafted</span>
+
+            <!-- Section Header -->
+            <div class="ai-magic-header">
+                <span class="badge">✨ AI Magic</span>
+                <h2>
+                    <span class="h2-top">See what our AI can write</span>
+                    <span class="h2-bottom">just for you.</span>
+                </h2>
+                <p>Type how you feel — our AI turns it into a message they'll never forget. Try it free, right now.</p>
+            </div>
+
+            <div class="ai-demo-card">
+
+                <!-- INPUT CARD -->
+                <div class="ai-input-wrap">
+                    <label class="ai-input-label">
+                        How are you feeling right now?
+                        <span>write anything — a few words or a full thought</span>
+                    </label>
+
+                    <textarea class="ai-textarea" id="ai-feeling-input"
+                        placeholder="e.g. I miss her so much it hurts, I want her to know how special she is to me..."
+                        maxlength="300"></textarea>
+
+                    <span class="ai-mood-label">Pick a mood (optional)</span>
+                    <div class="ai-mood-pills">
+                        <span class="ai-mood-pill" onclick="selectMood(this)">💞 In Love</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">🥺 Missing You</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">🎂 Birthday</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">💍 Anniversary</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">🌸 Just Because</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">🌍 Long Distance</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">💎 Proposal</span>
+                        <span class="ai-mood-pill" onclick="selectMood(this)">🥺 Apology</span>
+                    </div>
+
+                    <button class="ai-generate-btn" id="ai-generate-btn" onclick="generateMessage()">
+                        <div class="ai-spinner"></div>
+                        <span class="btn-text">✨ Generate My Message</span>
+                    </button>
+
+                    <div class="ai-error" id="ai-error">
+                        Something went wrong. Please try again in a moment.
+                    </div>
+                </div>
+
+                <!-- OUTPUT CARD -->
+                <div class="ai-output-wrap" id="ai-output-wrap">
+                    <div class="ai-output-header">
+                        <div class="ai-output-dot"></div>
+                        <span class="ai-output-label">✨ Your AI-crafted message</span>
+                    </div>
+
+                    <div class="ai-opening" id="ai-opening"></div>
+                    <div class="ai-message" id="ai-message"></div>
+                    <div class="ai-closing" id="ai-closing"></div>
+
+                    <div class="ai-output-cta">
+                        <p>Love what you see? <strong>Turn this into a full Love Code</strong> with photos, music & a
+                            secret unlock.</p>
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <button class="ai-regen-btn" onclick="generateMessage()">↺ Regenerate</button>
+                            <a href="create.html" class="ai-cta-btn">♥ Create Love Code →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="lb-footer">
+        <!-- ... (same footer as index.html) ... -->
+        <div class="lb-footer-body">
+            <div class="container">
+                <div class="lb-footer-grid">
+                    <div class="lb-col-brand">
+                        <a href="index.html" class="lb-logo">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                                <defs>
+                                    <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ff6b80" />
+                                        <stop offset="100%" style="stop-color:#e8445a" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#fg)" />
+                            </svg>
+                            <span class="lb-logo-text">Love <em>Bites</em><span class="lb-logo-dot"></span></span>
+                        </a>
+                        <p class="lb-tagline">The world's most personal digital gift — turn your feelings into moments they'll never forget.</p>
+                    </div>
+                    <!-- Footer columns ... -->
+                </div>
+            </div>
+        </div>
+        <div class="lb-divider"></div>
+        <div class="lb-footer-bottom">
+            <div class="container">
+                <div class="lb-bottom-inner">
+                    <p class="lb-copy">© 2026 Love Bites. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

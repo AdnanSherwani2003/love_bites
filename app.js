@@ -323,82 +323,30 @@ if (toastContainer) {
 }
 
 // ══════════════════════════════════════
-// FLOATING BACKGROUND WORDS
-// ══════════════════════════════════════
-const bgWordsList = [
-  'together', 'always', 'forever',
-  'yours', 'cherish', 'beloved',
-  'infinite', 'some love stories deserve remebered to be forever', 'remember',
-  'devotion', 'eternal', 'soulmate',
-  'always', 'because', 'I love you',
-  'never forget', 'with you',
-  'my heart', 'only you',
-  'every moment', 'hold on',
-  'promise', 'always & forever',
-];
-
-const bgWordsContainer = document.getElementById('bgWords');
-
-function spawnBgWord() {
-  if (!bgWordsContainer) return;
-  const word = bgWordsList[Math.floor(Math.random() * bgWordsList.length)];
-  const el = document.createElement('div');
-  el.className = 'bg-word';
-
-  const size = Math.random() * 2.5 + 1.2;
-  const left = Math.random() * 95;
-  const dur = Math.random() * 20 + 18;
-  const delay = Math.random() * 8;
-  const rot = (Math.random() * 30 - 15);
-
-  el.style.cssText = `
-    left: ${left}%;
-    bottom: -80px;
-    font-size: ${size}rem;
-    --rot: ${rot}deg;
-    animation-duration: ${dur}s;
-    animation-delay: ${delay}s;
-  `;
-  el.textContent = word;
-  bgWordsContainer.appendChild(el);
-  setTimeout(() => el.remove(), (dur + delay) * 1000 + 500);
-}
-
-if (bgWordsContainer) {
-  for (let i = 0; i < 8; i++) {
-    setTimeout(spawnBgWord, i * 1200);
-  }
-  setInterval(spawnBgWord, 2800);
-}
-
-// ══════════════════════════════════════
-// FLOATING SOFT SHAPES
+// BG SHAPES
 // ══════════════════════════════════════
 const bgShapesContainer = document.getElementById('bgShapes');
 
-const heartChars = ['♥', '♡', '❤', '💕', '💗', '💓', '✦', '✧'];
-const sparkleChars = ['✦', '✧', '✸', '✺', '❋', '✿', '❀'];
+const circleBlobChars = ['·', '⋅', '‣', '⁃'];
+const heartShapeChars = ['♥', '♡', '❣️', '❦'];
+const sparkleChars = ['✨', '❇️', '✦', '❆'];
 
-function spawnHeartShape() {
+function spawnCircleBlob() {
   if (!bgShapesContainer) return;
   const el = document.createElement('div');
-  el.className = 'bg-shape heart';
+  el.className = 'bg-shape circle-blob';
 
-  const char = heartChars[Math.floor(Math.random() * heartChars.length)];
-  const size = Math.random() * 18 + 8;
+  const char = circleBlobChars[Math.floor(Math.random() * circleBlobChars.length)];
+  const size = Math.random() * 10 + 6;
   const left = Math.random() * 98;
-  const dur = Math.random() * 16 + 12;
-  const delay = Math.random() * 10;
-  const hue = Math.random() * 20 + 340;
-  const light = Math.random() * 20 + 65;
-  const opacity = Math.random() * 0.15 + 0.06;
+  const dur = Math.random() * 14 + 10;
+  const delay = Math.random() * 8;
 
   el.style.cssText = `
     left: ${left}%;
-    bottom: -30px;
+    bottom: -20px;
     font-size: ${size}px;
-    color: hsl(${hue}, 75%, ${light}%);
-    opacity: ${opacity};
+    color: rgba(232, 68, 90, 0.18);
     animation-duration: ${dur}s;
     animation-delay: ${delay}s;
   `;
@@ -407,25 +355,28 @@ function spawnHeartShape() {
   setTimeout(() => el.remove(), (dur + delay) * 1000 + 500);
 }
 
-function spawnCircleBlob() {
+function spawnHeartShape() {
   if (!bgShapesContainer) return;
   const el = document.createElement('div');
-  el.className = 'bg-shape circle';
+  el.className = 'bg-shape heart-shape';
 
-  const size = Math.random() * 120 + 60;
-  const left = Math.random() * 90;
-  const top = Math.random() * 80 + 5;
-  const dur = Math.random() * 10 + 8;
+  const char = heartShapeChars[Math.floor(Math.random() * heartShapeChars.length)];
+  const size = Math.random() * 10 + 6;
+  const left = Math.random() * 98;
+  const dur = Math.random() * 14 + 10;
+  const delay = Math.random() * 8;
 
   el.style.cssText = `
     left: ${left}%;
-    top: ${top}%;
-    width: ${size}px;
-    height: ${size}px;
+    bottom: -20px;
+    font-size: ${size}px;
+    color: rgba(232, 68, 90, 0.18);
     animation-duration: ${dur}s;
-    animation-delay: ${Math.random() * 4}s;
+    animation-delay: ${delay}s;
   `;
+  el.textContent = char;
   bgShapesContainer.appendChild(el);
+  setTimeout(() => el.remove(), (dur + delay) * 1000 + 500);
 }
 
 function spawnSparkle() {
@@ -461,18 +412,181 @@ if (bgShapesContainer) {
 }
 
 // ═══════════════════════════════════════
-// JOURNEY SECTION — scroll animations + interactions
+// AI MAGIC SECTION LOGIC
+// ═══════════════════════════════════════
+
+var selectedMood = '';
+
+/* ---- MOOD PILL TOGGLE ----
+   Only one pill selected at a time.
+   Clicking selected pill again deselects it. */
+function selectMood(el) {
+  var pills = document.querySelectorAll('.ai-mood-pill');
+  pills.forEach(function(p) { p.classList.remove('selected'); });
+  if (selectedMood === el.textContent.trim()) {
+    selectedMood = ''; /* deselect if clicking same pill */
+  } else {
+    el.classList.add('selected');
+    selectedMood = el.textContent.trim();
+  }
+}
+
+/* ---- MAIN GENERATE FUNCTION ----
+   Called by Generate button AND Regenerate button. */
+function generateMessage() {
+  var inputEl = document.getElementById('ai-feeling-input');
+  if (!inputEl) return;
+  var feeling = inputEl.value.trim();
+
+  /* Validation: highlight textarea red if empty */
+  if (!feeling) {
+    inputEl.focus();
+    inputEl.style.borderColor = 'rgba(192,49,79,0.5)';
+    setTimeout(function() {
+      inputEl.style.borderColor = '';
+    }, 1500);
+    return;
+  }
+
+  /* UI: set loading state */
+  var btn = document.getElementById('ai-generate-btn');
+  var errorEl = document.getElementById('ai-error');
+  if (btn) {
+    btn.classList.add('loading');
+    btn.disabled = true;
+  }
+  if (errorEl) errorEl.classList.remove('visible');
+
+  /* Hide output card while regenerating */
+  var out = document.getElementById('ai-output-wrap');
+  if (out) {
+    out.classList.remove('visible');
+    out.style.display = 'none';
+  }
+
+  /*
+    PROMPT CONSTRUCTION
+    Instructs Claude to return ONLY clean JSON.
+    No markdown fences. No extra text.
+    3 fields: opening, message, closing.
+  */
+  var moodLine = selectedMood ? 'Mood/Occasion: ' + selectedMood + '\n' : '';
+  var prompt =
+    'You are a romantic AI that writes deeply personal, heartfelt love messages for the Love Bites app.\n\n' +
+    'The user has shared this feeling:\n"' + feeling + '"\n' +
+    moodLine + '\n' +
+    'Write a love message with exactly 3 parts. ' +
+    'Respond ONLY with valid JSON — no markdown, no backticks, no extra text:\n\n' +
+    '{\n' +
+    '  "opening": "A single romantic opening line — poetic, intimate, 1 sentence. Like the first line of a love letter.",\n' +
+    '  "message": "The main message body — 3 to 4 sentences. Warm, personal, emotional. Speaks directly to the feeling shared. Uses you and I.",\n' +
+    '  "closing": "A tender closing line — like a signature. Poetic and memorable. 1 sentence."\n' +
+    '}';
+
+  /*
+    API CALL
+    Hits Anthropic /v1/messages endpoint.
+    API key is handled by proxy — DO NOT add key here.
+    Model: claude-sonnet-4-20250514
+  */
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+
+    /* Extract raw text from API response */
+    var raw = '';
+    if (data.content && data.content.length > 0) {
+      for (var i = 0; i < data.content.length; i++) {
+        if (data.content[i].type === 'text') {
+          raw += data.content[i].text;
+        }
+      }
+    }
+
+    /* Strip any accidental markdown fences + parse JSON */
+    var cleaned = raw.replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(cleaned);
+
+    /* Fill the 3 output fields */
+    var openingEl = document.getElementById('ai-opening');
+    var messageEl = document.getElementById('ai-message');
+    var closingEl = document.getElementById('ai-closing');
+    
+    if (openingEl) openingEl.textContent = parsed.opening || '';
+    if (messageEl) messageEl.textContent = parsed.message || '';
+    if (closingEl) closingEl.textContent = parsed.closing || '';
+
+    /* Show output card with fade+slide animation:
+       1. Set display:block first
+       2. 30ms delay so browser registers it
+       3. Add .visible to trigger CSS transition */
+    if (out) {
+      out.style.display = 'block';
+      setTimeout(function() { out.classList.add('visible'); }, 30);
+
+      /* Smooth scroll to output card */
+      setTimeout(function() {
+        out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+
+  })
+  .catch(function() {
+    /* Show error message on failure */
+    if (errorEl) errorEl.classList.add('visible');
+  })
+  .then(function() {
+    /* Always reset button — runs after .then OR .catch */
+    if (btn) {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+}
+
+// Support Ctrl+Enter in textarea
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('ai-feeling-input');
+  if (textarea) {
+    textarea.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        generateMessage();
+      }
+    });
+  }
+});
+
+// ═══════════════════════════════════════
+// JOURNEY SECTION — animations + interactions
 // ═══════════════════════════════════════
 (function () {
+  // Intersection Observer for scroll reveal
   const io = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
-      if (e.isIntersecting) e.target.classList.add('v');
+      if (e.isIntersecting) {
+        e.target.classList.add('v');
+      }
     });
-  }, { threshold: .08, rootMargin: '0px 0px -10px 0px' });
+  }, { 
+    threshold: 0.1, 
+    rootMargin: '0px 0px -50px 0px' 
+  });
 
-  document.querySelectorAll(
-    '.jrn-pair, .jrn-tc, .jrn-head, .jrn-sb, .jrn-how, .jrn-cta, .jrn-gw-q'
-  ).forEach(function (el) { io.observe(el); });
+  const revealTargets = document.querySelectorAll(
+    '#journey, .jrn-pair, .jrn-tc, .jrn-head, .jrn-sb, .jrn-how, .jrn-cta, .jrn-gw-q'
+  );
+  
+  revealTargets.forEach(function (el) { 
+    io.observe(el); 
+  });
 
   // 3D tilt on image cards
   document.querySelectorAll('.jrn-img').forEach(function (c) {
