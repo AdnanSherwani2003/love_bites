@@ -2,293 +2,1221 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Message For You | Love Bites</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .view-container {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #ffb3c1 0%, #ff4d6d 100%);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Bites — Your Love Code</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .envelope-wrapper {
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.5s ease;
-        }
+    html,
+    body {
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: 'DM Sans', sans-serif;
+    }
 
-        .envelope-wrapper:hover {
-            transform: scale(1.05);
-        }
+    /* ===================== THEMES ===================== */
+    body.theme-anniversary {
+      --bg1: #0d0005;
+      --bg2: #1a0510;
+      --bg3: #2a0820;
+      --accent: #c9a84c;
+      --accent2: #e8c97a;
+      --text: rgba(255, 235, 210, 0.92);
+      --text-dim: rgba(255, 235, 210, 0.32);
+      --pill-bg: rgba(201, 168, 76, 0.12);
+      --pill-border: rgba(201, 168, 76, 0.3);
+      --pill-color: #e8c97a;
+      --btn-grad: linear-gradient(135deg, #e8c97a, #c9a84c);
+      --polaroid: #fffbf0;
+      --photo-shadow: 0 20px 60px rgba(201, 168, 76, 0.25);
+    }
 
-        .envelope {
-            width: 300px;
-            height: 200px;
-            background: #fff;
-            position: relative;
-            border-radius: 0 0 15px 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+    body.theme-birthday {
+      --bg1: #12050a;
+      --bg2: #200d14;
+      --bg3: #2e1520;
+      --accent: #ff6b35;
+      --accent2: #ffa500;
+      --text: rgba(255, 240, 220, 0.95);
+      --text-dim: rgba(255, 240, 220, 0.35);
+      --pill-bg: rgba(255, 107, 53, 0.15);
+      --pill-border: rgba(255, 107, 53, 0.4);
+      --pill-color: #ffa500;
+      --btn-grad: linear-gradient(135deg, #ffa500, #ff6b35);
+      --polaroid: #fff9f0;
+      --photo-shadow: 0 20px 60px rgba(255, 107, 53, 0.3);
+    }
 
-        .envelope::before {
-            content: '';
-            position: absolute;
-            top: -150px;
-            left: 0;
-            border-left: 150px solid transparent;
-            border-right: 150px solid transparent;
-            border-bottom: 150px solid #fff;
-            z-index: 2;
-            transition: transform 0.5s ease;
-            transform-origin: bottom;
-        }
+    body.theme-valentine {
+      --bg1: #0d0005;
+      --bg2: #1a0008;
+      --bg3: #2d0015;
+      --accent: #e8445a;
+      --accent2: #ff8aaa;
+      --text: rgba(255, 220, 230, 0.95);
+      --text-dim: rgba(255, 220, 230, 0.32);
+      --pill-bg: rgba(232, 68, 90, 0.12);
+      --pill-border: rgba(232, 68, 90, 0.3);
+      --pill-color: #ff8aaa;
+      --btn-grad: linear-gradient(135deg, #ff8aaa, #e8445a);
+      --polaroid: #fff5f7;
+      --photo-shadow: 0 20px 60px rgba(232, 68, 90, 0.35);
+    }
 
-        .open .envelope::before {
-            transform: rotateX(180deg);
-            z-index: 0;
-        }
+    body.theme-justbecause {
+      --bg1: #0a0815;
+      --bg2: #130f25;
+      --bg3: #1e1538;
+      --accent: #c084fc;
+      --accent2: #e0aaff;
+      --text: rgba(240, 220, 255, 0.92);
+      --text-dim: rgba(240, 220, 255, 0.32);
+      --pill-bg: rgba(192, 132, 252, 0.12);
+      --pill-border: rgba(192, 132, 252, 0.3);
+      --pill-color: #e0aaff;
+      --btn-grad: linear-gradient(135deg, #e0aaff, #c084fc);
+      --polaroid: #fdf8ff;
+      --photo-shadow: 0 20px 60px rgba(192, 132, 252, 0.3);
+    }
 
-        .letter {
-            position: absolute;
-            bottom: 0;
-            left: 10px;
-            width: 280px;
-            height: 180px;
-            background: #fff0f3;
-            padding: 20px;
-            transition: transform 0.8s ease;
-            z-index: 1;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-        }
+    body.theme-apology {
+      --bg1: #0a0a0a;
+      --bg2: #141010;
+      --bg3: #1e1418;
+      --accent: #f9a8c9;
+      --accent2: #fce4ec;
+      --text: rgba(255, 235, 245, 0.9);
+      --text-dim: rgba(255, 235, 245, 0.28);
+      --pill-bg: rgba(249, 168, 201, 0.1);
+      --pill-border: rgba(249, 168, 201, 0.25);
+      --pill-color: #f9a8c9;
+      --btn-grad: linear-gradient(135deg, #fce4ec, #f9a8c9);
+      --polaroid: #fff8fb;
+      --photo-shadow: 0 20px 60px rgba(249, 168, 201, 0.2);
+    }
 
-        .open .letter {
-            transform: translateY(-120px);
-            height: auto;
-            min-height: 300px;
-        }
+    body {
+      background: var(--bg1);
+    }
 
-        .reveal-content {
-            opacity: 0;
-            transition: opacity 0.5s ease 0.5s;
-        }
+    @keyframes gradPulse {
+      0% {
+        background-position: 0% 50%;
+      }
 
-        .open .reveal-content {
-            opacity: 1;
-        }
+      50% {
+        background-position: 100% 50%;
+      }
 
-        #partnerMessage {
-            font-size: 1.2rem;
-            color: var(--secondary);
-            font-style: italic;
-            margin: 15px 0;
-        }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
 
-        #partnerMemory {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            border-top: 1px solid var(--primary-light);
-            padding-top: 10px;
-        }
-    </style>
+    /* ===================== LOCK SCREEN ===================== */
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: linear-gradient(145deg, var(--bg1), var(--bg2), var(--bg3), var(--bg2), var(--bg1));
+      background-size: 400% 400%;
+      animation: gradPulse 8s ease infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    #lockScreen.unlocking {
+      opacity: 0;
+      transform: scale(1.08);
+      pointer-events: none;
+    }
+
+    #lockScreen.hidden {
+      display: none !important;
+    }
+
+    .lock-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--text-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .lock-icon {
+      font-size: 3rem;
+      animation: lockPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes lockPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 20px var(--accent));
+      }
+    }
+
+    .lock-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-style: italic;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .lock-title em {
+      color: var(--accent2);
+      font-style: normal;
+    }
+
+    .lock-sub {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+
+    .lock-digits {
+      display: flex;
+      gap: 12px;
+    }
+
+    .lock-digit {
+      width: 56px;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--accent2);
+      text-align: center;
+      outline: none;
+      transition: all 0.2s;
+      caret-color: var(--accent2);
+    }
+
+    .lock-digit:focus {
+      border-color: var(--accent2);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+    }
+
+    .lock-hint {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .unlock-btn {
+      background: var(--btn-grad);
+      color: white;
+      border: none;
+      padding: 0.85rem 2.5rem;
+      border-radius: 100px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      letter-spacing: 0.02em;
+    }
+
+    .unlock-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ===================== HEART BURST ===================== */
+    #heartBurst {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      display: none;
+    }
+
+    .burst-heart {
+      position: absolute;
+      animation: burstFly 1.2s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes burstFly {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.5);
+      }
+
+      60% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(1.5);
+      }
+    }
+
+    /* ===================== EXPERIENCE ===================== */
+    #experience {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ===================== PETAL FIELD ===================== */
+    .petal-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .falling-petal {
+      position: absolute;
+      top: -5%;
+      animation: petalFall linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes petalFall {
+      0% {
+        opacity: 0;
+        transform: translateY(0) rotate(0deg) translateX(0);
+      }
+
+      5% {
+        opacity: 0.6;
+      }
+
+      90% {
+        opacity: 0.25;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(110vh) rotate(720deg) translateX(60px);
+      }
+    }
+
+    /* ===================== PARTICLES ===================== */
+    .s1-particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleDrift linear infinite;
+    }
+
+    @keyframes particleDrift {
+      0% {
+        opacity: 0;
+        transform: translateY(100vh) scale(0);
+      }
+
+      10% {
+        opacity: 0.7;
+      }
+
+      80% {
+        opacity: 0.3;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-20vh) scale(1.5);
+      }
+    }
+
+    /* ===================== SCENE 1 ===================== */
+    #scene1 {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
+      background-size: 300% 300%;
+      animation: gradPulse 10s ease infinite;
+    }
+
+    .scene1-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .quote-wrap {
+      text-align: center;
+      max-width: 720px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .to-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.5s forwards;
+    }
+
+    .to-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 9vw, 7rem);
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.8s forwards;
+    }
+
+    .opening-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.2rem, 2.8vw, 1.9rem);
+      color: var(--text);
+      line-height: 1.75;
+      opacity: 0;
+      animation: fadeUp 1.2s ease 1.4s forwards;
+      position: relative;
+      padding: 0 1.5rem;
+    }
+
+    .opening-quote::before {
+      content: '"';
+      position: absolute;
+      top: -2.5rem;
+      left: 0;
+      font-size: 7rem;
+      color: var(--accent);
+      opacity: 0.08;
+      font-style: normal;
+      line-height: 1;
+    }
+
+    .mood-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--pill-bg);
+      border: 1px solid var(--pill-border);
+      border-radius: 100px;
+      padding: 0.45rem 1.3rem;
+      font-size: 0.72rem;
+      color: var(--pill-color);
+      font-weight: 600;
+      margin-top: 2.2rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 2.2s forwards;
+    }
+
+    .scroll-cue {
+      margin-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 3s forwards;
+    }
+
+    .scroll-cue span {
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .scroll-arrow {
+      width: 22px;
+      height: 22px;
+      border-right: 1.5px solid var(--accent);
+      border-bottom: 1.5px solid var(--accent);
+      transform: rotate(45deg);
+      opacity: 0.5;
+      animation: arrowBounce 1.5s ease-in-out infinite;
+    }
+
+    @keyframes arrowBounce {
+
+      0%,
+      100% {
+        transform: rotate(45deg) translateY(0);
+      }
+
+      50% {
+        transform: rotate(45deg) translateY(7px);
+      }
+    }
+
+    /* ===================== SCENE 2 ===================== */
+    #scene2 {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 0 8rem;
+      background: linear-gradient(180deg, var(--bg2) 0%, var(--bg1) 40%, var(--bg2) 80%, var(--bg1) 100%);
+      background-size: 100% 400%;
+      animation: gradPulse 14s ease infinite;
+    }
+
+    .scene2-header {
+      text-align: center;
+      padding: 0 2rem 5rem;
+    }
+
+    .scene2-eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      opacity: 0.7;
+    }
+
+    .scene2-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .scene2-title em {
+      color: var(--accent2);
+      font-style: normal;
+    }
+
+    .photo-sequence {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ===================== PHOTO MOMENT ===================== */
+    .photo-moment {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 3rem;
+      position: relative;
+      opacity: 0;
+      transform: translateY(70px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .photo-moment.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .moment-inner {
+      display: flex;
+      align-items: center;
+      gap: 4rem;
+      max-width: 1050px;
+      width: 100%;
+    }
+
+    /* LEFT = image first, RIGHT = image second */
+    .photo-moment[data-idx="0"] .moment-inner {
+      flex-direction: row;
+    }
+
+    .photo-moment[data-idx="1"] .moment-inner {
+      flex-direction: row-reverse;
+    }
+
+    .moment-text {
+      flex: 1;
+      padding: 1.5rem 0;
+    }
+
+    .moment-number {
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.5;
+      margin-bottom: 0.9rem;
+    }
+
+    .moment-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--pill-bg);
+      border: 1px solid var(--pill-border);
+      border-radius: 100px;
+      padding: 0.3rem 1rem;
+      font-size: 0.68rem;
+      color: var(--pill-color);
+      font-weight: 600;
+      margin-bottom: 1.6rem;
+    }
+
+    .moment-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+      color: var(--text);
+      line-height: 1.45;
+      margin-bottom: 1.3rem;
+    }
+
+    .moment-caption {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 320px;
+    }
+
+    /* ===================== PHOTO STYLES ===================== */
+
+    /* POLAROID */
+    .style-polaroid .moment-img {
+      flex: 0 0 auto;
+      width: 340px;
+      background: var(--polaroid);
+      padding: 12px 12px 52px 12px;
+      border-radius: 4px;
+      box-shadow: var(--photo-shadow), 0 6px 24px rgba(0, 0, 0, 0.5), 0 30px 60px rgba(0, 0, 0, 0.35);
+      position: relative;
+      transform: rotate(-2.5deg);
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+      cursor: pointer;
+    }
+
+    .photo-moment[data-idx="1"] .style-polaroid .moment-img {
+      transform: rotate(2deg);
+    }
+
+    .style-polaroid .moment-img:hover {
+      transform: rotate(0deg) scale(1.1) !important;
+      z-index: 20;
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.65), 0 0 0 2px rgba(255, 255, 255, 0.18) !important;
+    }
+
+    .style-polaroid .moment-img img,
+    .style-polaroid .moment-img-inner {
+      border-radius: 2px;
+    }
+
+    .polaroid-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      color: #8a7a6a;
+      letter-spacing: 0.04em;
+    }
+
+    /* CINEMATIC */
+    .style-cinematic .moment-img {
+      flex: 1;
+      max-width: 520px;
+      aspect-ratio: 16/9;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 40px 80px rgba(0, 0, 0, 0.6);
+      position: relative;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+      cursor: pointer;
+    }
+
+    .style-cinematic .moment-img:hover {
+      transform: scale(1.05) !important;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 60px 110px rgba(0, 0, 0, 0.75) !important;
+      z-index: 20;
+    }
+
+    .style-cinematic .moment-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, transparent 60%, var(--bg1) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .style-cinematic .moment-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 10s ease;
+      filter: brightness(0.9) contrast(1.05);
+    }
+
+    .photo-moment.visible .style-cinematic .moment-img img {
+      transform: scale(1.08);
+    }
+
+    /* FLOATING CARD */
+    .style-card .moment-img {
+      flex: 0 0 auto;
+      width: 360px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--photo-shadow), 0 60px 100px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      animation: cardFloat 6s ease-in-out infinite;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.45s ease;
+      cursor: pointer;
+    }
+
+    .style-card .moment-img:hover {
+      animation-play-state: paused;
+      transform: scale(1.1) translateY(-10px) !important;
+      z-index: 20;
+      box-shadow: var(--photo-shadow), 0 80px 120px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    }
+
+    @keyframes cardFloat {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-14px);
+      }
+    }
+
+    .style-card .moment-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 8s ease;
+    }
+
+    .photo-moment.visible .style-card .moment-img img {
+      transform: scale(1.07);
+    }
+
+    /* placeholders */
+    .moment-img-placeholder {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+    }
+
+    .style-polaroid .moment-img-placeholder {
+      aspect-ratio: 1/1;
+    }
+
+    .style-cinematic .moment-img-placeholder {
+      height: 100%;
+    }
+
+    .style-card .moment-img-placeholder {
+      aspect-ratio: 4/5;
+    }
+
+    .moment-img-placeholder.p1 {
+      background: linear-gradient(135deg, #2d1520, #4a1030);
+    }
+
+    .moment-img-placeholder.p2 {
+      background: linear-gradient(135deg, #1a1530, #2d2050);
+    }
+
+    .moment-img-placeholder.p3 {
+      background: linear-gradient(135deg, #0d2020, #153030);
+    }
+
+    .moment-img-placeholder.p4 {
+      background: linear-gradient(135deg, #2d2015, #4a3010);
+    }
+
+    .moment-img-placeholder.p5 {
+      background: linear-gradient(135deg, #1a0d2d, #2d154a);
+    }
+
+    /* DIVIDER */
+    .moment-divider {
+      text-align: center;
+      padding: 2rem 0;
+      position: relative;
+    }
+
+    .moment-divider::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 1px;
+      height: 100px;
+      background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+      opacity: 0.2;
+    }
+
+    .moment-divider span {
+      font-size: 1.4rem;
+      opacity: 0.25;
+      color: var(--accent);
+    }
+
+    /* ===================== SCENE 3 ===================== */
+    #scene3 {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 4rem 2rem;
+      text-align: center;
+      z-index: 1;
+      background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 50%, var(--bg1) 100%);
+      background-size: 300% 300%;
+      animation: gradPulse 12s ease infinite;
+    }
+
+    .final-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .final-wrap {
+      max-width: 620px;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1.2s ease, transform 1.2s ease;
+    }
+
+    .final-wrap.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .final-heart {
+      font-size: 3.5rem;
+      animation: finalHeartbeat 2s ease-in-out infinite;
+      display: inline-block;
+      margin-bottom: 2rem;
+      filter: drop-shadow(0 0 25px var(--accent));
+    }
+
+    @keyframes finalHeartbeat {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      15% {
+        transform: scale(1.25);
+      }
+
+      30% {
+        transform: scale(1);
+      }
+
+      45% {
+        transform: scale(1.12);
+      }
+    }
+
+    .final-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      font-style: italic;
+      color: var(--accent);
+      opacity: 0.6;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    .final-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 3rem;
+    }
+
+    .final-quote em {
+      color: var(--accent2);
+      font-style: normal;
+    }
+
+    .final-names {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 3rem;
+    }
+
+    .final-made {
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      opacity: 0.4;
+      margin-top: 4rem;
+    }
+
+    .final-made span {
+      color: var(--accent);
+      animation: finalHeartbeat 2s ease-in-out infinite;
+    }
+
+    /* ===================== THEME NAME STYLES ===================== */
+    body.theme-anniversary .to-name {
+      background: linear-gradient(135deg, #c9a84c, #e8c97a, #c9a84c);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200%;
+      animation: gradPulse 4s ease infinite;
+    }
+
+    body.theme-birthday .to-name {
+      background: linear-gradient(135deg, #ff6b35, #ffa500, #ff6b35);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200%;
+      animation: gradPulse 4s ease infinite;
+    }
+
+    body.theme-valentine .to-name {
+      color: #ffc0cb;
+      text-shadow: 0 0 50px rgba(232, 68, 90, 0.5);
+    }
+
+    body.theme-justbecause .to-name {
+      background: linear-gradient(135deg, #c084fc, #e0aaff, #c084fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200%;
+      animation: gradPulse 4s ease infinite;
+    }
+
+    body.theme-apology .to-name {
+      color: var(--text);
+      opacity: 0.9;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(32px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media(max-width:750px) {
+
+      .photo-moment[data-idx="0"] .moment-inner,
+      .photo-moment[data-idx="1"] .moment-inner {
+        flex-direction: column !important;
+        gap: 2rem;
+      }
+
+      .style-polaroid .moment-img,
+      .style-card .moment-img {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      .style-cinematic .moment-img {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .moment-text {
+        text-align: center;
+      }
+
+      .moment-caption {
+        margin: 0 auto;
+      }
+    }
+  </style>
 </head>
 
-<body>
-    <div id="heart-container"></div>
+<body class="theme-anniversary">
 
-    <div class="view-container">
-        <!-- Envelope Surprise -->
-        <div id="envelopeWrapper" class="envelope-wrapper surprise-element" style="display: none;">
-            <div class="envelope">
-                <div class="letter glass-panel">
-                    <div class="reveal-content">
-                        <h2 class="romantic-font displayPartnerName">Hello.</h2>
-                        <p class="partnerMessage"></p>
-                        <p class="partnerMemory"></p>
-                        <p style="font-weight: 600; color: var(--primary); margin-top: 15px;">Forever Yours. ❤</p>
-                    </div>
-                </div>
-            </div>
-            <p class="instruction" style="text-align: center; margin-top: 20px; color: white; font-weight: 600;">Tap to
-                open your surprise</p>
-        </div>
+  <div class="petal-field" id="petalField"></div>
 
-        <!-- Scratch Card Surprise -->
-        <div id="scratchWrapper" class="scratch-container surprise-element" style="display: none;">
-            <div class="scratch-content">
-                <h2 class="romantic-font displayPartnerName"></h2>
-                <p class="partnerMessage"></p>
-                <p class="partnerMemory"></p>
-                <p style="font-weight: 600; color: var(--primary); margin-top: 15px;">Forever Yours. ❤</p>
-            </div>
-            <canvas id="scratch-canvas" width="320" height="450"></canvas>
-            <p class="instruction" style="text-align: center; margin-top: 20px; color: white; font-weight: 600;">Scratch
-                to
-                reveal my heart</p>
-        </div>
-
-        <!-- Photo Gallery Surprise -->
-        <div id="galleryWrapper" class="gallery-container surprise-element" style="display: none;">
-            <div id="photoStack">
-                <!-- polaroids added via JS -->
-            </div>
-            <p class="instruction" style="text-align: center; margin-top: 50px; color: white; font-weight: 600;">Swipe
-                the
-                photos away...</p>
-        </div>
+  <!-- LOCK SCREEN -->
+  <div id="lockScreen">
+    <p class="lock-logo">♥ Love Bites</p>
+    <div class="lock-icon" id="lockIcon">🔒</div>
+    <h2 class="lock-title">Someone left you<br /><em>something special</em></h2>
+    <p class="lock-sub">Enter your secret code to unlock it</p>
+    <div class="lock-digits">
+      <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d1" />
+      <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d2" />
+      <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d3" />
+      <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d4" />
     </div>
+    <p class="lock-hint" id="lockHint">Hint: the date we first met 💌</p>
+    <button class="unlock-btn" id="unlockBtn" onclick="unlock()">♥ Open Your Surprise</button>
+  </div>
 
-    <script>
-        // Load Data
-        const urlParams = new URLSearchParams(window.location.search);
-        const codeId = urlParams.get('id');
-        const data = JSON.parse(localStorage.getItem(`loveCode_${codeId}`));
+  <!-- HEART BURST -->
+  <div id="heartBurst"></div>
 
-        if (data) {
-            document.querySelectorAll('.displayPartnerName').forEach(el => el.innerText = `To ${data.name},`);
-            document.querySelectorAll('.partnerMessage').forEach(el => el.innerText = data.message);
-            document.querySelectorAll('.partnerMemory').forEach(el => el.innerText = data.memory ? `Remember: ${data.memory}` : "");
+  <!-- EXPERIENCE -->
+  <div id="experience">
+    <section id="scene1">
+      <div class="scene1-particles" id="scene1Particles"></div>
+      <div class="quote-wrap">
+        <p class="to-label" id="toLabelText">A Love Code — Just For You</p>
+        <h1 class="to-name" id="toName">Someone Special</h1>
+        <p class="opening-quote" id="openingQuote">There's something I've never found the right words for — until now.
+          This is for you, always.</p>
+        <div class="mood-pill" id="moodPill">💞 With Love</div>
+        <div class="scroll-cue"><span>Your moments</span>
+          <div class="scroll-arrow"></div>
+        </div>
+      </div>
+    </section>
 
-            // Show appropriate surprise
-            const surpriseType = data.surprise || 'letter';
-            if (surpriseType === 'letter' || surpriseType === 'petals') {
-                document.getElementById('envelopeWrapper').style.display = 'block';
-            } else if (surpriseType === 'scratch') {
-                document.getElementById('scratchWrapper').style.display = 'block';
-                initScratchCard();
-            } else if (surpriseType === 'gallery' || surpriseType === 'hearts') {
-                document.getElementById('galleryWrapper').style.display = 'block';
-                initGallery();
-            }
+    <section id="scene2">
+      <div class="scene2-header">
+        <p class="scene2-eyebrow" id="scene2Eyebrow">♥ Every chapter of us</p>
+        <h2 class="scene2-title" id="scene2Title">The moments that make<br /><em>us, us.</em></h2>
+      </div>
+      <div class="photo-sequence" id="photoSequence"></div>
+    </section>
+
+    <section id="scene3">
+      <div class="final-particles" id="finalParticles"></div>
+      <div class="final-wrap" id="finalWrap">
+        <div class="final-heart" id="finalHeart">♥</div>
+        <p class="final-title" id="finalTitle">Always & Forever</p>
+        <p class="final-quote" id="finalQuote">"You are every love story<br />I ever wanted to <em>live.</em>"</p>
+        <p class="final-names" id="finalNames">— With everything ♥</p>
+        <p class="final-made">Created with <span>♥</span> on Love Bites</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    var THEMES = {
+      'Anniversary 💍': { cls: 'theme-anniversary', heart: '♥', lockIcon: '🔒', burstEmoji: ['♥', '✨', '💛', '🌟'], petals: ['✨', '🌟', '💫', '⭐'], petalCount: 15, particleColor: 'rgba(201,168,76,', toLabel: 'A Love Code — Just For You', pill: '💍 Anniversary', eyebrow: '♥ Every chapter of us', s2title: 'The moments that make<br/><em>us, us.</em>', finalTitle: 'Always & Forever', finalQuote: '"You are every love story<br/>I ever wanted to <em>live.</em>"', photoStyle: ['style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid'], tags: ['💍 First Date', '✈️ Trip Together', '🎂 Birthday', '🌙 Everyday', '⭐ Memory'], quotes: ['"The night everything changed."', '"Our world, just for a while."', '"Another year of you."', '"The quiet ones are my favourite."', '"Every moment with you counts."'], captions: ['I still remember exactly how you looked. The way you smiled like you already knew.', 'Between the airport chaos and sunsets — I realized I want every road with you.', 'Celebrating you is the easiest thing. You make every day feel like a reason.', 'Not every moment needs a stage. Some of my best are just — you, being you.', 'Every single moment with you is one I\'d choose again.'], placeholderEmojis: ['🌅', '🏝️', '🎂', '🕯️', '💝'], placeholderClasses: ['p1', 'p2', 'p3', 'p4', 'p5'] },
+      'Birthday 🎂': { cls: 'theme-birthday', heart: '🎂', lockIcon: '🎂', burstEmoji: ['🎉', '🎈', '✨', '🎊'], petals: ['🎉', '🎈', '⭐', '✨', '🌟'], petalCount: 25, particleColor: 'rgba(255,107,53,', toLabel: 'A Birthday Surprise — Just For You', pill: '🎂 Happy Birthday!', eyebrow: '🎂 All the moments that made you, you', s2title: 'A year full of<br/><em>beautiful memories.</em>', finalTitle: 'Happy Birthday, Beautiful', finalQuote: '"Another year of you —<br/>the world\'s greatest <em>gift.</em>"', photoStyle: ['style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid'], tags: ['🎂 Birthday Moment', '🎉 Celebration', '🌟 Memory', '🎈 Together', '💝 Special'], quotes: ['"Every year you get more wonderful."', '"This one\'s for you, superstar."', '"Another trip around the sun."', '"The best thing about your birthday? You."', '"Here\'s to you, always."'], captions: ['Another year of knowing you — and somehow it only gets better.', 'You make every celebration feel like the best one yet.', 'The way you light up a room hasn\'t changed one bit.', 'I\'m so lucky to get to celebrate you.', 'Happy birthday to the person who makes ordinary days extraordinary.'], placeholderEmojis: ['🎉', '🎈', '🌟', '🎊', '🎂'], placeholderClasses: ['p2', 'p3', 'p1', 'p4', 'p5'] },
+      "Valentine's Day 💝": { cls: 'theme-valentine', heart: '💝', lockIcon: '💝', burstEmoji: ['💝', '🌹', '❤️', '💕'], petals: ['🌹', '💕', '❤️', '🌸', '💗'], petalCount: 30, particleColor: 'rgba(232,68,90,', toLabel: 'A Valentine — Just For You', pill: "💝 Valentine's Day", eyebrow: '❤️ Every reason I love you', s2title: 'The love between<br/><em>you and me.</em>', finalTitle: 'Be My Valentine', finalQuote: '"You are the reason<br/>love feels like <em>magic.</em>"', photoStyle: ['style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid'], tags: ['❤️ First Date', '💕 Together', '🌹 Romance', '💗 Everyday', '✨ Special'], quotes: ['"The night I knew you were everything."', '"Together is my favourite place."', '"You make love feel easy."', '"Every day feels like Valentine\'s."', '"Endlessly, hopelessly — yours."'], captions: ['From the very first moment, I knew you were something different.', 'Being with you is the easiest and best thing I\'ve ever done.', 'You make love feel simple and beautiful.', 'I fall for you a little more every single day.', 'This day, every day — you\'re my person.'], placeholderEmojis: ['🌹', '💕', '❤️', '💗', '🌸'], placeholderClasses: ['p1', 'p3', 'p2', 'p4', 'p5'] },
+      'Just Because 🌸': { cls: 'theme-justbecause', heart: '🌸', lockIcon: '🌸', burstEmoji: ['🌸', '💜', '✨', '💫'], petals: ['🌸', '🌷', '💜', '✨', '🌺'], petalCount: 20, particleColor: 'rgba(192,132,252,', toLabel: 'A Little Something — Just Because', pill: '🌸 Just Because', eyebrow: '🌸 The small moments that mean everything', s2title: 'No reason needed —<br/><em>just you.</em>', finalTitle: 'Just Because I Love You', finalQuote: '"No occasion needed<br/>to love you <em>endlessly.</em>"', photoStyle: ['style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid'], tags: ['🌸 A Random Day', '☕ Morning', '🌙 Quiet Night', '💜 Just Us', '✨ This Moment'], quotes: ['"No reason — just you."', '"A random day and yet — perfect."', '"The small moments are the best."', '"Just because you deserve this."', '"Because every day with you counts."'], captions: ['You don\'t need a reason to be celebrated. You just do.', 'Some of my favourite days are ones where nothing special happened — except you.', 'The quiet in-between moments with you are my favourite.', 'I made this for no reason except that I love you.', 'Because you deserve to be reminded, always.'], placeholderEmojis: ['🌸', '🌷', '💜', '✨', '🌙'], placeholderClasses: ['p2', 'p1', 'p4', 'p3', 'p5'] },
+      'Apology 🥺': { cls: 'theme-apology', heart: '🤍', lockIcon: '🥺', burstEmoji: ['🤍', '🌸', '✨', '💗'], petals: ['🌸', '🤍', '✨', '🕊️'], petalCount: 10, particleColor: 'rgba(249,168,201,', toLabel: 'From My Heart — To Yours', pill: '🥺 From the Heart', eyebrow: '🤍 The moments I treasure most', s2title: 'The us I never<br/><em>want to lose.</em>', finalTitle: "I'm Sorry. I Mean It.", finalQuote: '"What we have is worth<br/>more than my <em>pride.</em>"', photoStyle: ['style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid', 'style-polaroid'], tags: ['🤍 A Good Memory', '🌸 When We Laughed', '☀️ A Happy Day', '💗 Us at Our Best', '✨ Why You Matter'], quotes: ['"This is what I never want to lose."', '"Remember this? Me too, always."', '"Our best days — I want more."', '"You matter more than I showed."', '"I\'m sorry. And I mean every word."'], captions: ['I keep coming back to the good times and remembering what we are.', 'I never want to take what we have for granted again.', 'This is the us I want to protect.', 'You deserve someone who shows up. I\'m going to be that person.', 'I\'m sorry. Not because I have to — but because you deserve to hear it.'], placeholderEmojis: ['🤍', '🌸', '☀️', '💗', '✨'], placeholderClasses: ['p1', 'p2', 'p3', 'p4', 'p5'] }
+    };
+
+    var OCCASION_MAP = { 'Anniversary 💍': 'Anniversary 💍', 'Birthday 🎂': 'Birthday 🎂', "Valentine's Day 💝": "Valentine's Day 💝", 'Just Because 🌸': 'Just Because 🌸', 'Apology 🥺': 'Apology 🥺' };
+    function getTheme(o) { return THEMES[OCCASION_MAP[o]] || THEMES['Anniversary 💍']; }
+
+    function applyTheme(th) {
+      Object.values(THEMES).forEach(function (t) { document.body.classList.remove(t.cls); });
+      document.body.classList.add(th.cls);
+    }
+
+    function loadData() {
+      var occasion = localStorage.getItem('loveOccasion') || 'Anniversary 💍';
+      var name = localStorage.getItem('loveName') || 'Someone Special';
+      var message = localStorage.getItem('loveMessage') || '';
+      var hint = localStorage.getItem('loveHint') || 'the date we first met';
+      var mood = localStorage.getItem('loveMood') || '';
+      var th = getTheme(occasion);
+      applyTheme(th);
+      document.getElementById('lockHint').textContent = 'Hint: ' + hint + ' 💌';
+      document.getElementById('lockIcon').textContent = th.lockIcon;
+      document.getElementById('unlockBtn').textContent = th.heart + ' Open Your Surprise';
+      document.getElementById('toName').textContent = name;
+      document.getElementById('toLabelText').textContent = th.toLabel;
+      document.getElementById('openingQuote').textContent = message || "There's something I've never found the right words for — until now. This is for you, always.";
+      document.getElementById('moodPill').textContent = th.pill + (mood ? ' · ' + mood : '');
+      document.getElementById('scene2Eyebrow').textContent = th.eyebrow;
+      document.getElementById('scene2Title').innerHTML = th.s2title;
+      document.getElementById('finalHeart').textContent = th.heart;
+      document.getElementById('finalTitle').textContent = th.finalTitle;
+      document.getElementById('finalQuote').innerHTML = th.finalQuote;
+      document.getElementById('finalNames').textContent = '— With everything ' + th.heart;
+      return th;
+    }
+
+    function loadPhotos(th) {
+      var seq = document.getElementById('photoSequence');
+      seq.innerHTML = '';
+      var saved = localStorage.getItem('lovePhotos');
+      var photos = saved ? JSON.parse(saved) : [];
+      if (photos.length === 0) photos = ['p1', 'p2', 'p3', 'p4', 'p5'];
+      photos.forEach(function (src, i) {
+        if (i > 0) {
+          var dv = document.createElement('div');
+          dv.className = 'moment-divider';
+          dv.innerHTML = '<span>' + th.heart + '</span>';
+          seq.appendChild(dv);
+        }
+        var pStyle = th.photoStyle[i] || 'style-card';
+        var isReal = src.startsWith('data:') || src.startsWith('http');
+        var imgHtml;
+        if (isReal) {
+          var aspect = (pStyle === 'style-cinematic') ? 'aspect-ratio:16/9;' : 'aspect-ratio:' + (pStyle === 'style-polaroid' ? '1/1' : '4/5') + ';';
+          imgHtml = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;display:block;' + aspect + '"/>';
         } else {
-            document.body.innerHTML = '<div class="view-container"><h1 class="romantic-font" style="color:white;">Oops! This Love Code has expired or doesn\'t exist.</h1></div>';
+          var aspect2 = (pStyle === 'style-polaroid') ? 'aspect-ratio:1/1;' : (pStyle === 'style-cinematic') ? 'height:100%;' : 'aspect-ratio:4/5;';
+          imgHtml = '<div class="moment-img-placeholder ' + th.placeholderClasses[i] + '" style="' + aspect2 + '">' + th.placeholderEmojis[i] + '</div>';
         }
+        var captionBand = (pStyle === 'style-polaroid') ? '<div class="polaroid-caption">' + th.tags[i] + '</div>' : '';
+        var m = document.createElement('div');
+        m.className = 'photo-moment ' + pStyle;
+        m.setAttribute('data-idx', i % 2);
+        m.innerHTML = '<div class="moment-inner">'
+          + '<div class="moment-img">' + imgHtml + captionBand + '</div>'
+          + '<div class="moment-text">'
+          + '<p class="moment-number">Moment 0' + (i + 1) + '</p>'
+          + '<div class="moment-tag">' + (th.tags[i] || '♥ Memory') + '</div>'
+          + '<p class="moment-quote">' + (th.quotes[i] || '"A moment just for us."') + '</p>'
+          + '<p class="moment-caption">' + (th.captions[i] || '') + '</p>'
+          + '</div></div>';
+        seq.appendChild(m);
+      });
+    }
 
-        // --- ENVELOPE LOGIC ---
-        const envelope = document.getElementById('envelopeWrapper');
-        envelope.addEventListener('click', () => {
-            envelope.classList.add('open');
-            envelope.querySelector('.instruction').style.display = 'none';
-            playHearts();
-        });
+    function initParticles(th) {
+      var c = document.getElementById('scene1Particles'); c.innerHTML = '';
+      for (var i = 0; i < 30; i++) {
+        var p = document.createElement('div'); p.className = 's1-particle';
+        var size = (3 + Math.random() * 5) + 'px';
+        p.style.cssText = 'left:' + (Math.random() * 100) + '%;bottom:0;width:' + size + ';height:' + size + ';background:' + th.particleColor + (0.5 + Math.random() * 0.4) + ');animation-duration:' + (5 + Math.random() * 10) + 's;animation-delay:' + (Math.random() * 8) + 's;z-index:5;';
+        c.appendChild(p);
+      }
+      var fc = document.getElementById('finalParticles'); fc.innerHTML = '';
+      for (var j = 0; j < 20; j++) {
+        var p2 = document.createElement('div'); p2.className = 's1-particle';
+        var s2 = (2 + Math.random() * 4) + 'px';
+        p2.style.cssText = 'left:' + (Math.random() * 100) + '%;bottom:0;width:' + s2 + ';height:' + s2 + ';background:' + th.particleColor + (0.4 + Math.random() * 0.5) + ');animation-duration:' + (6 + Math.random() * 8) + 's;animation-delay:' + (Math.random() * 5) + 's;z-index:5;';
+        fc.appendChild(p2);
+      }
+    }
 
-        // --- SCRATCH CARD LOGIC ---
-        function initScratchCard() {
-            const canvas = document.getElementById('scratch-canvas');
-            const ctx = canvas.getContext('2d');
-            let isDrawing = false;
+    function initPetals(th) {
+      var field = document.getElementById('petalField'); field.innerHTML = '';
+      for (var i = 0; i < th.petalCount; i++) {
+        var p = document.createElement('div'); p.className = 'falling-petal';
+        p.textContent = th.petals[Math.floor(Math.random() * th.petals.length)];
+        p.style.cssText = 'left:' + (Math.random() * 100) + '%;font-size:' + (0.6 + Math.random() * 0.8) + 'rem;animation-duration:' + (8 + Math.random() * 12) + 's;animation-delay:' + (Math.random() * 10) + 's;opacity:0;';
+        field.appendChild(p);
+      }
+    }
 
-            // Fill with silver/scratch color
-            ctx.fillStyle = '#C0C0C0';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function initScrollObserver() {
+      setTimeout(function () {
+        var els = document.querySelectorAll('.photo-moment,.final-wrap');
+        var obs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.15 });
+        els.forEach(function (m) { obs.observe(m); });
+      }, 150);
+    }
 
-            // Add some "scratch here" texture
-            ctx.fillStyle = '#A0A0A0';
-            for (let i = 0; i < 100; i++) {
-                ctx.beginPath();
-                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1, 0, Math.PI * 2);
-                ctx.fill();
-            }
+    var digits = document.querySelectorAll('.lock-digit');
+    digits.forEach(function (d, i) {
+      d.addEventListener('input', function () { if (d.value && i < digits.length - 1) digits[i + 1].focus(); });
+      d.addEventListener('keydown', function (e) { if (e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus(); });
+    });
 
-            function scratch(e) {
-                if (!isDrawing) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+    function unlock() {
+      var occasion = localStorage.getItem('loveOccasion') || 'Anniversary 💍';
+      var th = getTheme(occasion);
+      var burst = document.getElementById('heartBurst');
+      burst.style.display = 'block';
+      var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      for (var i = 0; i < 36; i++) {
+        var h = document.createElement('div'); h.className = 'burst-heart';
+        var angle = (Math.PI * 2 / 36) * i; var dist = 120 + Math.random() * 250;
+        h.style.left = cx + 'px'; h.style.top = cy + 'px';
+        h.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
+        h.style.setProperty('--ty', (Math.sin(angle) * dist) + 'px');
+        h.style.animationDelay = (Math.random() * 0.4) + 's';
+        h.style.fontSize = (0.8 + Math.random() * 2) + 'rem';
+        h.textContent = th.burstEmoji[Math.floor(Math.random() * th.burstEmoji.length)];
+        burst.appendChild(h);
+      }
+      setTimeout(function () { document.getElementById('lockScreen').classList.add('unlocking'); }, 200);
+      setTimeout(function () {
+        document.getElementById('lockScreen').classList.add('hidden');
+        burst.style.display = 'none';
+        var exp = document.getElementById('experience');
+        exp.style.display = 'flex'; exp.style.flexDirection = 'column';
+        var activeTheme = loadData();
+        loadPhotos(activeTheme);
+        initParticles(activeTheme);
+        initPetals(activeTheme);
+        initScrollObserver();
+      }, 1000);
+    }
 
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(x, y, 30, 0, Math.PI * 2);
-                ctx.fill();
-
-                checkScratchPercent();
-            }
-
-            function checkScratchPercent() {
-                const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                let transparentPixels = 0;
-                for (let i = 0; i < pixels.length; i += 4) {
-                    if (pixels[i + 3] < 128) transparentPixels++;
-                }
-                const percent = (transparentPixels / (canvas.width * canvas.height)) * 100;
-                if (percent > 40) {
-                    canvas.style.transition = 'opacity 1s';
-                    canvas.style.opacity = '0';
-                    setTimeout(() => {
-                        canvas.remove();
-                        const instr = document.querySelector('#scratchWrapper .instruction');
-                        if (instr) instr.style.display = 'none';
-                        playHearts();
-                    }, 1000);
-                }
-            }
-
-            canvas.addEventListener('mousedown', () => isDrawing = true);
-            canvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); });
-            window.addEventListener('mouseup', () => isDrawing = false);
-            window.addEventListener('touchend', () => isDrawing = false);
-            canvas.addEventListener('mousemove', scratch);
-            canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); });
-        }
-
-        // --- GALLERY LOGIC ---
-        function initGallery() {
-            const stack = document.getElementById('photoStack');
-            const photos = [
-                'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=300&h=400&fit=crop',
-                'https://images.unsplash.com/photo-1516589174184-c68526514283?q=80&w=300&h=400&fit=crop',
-                'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=300&h=400&fit=crop'
-            ];
-
-            photos.forEach((src, index) => {
-                const div = document.createElement('div');
-                div.className = 'polaroid';
-                div.style.zIndex = photos.length - index;
-                div.innerHTML = `
-                    <img src="${src}" alt="Memory">
-                    <p class="romantic-font" style="margin-top:10px; color:var(--text-muted)">Memory #${photos.length - index}</p>
-                `;
-
-                div.addEventListener('click', () => {
-                    div.classList.add('swiped');
-                    if (index === photos.length - 1) {
-                        setTimeout(() => {
-                            const instr = document.querySelector('#galleryWrapper .instruction');
-                            if (instr) instr.innerHTML = "End of memories, but start of us. ❤";
-                            playHearts();
-                        }, 500);
-                    }
-                });
-
-                stack.appendChild(div);
-            });
-        }
-
-        // Hearts Animation
-        function playHearts() {
-            const interval = setInterval(() => {
-                const heart = document.createElement('div');
-                heart.classList.add('heart');
-                heart.innerHTML = '❤';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.fontSize = Math.random() * 20 + 20 + 'px';
-                heart.style.animationDuration = Math.random() * 2 + 3 + 's';
-                heart.style.opacity = '0.8';
-                heart.style.color = '#ff4d6d';
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 5000);
-            }, 100);
-            setTimeout(() => clearInterval(interval), 10000);
-        }
-    </script>
+    (function () {
+      var occ = localStorage.getItem('loveOccasion') || 'Anniversary 💍';
+      var th = getTheme(occ);
+      applyTheme(th);
+      document.getElementById('lockIcon').textContent = th.lockIcon;
+      var hint = localStorage.getItem('loveHint');
+      if (hint) document.getElementById('lockHint').textContent = 'Hint: ' + hint + ' 💌';
+      initPetals(th);
+      document.getElementById('experience').style.display = 'none';
+    })();
+  </script>
 </body>
 
 </html>

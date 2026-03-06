@@ -941,12 +941,11 @@
             <div class="form-group">
                 <label>Occasion</label>
                 <select id="occasionSelect">
-                    <option>Anniversary 💍</option>
-                    <option>Birthday 🎂</option>
-                    <option>Valentine's Day 💝</option>
-                    <option>Just Because 🌸</option>
-                    <option>Long Distance 🌍</option>
-                    <option>Apology 🥺</option>
+                    <option value="Anniversary 💍">Anniversary 💍</option>
+                    <option value="Birthday 🎂">Birthday 🎂</option>
+                    <option value="Valentine's Day 💝">Valentine's Day 💝</option>
+                    <option value="Just Because 🌸">Just Because 🌸</option>
+                    <option value="Apology 🥺">Apology 🥺</option>
                 </select>
             </div>
             <div class="form-group">
@@ -969,10 +968,12 @@
             <span class="badge">♥ Step 3 of 5</span>
             <h1>Add Your<br /><em>Moments</em></h1>
             <p class="subtext">Upload photos by occasion — we'll place them perfectly in your Love Code.</p>
-            <div class="upload-area" onclick="simulateUpload()">
+            <div class="upload-area" onclick="document.getElementById('realFileInput').click()">
+                <input type="file" id="realFileInput" accept="image/*" multiple style="display:none"
+                    onchange="handleRealUpload(this)" />
                 <div class="upload-icon">📸</div>
                 <h3>Drop photos here or tap to upload</h3>
-                <p>JPG, PNG, HEIC · Up to 20 photos</p>
+                <p>JPG, PNG, HEIC · Up to 5 photos</p>
             </div>
             <p
                 style="font-size:0.8rem;font-weight:600;color:var(--rose);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;text-align:left;">
@@ -985,12 +986,9 @@
                 <div class="tag" onclick="toggleTag(this)">⭐ Custom</div>
             </div>
             <div class="photo-grid" id="photoGrid">
-                <div class="photo-slot filled">🌅<div class="photo-label">First date</div>
-                </div>
-                <div class="photo-slot filled">🏝️<div class="photo-label">Trip</div>
-                </div>
-                <div class="photo-slot filled">🎂<div class="photo-label">Birthday</div>
-                </div>
+                <div class="photo-slot">＋</div>
+                <div class="photo-slot">＋</div>
+                <div class="photo-slot">＋</div>
                 <div class="photo-slot">＋</div>
                 <div class="photo-slot">＋</div>
             </div>
@@ -1028,11 +1026,9 @@
             <h1>Your Love Code<br /><em>is ready</em></h1>
             <div class="love-code-card">
                 <div class="to-label">To</div>
-                <div class="to-name" id="previewName">Sofia</div>
-                <div class="photo-strip">
-                    <div class="photo-strip-item">🌅</div>
-                    <div class="photo-strip-item">🏝️</div>
-                    <div class="photo-strip-item">🎂</div>
+                <div class="to-name" id="previewName">Your Love</div>
+                <div class="photo-strip" id="previewPhotoStrip">
+                    <!-- Dynamic images go here -->
                 </div>
                 <div class="message-preview" id="previewMessage">
                     "There's something I've never found the right words for — until now. The way you laugh at your own
@@ -1119,30 +1115,7 @@
                 <div class="share-btn"><span class="s-icon">✉️</span>Email</div>
                 <div class="share-btn"><span class="s-icon">📋</span>Copy</div>
             </div>
-            <button class="btn-primary" onclick="goTo(7)">👀 Preview what they'll see</button>
-        </div>
-    </div>
-
-    <!-- SCREEN 7 — PARTNER UNLOCK -->
-    <div class="screen unlock-screen" id="screen7">
-        <span class="wm" style="top:8%;left:-4%;transform:rotate(-10deg)">open</span>
-        <span class="wm" style="bottom:10%;right:-4%;transform:rotate(8deg)">yours</span>
-        <div class="content">
-            <div style="font-size:3rem;margin-bottom:20px;">🔒</div>
-            <h1 class="unlock-title">Someone left you<br /><em>something special</em></h1>
-            <p class="unlock-sub">Enter your secret code to unlock it</p>
-            <div class="unlock-input-wrap">
-                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
-                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
-                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
-                <input class="unlock-digit" maxlength="1" type="text" placeholder="•" oninput="checkUnlock(this)" />
-            </div>
-            <p style="color:rgba(249,208,222,0.4);font-size:0.82rem;" id="finalHintDisplay">Hint: the date we first met
-                💌</p>
-            <div style="margin-top:40px;">
-                <button class="btn-secondary" style="border-color:rgba(255,138,170,0.4);color:#ff8aaa;"
-                    onclick="goTo(6)">← Back to share</button>
-            </div>
+            <button class="btn-primary" onclick="generateAndOpen()">👀 View Love Code</button>
         </div>
     </div>
 
@@ -1156,7 +1129,6 @@
             var bar = document.getElementById('progressBar');
             if (!dots || !bar) return;
             dots.innerHTML = '';
-            if (currentScreen === 7) { bar.style.display = 'none'; return; }
             bar.style.display = 'flex';
             for (var i = 1; i <= 6; i++) {
                 var d = document.createElement('div');
@@ -1170,31 +1142,64 @@
 
         /* Main screen navigation function */
         function goTo(n) {
-            var prev = document.getElementById('screen' + currentScreen);
-            if (prev) prev.classList.remove('active');
-            var prev4b = document.getElementById('screen4b');
-            if (prev4b) prev4b.classList.remove('active');
+            console.log('Navigating to screen:', n);
 
-            if (n === 4) {
-                document.getElementById('screen4').classList.add('active');
-                currentScreen = 4;
-                updateProgress();
-                runLoader();
+            // Hide all potential screens to be safe
+            for (var i = 1; i <= 6; i++) {
+                var s = document.getElementById('screen' + i);
+                if (s) s.classList.remove('active');
+            }
+            var s4b = document.getElementById('screen4b');
+            if (s4b) s4b.classList.remove('active');
+
+            // Set and show new screen
+            currentScreen = n;
+            var targetId = (n === '4b') ? 'screen4b' : 'screen' + n;
+            var el = document.getElementById(targetId);
+            if (el) {
+                el.classList.add('active');
             } else {
-                currentScreen = n;
-                var el = document.getElementById('screen' + n);
-                if (el) el.classList.add('active');
-                updateProgress();
+                console.error('Target screen not found:', targetId);
             }
 
-            if (n === 6) spawnConfetti();
-            if (n === '4b' || n === 5 || n === 6 || n === 7) {
-                document.getElementById('previewName').textContent = document.getElementById('partnerNameInput').value || 'Sofia';
-                var occ = document.getElementById('occasionSelect').value;
-                document.getElementById('previewMoodTag').textContent = selectedMood + ' · ' + occ;
-                var hint = document.getElementById('unlockHint').value;
-                if (hint) document.getElementById('finalHintDisplay').textContent = 'Hint: ' + hint + ' 💌';
+            // Specific logic for certain screens
+            if (n === 4) {
+                runLoader();
+            } else if (n === 3) {
+                // Save name and occasion when navigating to Step 3
+                var nameVal = document.getElementById('partnerNameInput').value;
+                var occVal = document.getElementById('occasionSelect').value;
+                localStorage.setItem('loveName', nameVal);
+                localStorage.setItem('loveOccasion', occVal);
+            } else if (n === 6) {
+                saveFlowData();
+                spawnConfetti();
             }
+
+            // Update header dots
+            updateProgress();
+
+            // Dynamic preview updates
+            try {
+                var nameInput = document.getElementById('partnerNameInput');
+                var occSelect = document.getElementById('occasionSelect');
+                var nameVal = nameInput ? nameInput.value.trim() : '';
+                var occ = occSelect ? occSelect.value : '';
+
+                if (n === '4b' || n === 5 || n === 6) {
+                    var prevName = document.getElementById('previewName');
+                    if (prevName) {
+                        prevName.textContent = nameVal !== '' ? nameVal : 'Your Love';
+                    }
+                    var prevMood = document.getElementById('previewMoodTag');
+                    if (prevMood) {
+                        prevMood.textContent = (selectedMood || 'In Love') + ' · ' + occ;
+                    }
+                }
+            } catch (err) {
+                console.error('Error updating preview:', err);
+            }
+
             window.scrollTo(0, 0);
         }
 
@@ -1296,16 +1301,187 @@
             }
         }
 
-        function checkUnlock(el) {
-            var inputs = Array.prototype.slice.call(document.querySelectorAll('.unlock-digit'));
-            var filled = inputs.every(function (i) { return i.value.trim() !== ''; });
-            if (filled) {
-                setTimeout(function () {
-                    alert('Love Code Unlocked!\n\nIn the real app, a cinematic experience plays here — photos, message, music, and all.');
-                }, 300);
+        function savePhotosToStorage() {
+            var filledSlots = document.querySelectorAll('#photoGrid .photo-slot.filled');
+            var savedPhotos = [];
+
+            filledSlots.forEach(function (slot) {
+                var img = slot.querySelector('img');
+                if (img && img.src && img.src.startsWith('data:')) {
+                    savedPhotos.push(img.src);
+                }
+            });
+
+            // Debug: Log what we're saving
+            console.log('Saving photos to localStorage:', savedPhotos);
+
+            // Save photos to localStorage for love-view.html
+            try {
+                localStorage.setItem('lovePhotos', JSON.stringify(savedPhotos));
+                console.log('Photos saved to localStorage under key "lovePhotos"');
+            } catch (err) {
+                console.error('Storage error:', err);
+                if (err.name === 'QuotaExceededError') {
+                    showToast('Storage Full', 'Some photos were too large to save. Try fewer or smaller photos.');
+                }
             }
-            var idx = inputs.indexOf(el);
-            if (el.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+        }
+
+        // Save all flow data to localStorage for the final view
+        function saveFlowData() {
+            try {
+                var nameInput = document.getElementById('partnerNameInput');
+                var occSelect = document.getElementById('occasionSelect');
+                var memoryInput = document.getElementById('memoryInput');
+                var previewMsg = document.getElementById('previewMessage');
+                var hintInput = document.getElementById('unlockHint');
+
+                var nameVal = nameInput ? nameInput.value.trim() : '';
+                var occ = occSelect ? occSelect.value : '';
+                var memory = memoryInput ? memoryInput.value : '';
+                var openingMsg = previewMsg ? previewMsg.textContent : '';
+                var hint = hintInput ? hintInput.value : '';
+
+                var flowData = {
+                    partnerName: nameVal || "My Love",
+                    occasion: occ,
+                    memory: memory,
+                    openingMessage: openingMsg,
+                    mood: selectedMood || "Deeply in Love",
+                    unlockHint: hint
+                };
+
+                localStorage.setItem('loveFlowData', JSON.stringify(flowData));
+
+                // Individual keys for love-view.html
+                localStorage.setItem('loveOccasion', occ);
+                localStorage.setItem('loveName', nameVal || "Someone Special");
+                localStorage.setItem('loveMessage', openingMsg);
+                localStorage.setItem('loveHint', hint);
+                localStorage.setItem('loveMood', selectedMood || "");
+
+                console.log('Flow data saved:', flowData);
+
+                // Also ensure photos are saved one last time
+                savePhotosToStorage();
+            } catch (err) {
+                console.error('Error in saveFlowData:', err);
+            }
+        }
+
+        function generateAndOpen() {
+            saveFlowData();
+            window.open('love-view.html', '_blank');
+        }
+
+        function updatePreviewStrip() {
+            var filledSlots = document.querySelectorAll('#photoGrid .photo-slot.filled img');
+            var previewStrip = document.getElementById('previewPhotoStrip');
+            if (!previewStrip) return;
+
+            previewStrip.innerHTML = '';
+
+            filledSlots.forEach(function (img) {
+                var item = document.createElement('div');
+                item.className = 'photo-strip-item';
+                item.style.overflow = 'hidden';
+                var previewImg = document.createElement('img');
+                previewImg.src = img.src;
+                previewImg.style.width = '100%';
+                previewImg.style.height = '100%';
+                previewImg.style.objectFit = 'cover';
+                item.appendChild(previewImg);
+                previewStrip.appendChild(item);
+            });
+
+            // Also save to main storage
+            savePhotosToStorage();
+        }
+
+        async function handleRealUpload(input) {
+            var grid = document.getElementById('photoGrid');
+            if (!grid || !input.files.length) return;
+
+            var currentFilled = grid.querySelectorAll('.photo-slot.filled').length;
+            var remaining = 5 - currentFilled;
+
+            if (remaining <= 0) {
+                alert("Maximum 5 photos allowed");
+                return;
+            }
+
+            var filesToProcess = Array.from(input.files).slice(0, remaining);
+            if (input.files.length > remaining) {
+                alert("Only the first " + remaining + " photos will be added (Limit: 5)");
+            }
+
+            // Show a temporary loading state or toast
+            showToast('Processing Photos...', 'Please wait while we optimize your moments.');
+
+            for (const file of filesToProcess) {
+                try {
+                    const resizedDataUrl = await resizeImage(file, 1200); // Resize to max 1200px
+                    var slots = grid.querySelectorAll('.photo-slot:not(.filled)');
+                    if (slots.length > 0) {
+                        var slot = slots[0];
+                        slot.innerHTML = '';
+                        var img = document.createElement('img');
+                        img.src = resizedDataUrl;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '12px';
+                        img.style.display = 'block';
+                        slot.appendChild(img);
+                        slot.classList.add('filled');
+                    }
+                } catch (err) {
+                    console.error('Error processing image:', err);
+                    showToast('Error', 'Failed to process some photos.');
+                }
+            }
+
+            updatePreviewStrip();
+            input.value = '';
+        }
+
+        // Helper to resize images using canvas to save storage space
+        function resizeImage(file, maxSide) {
+            return new Promise((resolve, reject) => {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var img = new Image();
+                    img.onload = function () {
+                        var canvas = document.createElement('canvas');
+                        var width = img.width;
+                        var height = img.height;
+
+                        if (width > height) {
+                            if (width > maxSide) {
+                                height *= maxSide / width;
+                                width = maxSide;
+                            }
+                        } else {
+                            if (height > maxSide) {
+                                width *= maxSide / height;
+                                height = maxSide;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Compression to 0.7 quality saves massive space
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         function simulateUpload() {
@@ -1328,6 +1504,30 @@
         });
 
         updateProgress();
+
+        // Debug: Add manual test function
+        window.testPhotoSaving = function () {
+            var saved = localStorage.getItem('lovePhotos');
+            console.log('Raw localStorage data:', saved);
+            var photos = saved ? JSON.parse(saved) : [];
+            console.log('Parsed photos:', photos);
+            console.log('Number of photos:', photos.length);
+            return photos;
+        };
+
+        // Auto-test on page load
+        console.log('=== CREATE PHOTO DEBUG ===');
+        var testResult = testPhotoSaving();
+        console.log('=== END DEBUG ===');
+
+        // ✅ Dynamic Name Binding
+        document.getElementById('partnerNameInput').addEventListener('input', function () {
+            var val = this.value.trim();
+            var preview = document.getElementById('previewName');
+            if (preview) {
+                preview.textContent = val !== '' ? val : 'Your Love';
+            }
+        });
     </script>
 </body>
 

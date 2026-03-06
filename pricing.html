@@ -2,500 +2,18 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pricing — Love Bites</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | Love Bites</title>
+    <meta name="description"
+        content="Pay once, love forever. Simple, sweet, and heartfelt plans for your Love Code. No subscriptions ever.">
     <link rel="stylesheet" href="style.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #fdf0f3;
-            min-height: 100vh;
-        }
-
-        /* --- PAGE WRAPPER --- */
-        .pricing-page {
-            position: relative;
-            padding: 140px 24px 120px;
-            overflow: hidden;
-            min-height: 100vh;
-            background:
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(252, 228, 236, 0.9) 0%, transparent 70%),
-                radial-gradient(ellipse 60% 40% at 20% 100%, rgba(253, 240, 243, 0.8) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 245, 247, 0.8) 0%, transparent 60%),
-                linear-gradient(180deg, #fff5f7 0%, #fdf0f3 50%, #fce4ec 100%);
-        }
-
-        .wm {
-            position: absolute;
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: clamp(3rem, 7vw, 6rem);
-            font-weight: 700;
-            color: rgba(210, 100, 130, 0.07);
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-            z-index: 0;
-        }
-
-        /* --- PAGE HEADER --- */
-        .pricing-header {
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto 64px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .pricing-header .badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(192, 49, 79, 0.28);
-            color: var(--cta);
-            border-radius: 50px;
-            padding: 6px 18px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-bottom: 22px;
-        }
-
-        .pricing-header h1 {
-            font-family: 'Playfair Display', serif;
-            line-height: 1.15;
-            margin-bottom: 10px;
-        }
-
-        .pricing-header h1 .h1-top {
-            display: block;
-            font-size: clamp(1.3rem, 2.8vw, 1.75rem);
-            font-weight: 700;
-            color: rgba(139, 10, 42, 0.6);
-            letter-spacing: 0.01em;
-            margin-bottom: 4px;
-        }
-
-        .pricing-header h1 .h1-bottom {
-            display: block;
-            font-size: clamp(2.2rem, 5vw, 3.4rem);
-            font-weight: 900;
-            font-style: italic;
-            color: var(--crimson);
-            letter-spacing: -0.02em;
-            line-height: 1.05;
-        }
-
-        .pricing-header p {
-            color: rgba(90, 90, 90, 0.72);
-            font-size: 0.97rem;
-            line-height: 1.65;
-            margin-top: 10px;
-            font-weight: 300;
-        }
-
-        /* --- 3 PLANS GRID --- */
-        .plans-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            max-width: 1000px;
-            margin: 0 auto 80px;
-            position: relative;
-            z-index: 1;
-            align-items: start;
-        }
-
-        /* --- PLAN CARD --- */
-        .plan-card {
-            background: rgba(255, 255, 255, 0.78);
-            border: 1px solid rgba(192, 49, 79, 0.12);
-            border-radius: 28px;
-            padding: 40px 32px 36px;
-            position: relative;
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateY(24px);
-            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .plan-card:nth-child(1).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0s, transform 0.55s ease-out 0s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .plan-card:nth-child(2).revealed {
-            opacity: 1;
-            transform: translateY(-8px);
-            transition: opacity 0.55s ease-out 0.1s, transform 0.55s ease-out 0.1s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .plan-card:nth-child(3).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.2s, transform 0.55s ease-out 0.2s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .plan-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 52px rgba(192, 49, 79, 0.11), 0 4px 16px rgba(192, 49, 79, 0.06);
-            border-color: rgba(192, 49, 79, 0.22);
-        }
-
-        /* --- POPULAR CARD --- */
-        .plan-card.popular {
-            background: linear-gradient(145deg, #fff0f3, #fde8ed);
-            border: 1.5px solid rgba(192, 49, 79, 0.28);
-            box-shadow: 0 16px 48px rgba(192, 49, 79, 0.14);
-            transform: translateY(-8px);
-            padding-top: 52px;
-        }
-
-        .plan-card.popular:hover {
-            transform: translateY(-14px);
-            box-shadow: 0 28px 64px rgba(192, 49, 79, 0.18);
-        }
-
-        .popular-badge {
-            position: absolute;
-            top: -1px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #c0314f, #c94070);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            padding: 7px 20px;
-            border-radius: 0 0 14px 14px;
-            white-space: nowrap;
-            box-shadow: 0 4px 16px rgba(192, 49, 79, 0.3);
-        }
-
-        /* --- PLAN CONTENT --- */
-        .plan-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--crimson);
-            margin-bottom: 6px;
-            letter-spacing: -0.01em;
-        }
-
-        .plan-tagline {
-            font-size: 0.82rem;
-            color: rgba(90, 90, 90, 0.65);
-            font-weight: 300;
-            margin-bottom: 28px;
-            line-height: 1.5;
-        }
-
-        .plan-price-wrap {
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-
-        .plan-currency {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--crimson);
-            line-height: 1;
-        }
-
-        .plan-amount {
-            font-family: 'Playfair Display', serif;
-            font-size: 3.2rem;
-            font-weight: 900;
-            color: var(--crimson);
-            line-height: 1;
-            letter-spacing: -0.03em;
-        }
-
-        .plan-once {
-            font-size: 0.78rem;
-            color: rgba(90, 90, 90, 0.5);
-            font-weight: 400;
-            margin-bottom: 28px;
-        }
-
-        .plan-divider {
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(192, 49, 79, 0.15), transparent);
-            margin-bottom: 24px;
-        }
-
-        /* --- FEATURE CHECKLIST --- */
-        .plan-features {
-            list-style: none;
-            margin-bottom: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .plan-features li {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 0.88rem;
-            color: rgba(90, 90, 90, 0.85);
-            line-height: 1.5;
-            font-weight: 400;
-        }
-
-        .plan-features li::before {
-            content: '✓';
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 18px;
-            height: 18px;
-            min-width: 18px;
-            border-radius: 50%;
-            background: rgba(192, 49, 79, 0.1);
-            color: var(--cta);
-            font-size: 0.65rem;
-            font-weight: 700;
-            margin-top: 1px;
-        }
-
-        .plan-card.popular .plan-features li {
-            color: rgba(90, 90, 90, 0.95);
-        }
-
-        .plan-card.popular .plan-features li::before {
-            background: rgba(192, 49, 79, 0.15);
-        }
-
-        /* --- CTA BUTTONS --- */
-        .plan-btn {
-            display: block;
-            width: 100%;
-            padding: 15px 24px;
-            border-radius: 50px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.25s ease;
-            letter-spacing: 0.01em;
-        }
-
-        .plan-btn.outline {
-            background: transparent;
-            color: var(--cta);
-            border: 1.5px solid rgba(192, 49, 79, 0.35);
-        }
-
-        .plan-btn.outline:hover {
-            background: rgba(192, 49, 79, 0.06);
-            border-color: var(--cta);
-            transform: translateY(-2px);
-        }
-
-        .plan-btn.filled {
-            background: var(--cta);
-            color: white;
-            border: none;
-            box-shadow: 0 6px 24px rgba(192, 49, 79, 0.32);
-        }
-
-        .plan-btn.filled:hover {
-            background: var(--cta-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 32px rgba(192, 49, 79, 0.4);
-        }
-
-        /* --- TRUST LINE --- */
-        .pricing-trust {
-            text-align: center;
-            font-size: 0.8rem;
-            color: rgba(90, 90, 90, 0.5);
-            position: relative;
-            z-index: 1;
-            margin-bottom: 80px;
-            letter-spacing: 0.02em;
-        }
-
-        .pricing-trust span {
-            color: var(--cta);
-            font-weight: 600;
-        }
-
-        /* --- FAQ --- */
-        .faq-wrap {
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .faq-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .faq-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-            color: var(--crimson);
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .faq-header h2 em {
-            color: var(--rose);
-            font-style: italic;
-        }
-
-        .faq-header p {
-            color: rgba(90, 90, 90, 0.65);
-            font-size: 0.92rem;
-            font-weight: 300;
-        }
-
-        .faq-item {
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid rgba(192, 49, 79, 0.1);
-            border-radius: 18px;
-            margin-bottom: 12px;
-            overflow: hidden;
-            backdrop-filter: blur(8px);
-            transition: border-color 0.25s ease;
-        }
-
-        .faq-item:hover {
-            border-color: rgba(192, 49, 79, 0.22);
-        }
-
-        .faq-q {
-            width: 100%;
-            background: none;
-            border: none;
-            padding: 20px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            text-align: left;
-            gap: 16px;
-        }
-
-        .faq-q-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--crimson);
-            line-height: 1.4;
-        }
-
-        .faq-icon {
-            width: 28px;
-            height: 28px;
-            min-width: 28px;
-            border-radius: 50%;
-            background: rgba(192, 49, 79, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            color: var(--cta);
-            font-weight: 300;
-            transition: all 0.25s ease;
-            line-height: 1;
-        }
-
-        .faq-item.open .faq-icon {
-            background: var(--cta);
-            color: white;
-            transform: rotate(45deg);
-        }
-
-        .faq-a {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-            padding: 0 24px;
-        }
-
-        .faq-a p {
-            color: rgba(90, 90, 90, 0.8);
-            font-size: 0.9rem;
-            line-height: 1.8;
-            font-weight: 300;
-            padding-bottom: 20px;
-            border-top: 1px solid rgba(192, 49, 79, 0.08);
-            padding-top: 16px;
-        }
-
-        .faq-item.open .faq-a {
-            max-height: 300px;
-        }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 900px) {
-            .plans-grid {
-                grid-template-columns: 1fr;
-                max-width: 440px;
-                gap: 20px;
-            }
-
-            .plan-card.popular {
-                transform: translateY(0);
-            }
-
-            .plan-card.popular.revealed {
-                transform: translateY(0);
-            }
-
-            .plan-card.popular:hover {
-                transform: translateY(-6px);
-            }
-
-            .navbar {
-                padding: 16px 24px;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .navbar-links {
-                display: none;
-            }
-
-            .pricing-page {
-                padding: 120px 16px 100px;
-            }
-        }
-    </style>
 </head>
 
 <body>
-
-    <!-- ==========================================
-     NAVBAR
-     Logo → index.html
-     "Pricing" has .active (current page)
-     CTA button → create.html
-     ========================================== -->
     <nav id="navbar" class="scrolled">
         <div class="nav-container container">
             <a href="index.html" class="logo">
@@ -536,288 +54,354 @@
         </div>
     </nav>
 
-    <!-- ==========================================
-     PAGE CONTENT
-     ========================================== -->
-    <div class="pricing-page">
-
-        <!-- Watermark BG words -->
-        <span class="wm" style="top:3%;left:-4%;transform:rotate(-10deg)">yours</span>
-        <span class="wm" style="bottom:5%;right:-4%;transform:rotate(7deg)">always</span>
-        <span class="wm" style="top:38%;left:52%;transform:rotate(-4deg);font-size:3.5rem">forever</span>
-
-        <!-- Page Header -->
-        <div class="pricing-header">
-            <span class="badge">♥ Pricing</span>
-            <!--
-      TWO-LINE HEADLINE:
-      .h1-top    = small + faded → recedes
-      .h1-bottom = large + italic → dominates
-    -->
-            <h1>
-                <span class="h1-top">One moment. One payment.</span>
-                <span class="h1-bottom">No subscriptions ever.</span>
-            </h1>
-            <p>Pay once, love forever. Pick the plan that fits your moment.</p>
+    <!-- FULLSCREEN MOBILE MENU -->
+    <div class="fullscreen-menu" id="fullscreenMenu">
+        <div class="menu-topbar">
+            <div class="menu-logo">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="menuHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--rose-light)" />
+                            <stop offset="100%" style="stop-color:var(--rose)" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="url(#menuHeartGrad)" />
+                </svg>
+                <span class="menu-logo-text">Love<em>Bites</em><span class="menu-logo-dot"></span></span>
+            </div>
+            <button class="menu-close-btn" id="menuCloseBtn">✕</button>
         </div>
-
-
-        <!-- ==========================================
-       3 PLAN CARDS
-       All start hidden (opacity:0).
-       JS adds .revealed on scroll entry.
-       Plan 2 (.popular) stays elevated at -8px.
-       All CTA buttons → create.html
-       ========================================== -->
-        <div class="plans-grid">
-
-            <!-- PLAN 1: Sweet Start — outline button -->
-            <div class="plan-card">
-                <div class="plan-name">Sweet Start</div>
-                <p class="plan-tagline">Perfect for a first gesture — simple, sweet, and heartfelt.</p>
-                <div class="plan-price-wrap">
-                    <span class="plan-currency">₹</span>
-                    <span class="plan-amount">49</span>
+        <div class="menu-items">
+            <div class="menu-section-label">Explore</div>
+            <a href="index.html#how-it-works" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-rose">✨</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">How It Works</span>
+                        <span class="menu-item-sub">See the magic behind the code</span>
+                    </div>
                 </div>
-                <p class="plan-once">one-time payment</p>
-                <div class="plan-divider"></div>
-                <ul class="plan-features">
-                    <li>1 Love Code creation</li>
-                    <li>Choose your mood & occasion</li>
-                    <li>AI-written personal message</li>
-                    <li>Up to 5 photo uploads</li>
-                    <li>Secret 4-digit unlock code</li>
-                    <li>Shareable private link</li>
-                </ul>
-                <!-- outline button style -->
-                <a href="create.html" class="plan-btn outline">♥ Get Started</a>
-            </div>
-
-
-            <!-- PLAN 2: True Love — MOST POPULAR
-         .popular class → elevated + pink bg + filled button
-         .popular-badge → sits at top of card -->
-            <div class="plan-card popular">
-                <div class="popular-badge">⭐ Most Popular</div>
-                <div class="plan-name">True Love</div>
-                <p class="plan-tagline">The full experience — made for moments that deserve to be remembered forever.
-                </p>
-                <div class="plan-price-wrap">
-                    <span class="plan-currency">₹</span>
-                    <span class="plan-amount">99</span>
+                <span class="menu-arrow">›</span>
+            </a>
+            <a href="index.html#journey" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-pink">💝</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Love Stories</span>
+                        <span class="menu-item-sub">Get inspired by real love codes</span>
+                    </div>
                 </div>
-                <p class="plan-once">one-time payment</p>
-                <div class="plan-divider"></div>
-                <ul class="plan-features">
-                    <li>3 Love Code creations</li>
-                    <li>All moods & occasions</li>
-                    <li>AI-written personal message</li>
-                    <li>Up to 20 photo uploads</li>
-                    <li>5 premium templates</li>
-                    <li>Secret 4-digit unlock code</li>
-                    <li>Custom unlock hint message</li>
-                    <li>Shareable private link</li>
-                    <li>Reaction notifications</li>
-                </ul>
-                <!-- filled button style -->
-                <a href="create.html" class="plan-btn filled">♥ Create Your Love Code</a>
-            </div>
-
-
-            <!-- PLAN 3: Forever Love — outline button -->
-            <div class="plan-card">
-                <div class="plan-name">Forever Love</div>
-                <p class="plan-tagline">For the ones who love deeply — unlimited codes, every occasion, for life.</p>
-                <div class="plan-price-wrap">
-                    <span class="plan-currency">₹</span>
-                    <span class="plan-amount">149</span>
+                <span class="menu-arrow">›</span>
+            </a>
+            <a href="occasions.html" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-purple">💍</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Occasions</span>
+                        <span class="menu-item-sub">Perfect for every moment</span>
+                    </div>
                 </div>
-                <p class="plan-once">one-time payment</p>
-                <div class="plan-divider"></div>
-                <ul class="plan-features">
-                    <li>Unlimited Love Code creations</li>
-                    <li>All moods & occasions</li>
-                    <li>AI-written personal message</li>
-                    <li>Unlimited photo uploads</li>
-                    <li>All premium templates</li>
-                    <li>Secret unlock code + hint</li>
-                    <li>Cinematic slideshow mode</li>
-                    <li>Background music option</li>
-                    <li>Reaction notifications</li>
-                    <li>Priority support</li>
-                </ul>
-                <!-- outline button style -->
-                <a href="create.html" class="plan-btn outline">♥ Get Forever Love</a>
+                <span class="menu-arrow">›</span>
+            </a>
+            <a href="pricing.html" class="menu-item active">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-gold">💎</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Pricing</span>
+                        <span class="menu-item-sub">Pick the plan that fits you</span>
+                    </div>
+                </div>
+                <span class="menu-arrow">›</span>
+            </a>
+            <div class="menu-section-label" style="margin-top:2rem">More</div>
+            <a href="about.html" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-blue">👋</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">About Us</span>
+                        <span class="menu-item-sub">Our story and mission</span>
+                    </div>
+                </div>
+                <span class="menu-arrow">›</span>
+            </a>
+            <div class="menu-footer">
+                <a href="create.html" class="menu-btn-create">♥ Create Your Love Code</a>
+                <a href="#" class="menu-btn-signin">Sign In</a>
             </div>
-
         </div>
-
-
-        <!-- Trust line — below cards, above FAQ -->
-        <p class="pricing-trust">
-            <span>500+</span> Love Codes sent &nbsp;·&nbsp;
-            <span>4.9★</span> rating &nbsp;·&nbsp;
-            Secure payment &nbsp;·&nbsp;
-            End-to-end encrypted
-        </p>
-
-
-        <!-- ==========================================
-       FAQ ACCORDION
-       Each .faq-item has a button (.faq-q)
-       and a hidden answer panel (.faq-a).
-       JS toggleFaq() adds/removes .open class.
-       One item open at a time.
-       ========================================== -->
-        <div class="faq-wrap">
-
-            <div class="faq-header">
-                <h2>Questions? We've got <em>answers.</em></h2>
-                <p>Everything you need to know before creating your Love Code.</p>
-            </div>
-
-            <!-- FAQ 1 -->
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">
-                    <span class="faq-q-text">Is this really a one-time payment?</span>
-                    <span class="faq-icon">+</span>
-                </button>
-                <div class="faq-a">
-                    <p>Yes — absolutely. You pay once and your plan is yours forever. No monthly fees, no renewals, no
-                        hidden charges. Just a single payment for a moment that lasts a lifetime.</p>
-                </div>
-            </div>
-
-            <!-- FAQ 2 -->
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">
-                    <span class="faq-q-text">What is a Love Code?</span>
-                    <span class="faq-icon">+</span>
-                </button>
-                <div class="faq-a">
-                    <p>A Love Code is a private, beautifully animated experience built from your photos, feelings, and
-                        an AI-written message. You lock it with a secret code only your partner would know — and when
-                        they unlock it, they see something they'll never forget.</p>
-                </div>
-            </div>
-
-            <!-- FAQ 3 -->
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">
-                    <span class="faq-q-text">Can I upgrade my plan later?</span>
-                    <span class="faq-icon">+</span>
-                </button>
-                <div class="faq-a">
-                    <p>Yes — you can upgrade at any time. You'll only pay the difference between your current plan and
-                        the new one. Your existing Love Codes and data are always preserved.</p>
-                </div>
-            </div>
-
-            <!-- FAQ 4 -->
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">
-                    <span class="faq-q-text">How does the secret unlock code work?</span>
-                    <span class="faq-icon">+</span>
-                </button>
-                <div class="faq-a">
-                    <p>You set a 4-digit code — something only your partner would know, like the date you first met or a
-                        special number. You can also add a hint to guide them. They enter the code on their screen and
-                        your Love Code unlocks just for them.</p>
-                </div>
-            </div>
-
-            <!-- FAQ 5 -->
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">
-                    <span class="faq-q-text">Is my data private and secure?</span>
-                    <span class="faq-icon">+</span>
-                </button>
-                <div class="faq-a">
-                    <p>Completely. Your photos, messages, and Love Codes are end-to-end encrypted and private. Only the
-                        person with your unique link and secret code can ever see what you created.</p>
-                </div>
-            </div>
-
-            <!-- FAQ 6 -->
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">
-                    <span class="faq-q-text">What payment methods are accepted?</span>
-                    <span class="faq-icon">+</span>
-                </button>
-                <div class="faq-a">
-                    <p>We accept all major UPI apps (GPay, PhonePe, Paytm), debit and credit cards, and net banking. All
-                        payments are processed securely.</p>
-                </div>
-            </div>
-
-        </div>
-
     </div>
 
+    <main>
+        <div class="pricing-page" style="padding-top: 100px;">
+            <section id="pricing" class="pricing-section">
+                <span class="wm" style="top:3%;left:-4%;transform:rotate(-10deg)">yours</span>
+                <span class="wm" style="bottom:5%;right:-4%;transform:rotate(7deg)">always</span>
+                <span class="wm" style="top:38%;left:52%;transform:rotate(-4deg);font-size:3.5rem">forever</span>
 
-    <!-- ==========================================
-     JAVASCRIPT
-     📌 Must be at bottom of <body> AFTER all HTML
-     ⚠️ ES5 only — var, function(){}
-        No arrow functions, no const/let
-     ========================================== -->
-    <script>
+                <div class="pricing-header">
+                    <span class="badge">♥ Pricing</span>
+                    <h1>
+                        <span class="h1-top">One moment. One payment.</span>
+                        <span class="h1-bottom">No subscriptions ever.</span>
+                    </h1>
+                    <p>Pay once, love forever. Pick the plan that fits your moment.</p>
+                </div>
 
-        /* ---- SCROLL REVEAL ----
-           Watches .plan-card elements.
-           Adds .revealed on viewport entry.
-           CSS nth-child handles stagger timing.
-           Popular card (.plan-card:nth-child(2))
-           stays at translateY(-8px) when revealed. */
+                <div class="plans-grid">
+                    <div class="plan-card">
+                        <div class="plan-name">Sweet Start</div>
+                        <p class="plan-tagline">Perfect for a first gesture — simple, sweet, and heartfelt.</p>
+                        <div class="plan-price-wrap">
+                            <span class="plan-currency">₹</span>
+                            <span class="plan-amount">49</span>
+                        </div>
+                        <p class="plan-once">one-time payment</p>
+                        <div class="plan-divider"></div>
+                        <ul class="plan-features">
+                            <li>1 Love Code creation</li>
+                            <li>Choose your mood & occasion</li>
+                            <li>AI-written personal message</li>
+                            <li>Up to 5 photo uploads</li>
+                            <li>Secret 4-digit unlock code</li>
+                            <li>Shareable private link</li>
+                        </ul>
+                        <a href="create.html" class="plan-btn outline">♥ Get Started</a>
+                    </div>
 
-        var planCards = document.querySelectorAll('.plan-card');
+                    <div class="plan-card popular">
+                        <div class="popular-badge">⭐ Most Popular</div>
+                        <div class="plan-name">True Love</div>
+                        <p class="plan-tagline">The full experience — made for moments that deserve to be remembered
+                            forever.</p>
+                        <div class="plan-price-wrap">
+                            <span class="plan-currency">₹</span>
+                            <span class="plan-amount">99</span>
+                        </div>
+                        <p class="plan-once">one-time payment</p>
+                        <div class="plan-divider"></div>
+                        <ul class="plan-features">
+                            <li>3 Love Code creations</li>
+                            <li>All moods & occasions</li>
+                            <li>AI-written personal message</li>
+                            <li>Up to 20 photo uploads</li>
+                            <li>5 premium templates</li>
+                            <li>Secret 4-digit unlock code</li>
+                            <li>Custom unlock hint message</li>
+                            <li>Shareable private link</li>
+                            <li>Reaction notifications</li>
+                        </ul>
+                        <a href="create.html" class="plan-btn filled">♥ Create Your Love Code</a>
+                    </div>
 
-        if ('IntersectionObserver' in window) {
-            var planObserver = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('revealed');
-                        planObserver.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
+                    <div class="plan-card">
+                        <div class="plan-name">Forever Love</div>
+                        <p class="plan-tagline">For the ones who love deeply — unlimited codes, every occasion, for
+                            life.
+                        </p>
+                        <div class="plan-price-wrap">
+                            <span class="plan-currency">₹</span>
+                            <span class="plan-amount">149</span>
+                        </div>
+                        <p class="plan-once">one-time payment</p>
+                        <div class="plan-divider"></div>
+                        <ul class="plan-features">
+                            <li>Unlimited Love Code creations</li>
+                            <li>All moods & occasions</li>
+                            <li>AI-written personal message</li>
+                            <li>Unlimited photo uploads</li>
+                            <li>All premium templates</li>
+                            <li>Secret unlock code + hint</li>
+                            <li>Cinematic slideshow mode</li>
+                            <li>Background music option</li>
+                            <li>Reaction notifications</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <a href="create.html" class="plan-btn outline">♥ Get Forever Love</a>
+                    </div>
+                </div>
 
-            planCards.forEach(function (card) {
-                planObserver.observe(card);
-            });
+                <p class="pricing-trust">
+                    <span>500+</span> Love Codes sent &nbsp;·&nbsp;
+                    <span>4.9★</span> rating &nbsp;·&nbsp;
+                    Secure payment &nbsp;·&nbsp;
+                    End-to-end encrypted
+                </p>
 
-        } else {
-            /* Fallback for old browsers */
-            planCards.forEach(function (card) {
-                card.classList.add('revealed');
-            });
-        }
+                <div class="faq-wrap">
+                    <div class="faq-header">
+                        <h2>Questions? We've got <em>answers.</em></h2>
+                        <p>Everything you need to know before creating your Love Code.</p>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-q" onclick="toggleFaq(this)">
+                            <span class="faq-q-text">Is this really a one-time payment?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-a">
+                            <p>Yes — absolutely. You pay once and your plan is yours forever. No monthly fees, no
+                                renewals,
+                                no
+                                hidden charges. Just a single payment for a moment that lasts a lifetime.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-q" onclick="toggleFaq(this)">
+                            <span class="faq-q-text">What is a Love Code?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-a">
+                            <p>A Love Code is a private, beautifully animated experience built from your photos,
+                                feelings,
+                                and
+                                an AI-written message. You lock it with a secret code only your partner would know — and
+                                when
+                                they unlock it, they see something they'll never forget.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-q" onclick="toggleFaq(this)">
+                            <span class="faq-q-text">Can I upgrade my plan later?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-a">
+                            <p>Yes — you can upgrade at any time. You'll only pay the difference between your current
+                                plan
+                                and
+                                the new one. Your existing Love Codes and data are always preserved.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-q" onclick="toggleFaq(this)">
+                            <span class="faq-q-text">How does the secret unlock code work?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-a">
+                            <p>You set a 4-digit code — something only your partner would know, like the date you first
+                                met
+                                or a
+                                special number. You can also add a hint to guide them. They enter the code on their
+                                screen
+                                and
+                                your Love Code unlocks just for them.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-q" onclick="toggleFaq(this)">
+                            <span class="faq-q-text">Is my data private and secure?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-a">
+                            <p>Completely. Your photos, messages, and Love Codes are end-to-end encrypted and private.
+                                Only
+                                the
+                                person with your unique link and secret code can ever see what you created.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-q" onclick="toggleFaq(this)">
+                            <span class="faq-q-text">What payment methods are accepted?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-a">
+                            <p>We accept all major UPI apps (GPay, PhonePe, Paytm), debit and credit cards, and net
+                                banking.
+                                All
+                                payments are processed securely.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
 
+    <footer class="lb-footer">
+        <div class="lb-footer-body">
+            <div class="container">
+                <div class="lb-footer-grid">
+                    <div class="lb-col-brand">
+                        <a href="index.html" class="lb-logo">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                                <defs>
+                                    <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ff6b80" />
+                                        <stop offset="100%" style="stop-color:#e8445a" />
+                                    </linearGradient>
+                                </defs>
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                    fill="url(#fg)" />
+                            </svg>
+                            <span class="lb-logo-text">Love <em>Bites</em><span class="lb-logo-dot"></span></span>
+                        </a>
+                        <p class="lb-tagline">The world's most personal digital gift — turn your feelings into moments
+                            they'll never forget.</p>
+                        <div class="lb-socials">
+                            <a href="#" class="lb-social" aria-label="Instagram">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                </svg>
+                            </a>
+                            <a href="#" class="lb-social" aria-label="TikTok">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.24 8.24 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="lb-social" aria-label="YouTube">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.4a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+                                    <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="lb-col-title">Love Bites</h4>
+                        <ul class="lb-links">
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="index.html#journey">Love Stories</a></li>
+                            <li><a href="index.html#how-it-works">How It Works</a></li>
+                            <li><a href="pricing.html">Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="lb-col-title">Support</h4>
+                        <ul class="lb-links">
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Refund Policy</a></li>
+                            <li><a href="#">Report Issue</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="lb-col-title">Legal</h4>
+                        <ul class="lb-links">
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Cookie Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="lb-divider"></div>
+        <div class="lb-footer-bottom">
+            <div class="container">
+                <div class="lb-bottom-inner">
+                    <p class="lb-copy"> 2026 Love Bites. All rights reserved.</p>
+                    <p class="lb-made-with">Made with <span class="lb-heart"></span> for unforgettable moments.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-        /* ---- FAQ ACCORDION ----
-           toggleFaq(btn) is called via onclick on each .faq-q button.
-           It closes ALL items first, then opens the clicked one
-           (unless it was already open — then stays closed). */
-
-        function toggleFaq(btn) {
-            var item = btn.parentElement;
-            var isOpen = item.classList.contains('open');
-            /* Close all */
-            var allItems = document.querySelectorAll('.faq-item');
-            allItems.forEach(function (el) {
-                el.classList.remove('open');
-            });
-            /* Open clicked only if it was closed before */
-            if (!isOpen) {
-                item.classList.add('open');
-            }
-        }
-
-    </script>
-
-    <!-- ==========================================
-     END OF FILE
-     ========================================== -->
     <script src="app.js"></script>
 </body>
 

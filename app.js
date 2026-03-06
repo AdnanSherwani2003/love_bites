@@ -422,7 +422,7 @@ var selectedMood = '';
    Clicking selected pill again deselects it. */
 function selectMood(el) {
   var pills = document.querySelectorAll('.ai-mood-pill');
-  pills.forEach(function(p) { p.classList.remove('selected'); });
+  pills.forEach(function (p) { p.classList.remove('selected'); });
   if (selectedMood === el.textContent.trim()) {
     selectedMood = ''; /* deselect if clicking same pill */
   } else {
@@ -442,7 +442,7 @@ function generateMessage() {
   if (!feeling) {
     inputEl.focus();
     inputEl.style.borderColor = 'rgba(192,49,79,0.5)';
-    setTimeout(function() {
+    setTimeout(function () {
       inputEl.style.borderColor = '';
     }, 1500);
     return;
@@ -498,58 +498,58 @@ function generateMessage() {
       messages: [{ role: 'user', content: prompt }]
     })
   })
-  .then(function(res) { return res.json(); })
-  .then(function(data) {
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
 
-    /* Extract raw text from API response */
-    var raw = '';
-    if (data.content && data.content.length > 0) {
-      for (var i = 0; i < data.content.length; i++) {
-        if (data.content[i].type === 'text') {
-          raw += data.content[i].text;
+      /* Extract raw text from API response */
+      var raw = '';
+      if (data.content && data.content.length > 0) {
+        for (var i = 0; i < data.content.length; i++) {
+          if (data.content[i].type === 'text') {
+            raw += data.content[i].text;
+          }
         }
       }
-    }
 
-    /* Strip any accidental markdown fences + parse JSON */
-    var cleaned = raw.replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(cleaned);
+      /* Strip any accidental markdown fences + parse JSON */
+      var cleaned = raw.replace(/```json|```/g, '').trim();
+      var parsed = JSON.parse(cleaned);
 
-    /* Fill the 3 output fields */
-    var openingEl = document.getElementById('ai-opening');
-    var messageEl = document.getElementById('ai-message');
-    var closingEl = document.getElementById('ai-closing');
-    
-    if (openingEl) openingEl.textContent = parsed.opening || '';
-    if (messageEl) messageEl.textContent = parsed.message || '';
-    if (closingEl) closingEl.textContent = parsed.closing || '';
+      /* Fill the 3 output fields */
+      var openingEl = document.getElementById('ai-opening');
+      var messageEl = document.getElementById('ai-message');
+      var closingEl = document.getElementById('ai-closing');
 
-    /* Show output card with fade+slide animation:
-       1. Set display:block first
-       2. 30ms delay so browser registers it
-       3. Add .visible to trigger CSS transition */
-    if (out) {
-      out.style.display = 'block';
-      setTimeout(function() { out.classList.add('visible'); }, 30);
+      if (openingEl) openingEl.textContent = parsed.opening || '';
+      if (messageEl) messageEl.textContent = parsed.message || '';
+      if (closingEl) closingEl.textContent = parsed.closing || '';
 
-      /* Smooth scroll to output card */
-      setTimeout(function() {
-        out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 100);
-    }
+      /* Show output card with fade+slide animation:
+         1. Set display:block first
+         2. 30ms delay so browser registers it
+         3. Add .visible to trigger CSS transition */
+      if (out) {
+        out.style.display = 'block';
+        setTimeout(function () { out.classList.add('visible'); }, 30);
 
-  })
-  .catch(function() {
-    /* Show error message on failure */
-    if (errorEl) errorEl.classList.add('visible');
-  })
-  .then(function() {
-    /* Always reset button — runs after .then OR .catch */
-    if (btn) {
-      btn.classList.remove('loading');
-      btn.disabled = false;
-    }
-  });
+        /* Smooth scroll to output card */
+        setTimeout(function () {
+          out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+
+    })
+    .catch(function () {
+      /* Show error message on failure */
+      if (errorEl) errorEl.classList.add('visible');
+    })
+    .then(function () {
+      /* Always reset button — runs after .then OR .catch */
+      if (btn) {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
 }
 
 // Support Ctrl+Enter in textarea
@@ -573,19 +573,21 @@ document.addEventListener('DOMContentLoaded', () => {
     entries.forEach(function (e) {
       if (e.isIntersecting) {
         e.target.classList.add('v');
+        e.target.classList.add('revealed'); // Support both classes
       }
     });
-  }, { 
-    threshold: 0.1, 
-    rootMargin: '0px 0px -50px 0px' 
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
   });
 
   const revealTargets = document.querySelectorAll(
-    '#journey, .jrn-pair, .jrn-tc, .jrn-head, .jrn-sb, .jrn-how, .jrn-cta, .jrn-gw-q'
+    '#journey, .jrn-pair, .jrn-tc, .jrn-head, .jrn-sb, .jrn-how, .jrn-cta, .jrn-gw-q, ' +
+    '#occasions, .occasion-card, #pricing, .plan-card, #about, .animate-on-scroll'
   );
-  
-  revealTargets.forEach(function (el) { 
-    io.observe(el); 
+
+  revealTargets.forEach(function (el) {
+    io.observe(el);
   });
 
   // 3D tilt on image cards
@@ -623,6 +625,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-})();
+})();// ═══════════════════════════════════════
+// FAQ ACCORDION
+// ═══════════════════════════════════════
+window.toggleFaq = function (btn) {
+  const item = btn.parentElement;
+  const isOpen = item.classList.contains('open');
 
+  // Close all other items
+  document.querySelectorAll('.faq-item').forEach(el => {
+    el.classList.remove('open');
+  });
 
+  // Open clicked one if it was closed
+  if (!isOpen) {
+    item.classList.add('open');
+  }
+};

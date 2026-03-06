@@ -2,399 +2,18 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Occasions — Love Bites</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Occasions | Love Bites</title>
+    <meta name="description"
+        content="Pick an occasion — we'll craft a Love Code that fits it perfectly. Anniversaries, Birthdays, Valentine's Day and more.">
     <link rel="stylesheet" href="style.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #fdf0f3;
-            min-height: 100vh;
-        }
-
-        /* --- PAGE WRAPPER --- */
-        .occasions-page {
-            position: relative;
-            padding: 140px 24px 120px;
-            overflow: hidden;
-            min-height: 100vh;
-            background:
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(252, 228, 236, 0.9) 0%, transparent 70%),
-                radial-gradient(ellipse 60% 40% at 20% 100%, rgba(253, 240, 243, 0.8) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 245, 247, 0.8) 0%, transparent 60%),
-                linear-gradient(180deg, #fff5f7 0%, #fdf0f3 50%, #fce4ec 100%);
-        }
-
-        /* Watermark BG words */
-        .wm {
-            position: absolute;
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: clamp(3rem, 7vw, 6rem);
-            font-weight: 700;
-            color: rgba(210, 100, 130, 0.07);
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-            z-index: 0;
-        }
-
-        /* --- HEADER --- */
-        .occasions-header {
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto 64px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .occasions-header .badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(192, 49, 79, 0.28);
-            color: var(--cta);
-            border-radius: 50px;
-            padding: 6px 18px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-bottom: 22px;
-        }
-
-        .occasions-header h1 {
-            font-family: 'Playfair Display', serif;
-            line-height: 1.15;
-            margin-bottom: 10px;
-        }
-
-        .occasions-header h1 .h1-top {
-            display: block;
-            font-size: clamp(1.3rem, 2.8vw, 1.75rem);
-            font-weight: 700;
-            color: rgba(139, 10, 42, 0.6);
-            letter-spacing: 0.01em;
-            margin-bottom: 4px;
-        }
-
-        .occasions-header h1 .h1-bottom {
-            display: block;
-            font-size: clamp(2.2rem, 5vw, 3.4rem);
-            font-weight: 900;
-            font-style: italic;
-            color: var(--crimson);
-            letter-spacing: -0.02em;
-            line-height: 1.05;
-        }
-
-        .occasions-header p {
-            color: rgba(90, 90, 90, 0.72);
-            font-size: 0.97rem;
-            line-height: 1.65;
-            margin-top: 10px;
-            font-weight: 300;
-        }
-
-        /* --- GRID --- */
-        .occasions-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            max-width: 1100px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* --- OCCASION CARD --- */
-        .occasion-card {
-            background: rgba(255, 255, 255, 0.78);
-            border: 1px solid rgba(192, 49, 79, 0.10);
-            border-radius: 28px;
-            padding: 40px 28px 36px;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateY(24px);
-            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        /* Stagger reveal */
-        .occasion-card:nth-child(1).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0s, transform 0.55s ease-out 0s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(2).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.07s, transform 0.55s ease-out 0.07s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(3).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.14s, transform 0.55s ease-out 0.14s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(4).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.21s, transform 0.55s ease-out 0.21s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(5).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.28s, transform 0.55s ease-out 0.28s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(6).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.35s, transform 0.55s ease-out 0.35s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(7).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.42s, transform 0.55s ease-out 0.42s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        .occasion-card:nth-child(8).revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.55s ease-out 0.49s, transform 0.55s ease-out 0.49s, box-shadow 0.35s ease, border-color 0.35s ease;
-        }
-
-        /* Hover lift */
-        .occasion-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 24px 56px rgba(192, 49, 79, 0.13), 0 4px 16px rgba(192, 49, 79, 0.07);
-            border-color: rgba(192, 49, 79, 0.25);
-        }
-
-        .occasion-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(145deg, rgba(255, 240, 243, 0.5), rgba(255, 224, 232, 0.3));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border-radius: 28px;
-            z-index: 0;
-        }
-
-        .occasion-card:hover::after {
-            opacity: 1;
-        }
-
-        .occasion-card::before {
-            content: '';
-            position: absolute;
-            top: 20%;
-            bottom: 20%;
-            left: 0;
-            width: 2.5px;
-            border-radius: 0 2px 2px 0;
-            background: linear-gradient(180deg, rgba(192, 49, 79, 0.65), rgba(201, 64, 112, 0.25));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1;
-        }
-
-        .occasion-card:hover::before {
-            opacity: 1;
-        }
-
-        .card-inner {
-            position: relative;
-            z-index: 2;
-        }
-
-        .occasion-emoji {
-            font-size: 2.8rem;
-            display: block;
-            margin-bottom: 18px;
-            line-height: 1;
-            transition: transform 0.3s ease;
-        }
-
-        .occasion-card:hover .occasion-emoji {
-            transform: scale(1.12);
-        }
-
-        .occasion-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--crimson);
-            margin-bottom: 10px;
-            line-height: 1.3;
-            letter-spacing: -0.01em;
-        }
-
-        .occasion-desc {
-            color: rgba(90, 90, 90, 0.75);
-            font-size: 0.84rem;
-            line-height: 1.75;
-            font-weight: 300;
-            margin-bottom: 24px;
-        }
-
-        .occasion-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(192, 49, 79, 0.08);
-            border: 1px solid rgba(192, 49, 79, 0.18);
-            border-radius: 50px;
-            padding: 7px 16px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--cta);
-            transition: all 0.25s ease;
-            opacity: 0;
-            transform: translateY(6px);
-        }
-
-        .occasion-card:hover .occasion-pill {
-            opacity: 1;
-            transform: translateY(0);
-            background: var(--cta);
-            color: white;
-            border-color: var(--cta);
-        }
-
-        /* --- BOTTOM CTA --- */
-        .occasions-cta {
-            margin-top: 72px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .occasions-cta::before {
-            content: '';
-            display: block;
-            width: 48px;
-            height: 1.5px;
-            background: linear-gradient(90deg, transparent, rgba(192, 49, 79, 0.35), transparent);
-            margin: 0 auto 40px;
-        }
-
-        .occasions-cta p {
-            color: rgba(90, 90, 90, 0.6);
-            font-size: 0.92rem;
-            font-weight: 300;
-            margin-bottom: 24px;
-        }
-
-        .occasions-cta p strong {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            color: var(--rose);
-            font-weight: 700;
-        }
-
-        .cta-btn {
-            background: var(--cta);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 17px 44px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 6px 28px rgba(192, 49, 79, 0.32);
-            transition: all 0.25s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            text-decoration: none;
-            letter-spacing: 0.01em;
-        }
-
-        .cta-btn:hover {
-            background: var(--cta-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 36px rgba(192, 49, 79, 0.4);
-        }
-
-        .cta-trust {
-            margin-top: 16px;
-            font-size: 0.78rem;
-            color: rgba(90, 90, 90, 0.5);
-            letter-spacing: 0.02em;
-        }
-
-        .cta-trust span {
-            color: var(--cta);
-            font-weight: 600;
-        }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 1024px) {
-            .occasions-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .occasions-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 16px;
-            }
-
-            .navbar {
-                padding: 16px 24px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .occasions-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-
-            .occasion-card {
-                padding: 28px 16px 24px;
-            }
-
-            .navbar-links {
-                display: none;
-            }
-
-            .occasions-page {
-                padding: 120px 16px 100px;
-            }
-        }
-    </style>
 </head>
 
 <body>
-
-    <!-- NAVBAR
-     Logo → index.html
-     "Occasions" is .active
-     CTA → create.html -->
     <nav id="navbar" class="scrolled">
         <div class="nav-container container">
             <a href="index.html" class="logo">
@@ -435,135 +54,284 @@
         </div>
     </nav>
 
-    <div class="occasions-page">
-
-        <span class="wm" style="top:3%;left:-4%;transform:rotate(-10deg)">love</span>
-        <span class="wm" style="bottom:5%;right:-4%;transform:rotate(7deg)">celebrate</span>
-        <span class="wm" style="top:40%;left:52%;transform:rotate(-4deg);font-size:3.5rem">cherish</span>
-
-        <div class="occasions-header">
-            <span class="badge">♥ Occasions</span>
-            <h1>
-                <span class="h1-top">Every feeling deserves</span>
-                <span class="h1-bottom">its own moment.</span>
-            </h1>
-            <p>Pick an occasion — we'll craft a Love Code that fits it perfectly.</p>
+    <!-- FULLSCREEN MOBILE MENU -->
+    <div class="fullscreen-menu" id="fullscreenMenu">
+        <div class="menu-topbar">
+            <div class="menu-logo">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="menuHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--rose-light)" />
+                            <stop offset="100%" style="stop-color:var(--rose)" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        fill="url(#menuHeartGrad)" />
+                </svg>
+                <span class="menu-logo-text">Love<em>Bites</em><span class="menu-logo-dot"></span></span>
+            </div>
+            <button class="menu-close-btn" id="menuCloseBtn">✕</button>
         </div>
-
-        <!-- 8 CARDS — each is <a href="create.html">
-       Clicking any → goes to create.html
-       All start hidden, JS reveals on scroll -->
-        <div class="occasions-grid">
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">💍</span>
-                    <div class="occasion-name">Anniversary</div>
-                    <p class="occasion-desc">Celebrate another year of choosing each other — with every memory that made
-                        it real.</p>
-                    <span class="occasion-pill">Start creating →</span>
+        <div class="menu-items">
+            <div class="menu-section-label">Explore</div>
+            <a href="index.html#how-it-works" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-rose">✨</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">How It Works</span>
+                        <span class="menu-item-sub">See the magic behind the code</span>
+                    </div>
                 </div>
+                <span class="menu-arrow">›</span>
             </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">🎂</span>
-                    <div class="occasion-name">Birthday</div>
-                    <p class="occasion-desc">More than a card. A whole cinematic experience built around the person they
-                        are.</p>
-                    <span class="occasion-pill">Start creating →</span>
+            <a href="index.html#journey" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-pink">💝</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Love Stories</span>
+                        <span class="menu-item-sub">Get inspired by real love codes</span>
+                    </div>
                 </div>
+                <span class="menu-arrow">›</span>
             </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">💝</span>
-                    <div class="occasion-name">Valentine's Day</div>
-                    <p class="occasion-desc">Skip the generic. Give them something that actually feels like you wrote
-                        it.</p>
-                    <span class="occasion-pill">Start creating →</span>
+            <a href="occasions.html" class="menu-item active">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-purple">💍</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Occasions</span>
+                        <span class="menu-item-sub">Perfect for every moment</span>
+                    </div>
                 </div>
+                <span class="menu-arrow">›</span>
             </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">🌸</span>
-                    <div class="occasion-name">Just Because</div>
-                    <p class="occasion-desc">No reason needed. Sometimes the most unforgettable moments are the
-                        unexpected ones.</p>
-                    <span class="occasion-pill">Start creating →</span>
+            <a href="pricing.html" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-gold">💎</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">Pricing</span>
+                        <span class="menu-item-sub">Pick the plan that fits you</span>
+                    </div>
                 </div>
+                <span class="menu-arrow">›</span>
             </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">🌍</span>
-                    <div class="occasion-name">Long Distance</div>
-                    <p class="occasion-desc">Miles apart, but this will make them feel like you're right there with
-                        them.</p>
-                    <span class="occasion-pill">Start creating →</span>
+            <div class="menu-section-label" style="margin-top:2rem">More</div>
+            <a href="about.html" class="menu-item">
+                <div class="menu-item-left">
+                    <div class="menu-item-icon icon-blue">👋</div>
+                    <div class="menu-item-text">
+                        <span class="menu-item-label">About Us</span>
+                        <span class="menu-item-sub">Our story and mission</span>
+                    </div>
                 </div>
+                <span class="menu-arrow">›</span>
             </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">🥺</span>
-                    <div class="occasion-name">Apology</div>
-                    <p class="occasion-desc">Some apologies need more than words. Show them how much they truly mean to
-                        you.</p>
-                    <span class="occasion-pill">Start creating →</span>
-                </div>
-            </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">💎</span>
-                    <div class="occasion-name">Proposal</div>
-                    <p class="occasion-desc">The moment before the moment. Build up to the question with everything that
-                        led you here.</p>
-                    <span class="occasion-pill">Start creating →</span>
-                </div>
-            </a>
-
-            <a href="create.html" class="occasion-card">
-                <div class="card-inner">
-                    <span class="occasion-emoji">🌹</span>
-                    <div class="occasion-name">First Date</div>
-                    <p class="occasion-desc">Tell them how you felt before, during, and after. Make the beginning
-                        unforgettable.</p>
-                    <span class="occasion-pill">Start creating →</span>
-                </div>
-            </a>
-
+            <div class="menu-footer">
+                <a href="create.html" class="menu-btn-create">♥ Create Your Love Code</a>
+                <a href="#" class="menu-btn-signin">Sign In</a>
+            </div>
         </div>
-
-        <!-- BOTTOM CTA → create.html -->
-        <div class="occasions-cta">
-            <p>Not sure which to pick? <strong>Any occasion works.</strong></p>
-            <a href="create.html" class="cta-btn">♥ Create Your Love Code</a>
-            <p class="cta-trust"><span>500+</span> Love Codes sent &nbsp;·&nbsp; <span>4.9★</span> rating &nbsp;·&nbsp;
-                End-to-end encrypted</p>
-        </div>
-
     </div>
 
-    <!-- SCRIPT — bottom of body, ES5 only -->
-    <script>
-        var cards = document.querySelectorAll('.occasion-card');
-        if ('IntersectionObserver' in window) {
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('revealed');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-            cards.forEach(function (card) { observer.observe(card); });
-        } else {
-            cards.forEach(function (card) { card.classList.add('revealed'); });
-        }
-    </script>
+    <main>
+        <div class="occasions-page" style="padding-top: 100px;">
+            <section id="occasions" class="occasions-section">
+                <span class="wm" style="top:3%;left:-4%;transform:rotate(-10deg)">love</span>
+                <span class="wm" style="bottom:5%;right:-4%;transform:rotate(7deg)">celebrate</span>
+                <span class="wm" style="top:40%;left:52%;transform:rotate(-4deg);font-size:3.5rem">cherish</span>
+
+                <div class="occasions-header">
+                    <span class="badge">♥ Occasions</span>
+                    <h1>
+                        <span class="h1-top">Every feeling deserves</span>
+                        <span class="h1-bottom">its own moment.</span>
+                    </h1>
+                    <p>Pick an occasion — we'll craft a Love Code that fits it perfectly.</p>
+                </div>
+
+                <div class="occasions-grid">
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">💍</span>
+                            <div class="occasion-name">Anniversary</div>
+                            <p class="occasion-desc">Celebrate another year of choosing each other — with every memory
+                                that
+                                made
+                                it real.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">🎂</span>
+                            <div class="occasion-name">Birthday</div>
+                            <p class="occasion-desc">More than a card. A whole cinematic experience built around the
+                                person
+                                they
+                                are.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">💝</span>
+                            <div class="occasion-name">Valentine's Day</div>
+                            <p class="occasion-desc">Skip the generic. Give them something that actually feels like you
+                                wrote
+                                it.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">🌸</span>
+                            <div class="occasion-name">Just Because</div>
+                            <p class="occasion-desc">No reason needed. Sometimes the most unforgettable moments are the
+                                unexpected ones.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">🌍</span>
+                            <div class="occasion-name">Long Distance</div>
+                            <p class="occasion-desc">Miles apart, but this will make them feel like you're right there
+                                with
+                                them.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">🥺</span>
+                            <div class="occasion-name">Apology</div>
+                            <p class="occasion-desc">Some apologies need more than words. Show them how much they truly
+                                mean
+                                to
+                                you.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">💎</span>
+                            <div class="occasion-name">Proposal</div>
+                            <p class="occasion-desc">The moment before the moment. Build up to the question with
+                                everything
+                                that
+                                led you here.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                    <a href="create.html" class="occasion-card">
+                        <div class="card-inner">
+                            <span class="occasion-emoji">🌹</span>
+                            <div class="occasion-name">First Date</div>
+                            <p class="occasion-desc">Tell them how you felt before, during, and after. Make the
+                                beginning
+                                unforgettable.</p>
+                            <span class="occasion-pill">Start creating →</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="occasions-cta">
+                    <p>Not sure which to pick? <strong>Any occasion works.</strong></p>
+                    <a href="create.html" class="cta-btn">♥ Create Your Love Code</a>
+                    <p class="cta-trust"><span>500+</span> Love Codes sent &nbsp;·&nbsp; <span>4.9★</span> rating
+                        &nbsp;·&nbsp;
+                        End-to-end encrypted</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="lb-footer">
+        <div class="lb-footer-body">
+            <div class="container">
+                <div class="lb-footer-grid">
+                    <div class="lb-col-brand">
+                        <a href="index.html" class="lb-logo">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                                <defs>
+                                    <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ff6b80" />
+                                        <stop offset="100%" style="stop-color:#e8445a" />
+                                    </linearGradient>
+                                </defs>
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                    fill="url(#fg)" />
+                            </svg>
+                            <span class="lb-logo-text">Love <em>Bites</em><span class="lb-logo-dot"></span></span>
+                        </a>
+                        <p class="lb-tagline">The world's most personal digital gift — turn your feelings into moments
+                            they'll never forget.</p>
+                        <div class="lb-socials">
+                            <a href="#" class="lb-social" aria-label="Instagram">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                </svg>
+                            </a>
+                            <a href="#" class="lb-social" aria-label="TikTok">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.24 8.24 0 0 0 4.84 1.56V6.79a4.85 4.85 0 0 1-1.07-.1z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="lb-social" aria-label="YouTube">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.4a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+                                    <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="lb-col-title">Love Bites</h4>
+                        <ul class="lb-links">
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="index.html#journey">Love Stories</a></li>
+                            <li><a href="index.html#how-it-works">How It Works</a></li>
+                            <li><a href="pricing.html">Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="lb-col-title">Support</h4>
+                        <ul class="lb-links">
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Refund Policy</a></li>
+                            <li><a href="#">Report Issue</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="lb-col-title">Legal</h4>
+                        <ul class="lb-links">
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Cookie Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="lb-divider"></div>
+        <div class="lb-footer-bottom">
+            <div class="container">
+                <div class="lb-bottom-inner">
+                    <p class="lb-copy"> 2026 Love Bites. All rights reserved.</p>
+                    <p class="lb-made-with">Made with <span class="lb-heart"></span> for unforgettable moments.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script src="app.js"></script>
 </body>
 

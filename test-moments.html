@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Moments Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background: #e8445a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #d63450;
+        }
+
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f8ff;
+            border-radius: 4px;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d00;
+        }
+
+        .success {
+            background: #e6ffe6;
+            color: #080;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Test Moments Fix</h1>
+
+    <div class="test-section">
+        <h2>Test Photo Upload Simulation</h2>
+        <p>Click the buttons below to simulate different numbers of uploaded photos:</p>
+        <button onclick="testPhotos(1)">Test 1 Photo</button>
+        <button onclick="testPhotos(2)">Test 2 Photos</button>
+        <button onclick="testPhotos(3)">Test 3 Photos</button>
+        <button onclick="testPhotos(4)">Test 4 Photos</button>
+        <button onclick="testPhotos(5)">Test 5 Photos</button>
+        <button onclick="clearPhotos()">Clear Photos</button>
+        <div id="testResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Current localStorage Status</h2>
+        <button onclick="checkStorage()">Check Storage</button>
+        <div id="storageResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Open Love View</h2>
+        <p>After setting up test photos, click below to open the Love Code view:</p>
+        <button onclick="window.open('love-view.html', '_blank')">Open Love View</button>
+    </div>
+
+    <script>
+        // Sample test images (using data URLs for testing)
+        const testImages = [
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmY2YjgwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2U4NDQ1YSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vbWVudCAxPC90ZXh0Pjwvc3ZnPg==',
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZlNmY3Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2M5NDA3MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vbWVudCAyPC90ZXh0Pjwvc3ZnPg==',
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmOGZmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzAwYTBkMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vbWVudCAzPC90ZXh0Pjwvc3ZnPg==',
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZmMGY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmNjkwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vbWVudCA0PC90ZXh0Pjwvc3ZnPg==',
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBlNmZmIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzgwMDA4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vbWVudCA1PC90ZXh0Pjwvc3ZnPg=='
+        ];
+
+        function testPhotos(count) {
+            const photos = testImages.slice(0, count);
+            localStorage.setItem('loveMoments', JSON.stringify(photos));
+
+            const result = document.getElementById('testResult');
+            result.className = 'result success';
+            result.innerHTML = `
+                <strong>Success!</strong><br>
+                Saved ${count} test photo(s) to localStorage.<br>
+                Photos: ${JSON.stringify(photos.map((_, i) => `Photo ${i + 1}`))}<br>
+                Now open the Love View page to see all ${count} moments displayed.
+            `;
+        }
+
+        function clearPhotos() {
+            localStorage.removeItem('loveMoments');
+            localStorage.removeItem('loveFlowData');
+            const result = document.getElementById('testResult');
+            result.className = 'result success';
+            result.innerHTML = '<strong>Cleared!</strong><br>All test photos and flow data removed from localStorage.';
+        }
+
+        function checkStorage() {
+            const saved = localStorage.getItem('loveMoments');
+            const photos = saved ? JSON.parse(saved) : [];
+
+            const result = document.getElementById('storageResult');
+            if (photos.length === 0) {
+                result.className = 'result error';
+                result.innerHTML = '<strong>No photos found</strong><br>localStorage "loveMoments" is empty.';
+            } else {
+                result.className = 'result success';
+                result.innerHTML = `
+                    <strong>Found ${photos.length} photo(s)</strong><br>
+                    Data: ${saved.substring(0, 100)}...<br>
+                    Photos: ${photos.map((_, i) => `Photo ${i + 1}`).join(', ')}
+                `;
+            }
+        }
+
+        // Check storage on page load
+        checkStorage();
+    </script>
+</body>
+
+</html>

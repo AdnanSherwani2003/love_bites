@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Love Bites — Your Love Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --deep:#0d0005;
+  --deep2:#1a0510;
+  --rose:#e8445a;
+  --rose-light:#ff6b80;
+  --cream:#fff5f7;
+}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;background:var(--deep);font-family:'DM Sans',sans-serif;}
+
+/* LOCK SCREEN */
+#lockScreen{
+  position:fixed;inset:0;z-index:1000;
+  background:linear-gradient(145deg,#0d0005 0%,#1a0510 50%,#2a0820 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+  transition:opacity 0.8s ease,transform 0.8s ease;
+}
+#lockScreen.unlocking{opacity:0;transform:scale(1.08);pointer-events:none;}
+#lockScreen.hidden{display:none !important;}
+.lock-logo{font-family:'Playfair Display',serif;font-size:1rem;color:rgba(255,235,240,0.3);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:1rem;}
+.lock-icon{font-size:3rem;animation:lockPulse 2s ease-in-out infinite;}
+@keyframes lockPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0px rgba(232,68,90,0));}50%{transform:scale(1.1);filter:drop-shadow(0 0 20px rgba(232,68,90,0.5));}}
+.lock-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-style:italic;color:rgba(255,235,240,0.9);text-align:center;line-height:1.3;}
+.lock-title em{color:var(--rose-light);font-style:normal;}
+.lock-sub{font-size:0.8rem;color:rgba(255,235,240,0.35);letter-spacing:0.06em;text-align:center;}
+.lock-digits{display:flex;gap:12px;}
+.lock-digit{width:56px;height:64px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(232,68,90,0.25);border-radius:14px;font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--rose-light);text-align:center;outline:none;transition:all 0.2s;caret-color:var(--rose-light);}
+.lock-digit:focus{border-color:var(--rose-light);background:rgba(232,68,90,0.08);box-shadow:0 0 0 3px rgba(232,68,90,0.1);}
+.lock-hint{font-size:0.75rem;color:rgba(255,235,240,0.25);font-style:italic;}
+.unlock-btn{background:linear-gradient(135deg,var(--rose-light),var(--rose));color:white;border:none;padding:0.85rem 2.5rem;border-radius:100px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.25s;box-shadow:0 8px 24px rgba(232,68,90,0.35);letter-spacing:0.02em;}
+.unlock-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(232,68,90,0.5);}
+
+/* HEART BURST */
+#heartBurst{position:fixed;inset:0;z-index:999;pointer-events:none;display:none;}
+.burst-heart{position:absolute;animation:burstFly 1.2s ease-out forwards;opacity:0;}
+@keyframes burstFly{0%{opacity:1;transform:translate(0,0) scale(0.5);}60%{opacity:1;}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1.5);}}
+
+/* EXPERIENCE */
+#experience{display:none;flex-direction:column;min-height:100vh;}
+
+/* SCENE 1 */
+#scene1{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0d0005 0%,#1a0510 60%,#200818 100%);position:relative;overflow:hidden;padding:2rem;}
+.scene1-particles{position:absolute;inset:0;pointer-events:none;}
+.s1-particle{position:absolute;width:3px;height:3px;background:var(--rose);border-radius:50%;opacity:0;animation:particleDrift linear infinite;}
+@keyframes particleDrift{0%{opacity:0;transform:translateY(0) scale(0);}20%{opacity:0.6;}80%{opacity:0.3;}100%{opacity:0;transform:translateY(-80vh) scale(1.5);}}
+.quote-wrap{text-align:center;max-width:700px;position:relative;z-index:1;}
+.to-label{font-size:0.65rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,107,128,0.5);margin-bottom:1.5rem;opacity:0;animation:fadeUp 1s ease 0.5s forwards;}
+.to-name{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,8vw,6rem);font-weight:600;color:#fff;line-height:1;margin-bottom:3rem;opacity:0;animation:fadeUp 1s ease 0.8s forwards;text-shadow:0 0 60px rgba(232,68,90,0.3);}
+.opening-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.3rem,3vw,2rem);color:rgba(255,235,240,0.85);line-height:1.7;opacity:0;animation:fadeUp 1.2s ease 1.4s forwards;position:relative;padding:0 1rem;}
+.opening-quote::before{content:'"';position:absolute;top:-2rem;left:-1rem;font-size:6rem;color:rgba(232,68,90,0.08);font-style:normal;line-height:1;}
+.mood-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(232,68,90,0.12);border:1px solid rgba(232,68,90,0.25);border-radius:100px;padding:0.4rem 1.2rem;font-size:0.72rem;color:var(--rose-light);font-weight:500;margin-top:2rem;opacity:0;animation:fadeUp 1s ease 2.2s forwards;}
+.scroll-cue{margin-top:4rem;display:flex;flex-direction:column;align-items:center;gap:0.5rem;opacity:0;animation:fadeUp 1s ease 3s forwards;}
+.scroll-cue span{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,235,240,0.25);}
+.scroll-arrow{width:24px;height:24px;border-right:1.5px solid rgba(255,107,128,0.4);border-bottom:1.5px solid rgba(255,107,128,0.4);transform:rotate(45deg);animation:arrowBounce 1.5s ease-in-out infinite;}
+@keyframes arrowBounce{0%,100%{transform:rotate(45deg) translateY(0);}50%{transform:rotate(45deg) translateY(6px);}}
+
+/* SCENE 2 */
+#scene2{background:linear-gradient(180deg,#1a0510 0%,#0d0005 100%);padding:6rem 0;position:relative;overflow:hidden;}
+.scene2-header{text-align:center;padding:0 2rem 5rem;}
+.scene2-eyebrow{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(232,68,90,0.5);margin-bottom:1rem;}
+.scene2-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(2rem,5vw,3.5rem);color:rgba(255,235,240,0.9);line-height:1.2;}
+.scene2-title em{color:var(--rose-light);font-style:normal;}
+.photo-sequence{display:flex;flex-direction:column;gap:0;}
+.photo-moment{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:4rem 2rem;position:relative;opacity:0;transform:translateY(60px);transition:opacity 0.9s ease,transform 0.9s ease;}
+.photo-moment.visible{opacity:1;transform:translateY(0);}
+.photo-moment:nth-child(even) .moment-inner{flex-direction:row-reverse;}
+.moment-inner{display:flex;align-items:center;gap:4rem;max-width:1000px;width:100%;}
+.moment-img{flex:1;max-width:460px;aspect-ratio:4/5;border-radius:24px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(232,68,90,0.1);}
+.moment-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 8s ease;}
+.photo-moment.visible .moment-img img{transform:scale(1.06);}
+.moment-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;}
+.moment-img-placeholder.p1{background:linear-gradient(135deg,#2d1520,#4a1030,#3d0f28);}
+.moment-img-placeholder.p2{background:linear-gradient(135deg,#1a1530,#2d2050,#1e1a40);}
+.moment-img-placeholder.p3{background:linear-gradient(135deg,#0d2020,#153030,#0a2525);}
+.moment-img-placeholder.p4{background:linear-gradient(135deg,#2d2015,#4a3010,#3d280f);}
+.moment-text{flex:1;padding:1rem 0;}
+.moment-number{font-size:0.55rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(232,68,90,0.45);margin-bottom:0.8rem;}
+.moment-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(232,68,90,0.1);border:1px solid rgba(232,68,90,0.2);border-radius:100px;padding:0.3rem 0.9rem;font-size:0.7rem;color:var(--rose-light);font-weight:500;margin-bottom:1.5rem;}
+.moment-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.4rem,2.5vw,2rem);color:rgba(255,235,240,0.88);line-height:1.5;margin-bottom:1.2rem;}
+.moment-caption{font-size:0.78rem;color:rgba(255,235,240,0.3);line-height:1.7;max-width:320px;}
+.moment-divider{text-align:center;padding:1rem 0;position:relative;}
+.moment-divider::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:1px;height:80px;background:linear-gradient(to bottom,transparent,rgba(232,68,90,0.2),transparent);}
+.moment-divider span{font-size:1.2rem;opacity:0.3;}
+
+/* SCENE 3 */
+#scene3{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0d0005 0%,#1a0510 100%);position:relative;overflow:hidden;padding:4rem 2rem;text-align:center;}
+.final-wrap{max-width:600px;position:relative;z-index:1;opacity:0;transform:translateY(40px);transition:opacity 1s ease,transform 1s ease;}
+.final-wrap.visible{opacity:1;transform:translateY(0);}
+.final-heart{font-size:3rem;animation:finalHeartbeat 2s ease-in-out infinite;display:inline-block;margin-bottom:2rem;filter:drop-shadow(0 0 20px rgba(232,68,90,0.6));}
+@keyframes finalHeartbeat{0%,100%{transform:scale(1);}15%{transform:scale(1.2);}30%{transform:scale(1);}45%{transform:scale(1.1);}}
+.final-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,2vw,1.3rem);font-style:italic;color:rgba(255,107,128,0.5);letter-spacing:0.1em;margin-bottom:1rem;text-transform:uppercase;}
+.final-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.8rem,4vw,3rem);color:rgba(255,235,240,0.92);line-height:1.4;margin-bottom:3rem;}
+.final-quote em{color:var(--rose-light);font-style:normal;}
+.final-names{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:rgba(255,235,240,0.4);letter-spacing:0.08em;margin-bottom:3rem;}
+.final-made{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,235,240,0.2);margin-top:4rem;}
+.final-made span{color:var(--rose);animation:finalHeartbeat 2s ease-in-out infinite;}
+.petal-ring{position:absolute;inset:0;pointer-events:none;}
+.petal{position:absolute;font-size:0.8rem;opacity:0;animation:petalFloat linear infinite;}
+@keyframes petalFloat{0%{opacity:0;transform:translateY(20px) rotate(0deg);}10%{opacity:0.4;}90%{opacity:0.2;}100%{opacity:0;transform:translateY(-60vh) rotate(180deg);}}
+
+/* SHARED */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .moment-inner{flex-direction:column !important;gap:2rem;}
+  .moment-img{max-width:100%;width:100%;aspect-ratio:1/1;}
+  .moment-text{text-align:center;}
+  .moment-caption{margin:0 auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen">
+  <p class="lock-logo">♥ Love Bites</p>
+  <div class="lock-icon">🔒</div>
+  <h2 class="lock-title">Someone left you<br/><em>something special</em></h2>
+  <p class="lock-sub">Enter your secret code to unlock it</p>
+  <div class="lock-digits">
+    <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d1"/>
+    <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d2"/>
+    <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d3"/>
+    <input class="lock-digit" maxlength="1" type="text" placeholder="·" id="d4"/>
+  </div>
+  <p class="lock-hint">Hint: the date we first met 💌</p>
+  <button class="unlock-btn" onclick="unlock()">♥ Open Your Surprise</button>
+</div>
+
+<!-- HEART BURST -->
+<div id="heartBurst"></div>
+
+<!-- MAIN EXPERIENCE -->
+<div id="experience">
+
+  <!-- SCENE 1: Opening Quote -->
+  <section id="scene1">
+    <div class="scene1-particles" id="scene1Particles"></div>
+    <div class="quote-wrap">
+      <p class="to-label">A Love Code — Just For You</p>
+      <h1 class="to-name">Sofia</h1>
+      <p class="opening-quote">
+        There's something I've never found the right words for — until now. The way you laugh at your own jokes before finishing them is the most beautiful thing I've ever known. This is for you, always.
+      </p>
+      <div class="mood-pill">💞 Deeply in Love · Anniversary 💍</div>
+      <div class="scroll-cue">
+        <span>Your moments</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 2: Photo Sequence -->
+  <section id="scene2">
+    <div class="scene2-header">
+      <p class="scene2-eyebrow">♥ Every chapter of us</p>
+      <h2 class="scene2-title">The moments that make<br/><em>us, us.</em></h2>
+    </div>
+    <div class="photo-sequence">
+
+      <div class="photo-moment">
+        <div class="moment-inner">
+          <div class="moment-img">
+            <div class="moment-img-placeholder p1">🌅</div>
+          </div>
+          <div class="moment-text">
+            <p class="moment-number">Moment 01</p>
+            <div class="moment-tag">📸 First Date</div>
+            <p class="moment-quote">"The night everything changed."</p>
+            <p class="moment-caption">I still remember exactly how you looked. The way you smiled like you already knew something I didn't.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="moment-divider"><span>♥</span></div>
+
+      <div class="photo-moment">
+        <div class="moment-inner">
+          <div class="moment-img">
+            <div class="moment-img-placeholder p2">🏝️</div>
+          </div>
+          <div class="moment-text">
+            <p class="moment-number">Moment 02</p>
+            <div class="moment-tag">✈️ Trip Together</div>
+            <p class="moment-quote">"Our world, just for a while."</p>
+            <p class="moment-caption">Somewhere between the airport chaos and the sunsets — I realized I want to travel every road with you.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="moment-divider"><span>♥</span></div>
+
+      <div class="photo-moment">
+        <div class="moment-inner">
+          <div class="moment-img">
+            <div class="moment-img-placeholder p3">🎂</div>
+          </div>
+          <div class="moment-text">
+            <p class="moment-number">Moment 03</p>
+            <div class="moment-tag">🎂 Birthday</div>
+            <p class="moment-quote">"Another year of you — my favorite."</p>
+            <p class="moment-caption">Celebrating you is the easiest thing in the world. You make every ordinary day feel like a reason.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="moment-divider"><span>♥</span></div>
+
+      <div class="photo-moment">
+        <div class="moment-inner">
+          <div class="moment-img">
+            <div class="moment-img-placeholder p4">🕯️</div>
+          </div>
+          <div class="moment-text">
+            <p class="moment-number">Moment 04</p>
+            <div class="moment-tag">🌙 Everyday</div>
+            <p class="moment-quote">"The quiet ones are my favourite."</p>
+            <p class="moment-caption">Not every moment needs a stage. Some of my best memories are just — you, being you, next to me.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SCENE 3: Final Closing -->
+  <section id="scene3">
+    <div class="petal-ring" id="petalRing"></div>
+    <div class="final-wrap" id="finalWrap">
+      <div class="final-heart">♥</div>
+      <p class="final-title">Always & Forever</p>
+      <p class="final-quote">"You are every love story<br/>I ever wanted to <em>live.</em>"</p>
+      <p class="final-names">— From Arjun, with everything</p>
+      <p class="final-made">Created with <span>♥</span> on Love Bites</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+var digits = document.querySelectorAll('.lock-digit');
+digits.forEach(function(d,i){
+  d.addEventListener('input',function(){
+    if(d.value && i < digits.length-1) digits[i+1].focus();
+  });
+  d.addEventListener('keydown',function(e){
+    if(e.key==='Backspace' && !d.value && i>0) digits[i-1].focus();
+  });
+});
+
+function unlock(){
+  var burst = document.getElementById('heartBurst');
+  burst.style.display='block';
+  var cx=window.innerWidth/2, cy=window.innerHeight/2;
+  for(var i=0;i<30;i++){
+    var h=document.createElement('div');
+    h.className='burst-heart';
+    var angle=(Math.PI*2/30)*i;
+    var dist=150+Math.random()*200;
+    h.style.left=cx+'px';
+    h.style.top=cy+'px';
+    h.style.setProperty('--tx',(Math.cos(angle)*dist)+'px');
+    h.style.setProperty('--ty',(Math.sin(angle)*dist)+'px');
+    h.style.animationDelay=(Math.random()*0.3)+'s';
+    h.style.fontSize=(1+Math.random()*1.5)+'rem';
+    h.textContent=['♥','💕','🌸','✨'][Math.floor(Math.random()*4)];
+    burst.appendChild(h);
+  }
+  setTimeout(function(){
+    document.getElementById('lockScreen').classList.add('unlocking');
+  },200);
+  setTimeout(function(){
+    document.getElementById('lockScreen').classList.add('hidden');
+    burst.style.display='none';
+    var exp=document.getElementById('experience');
+    exp.style.display='flex';
+    exp.style.flexDirection='column';
+    initParticles();
+    initScrollObserver();
+    initPetals();
+  },1000);
+}
+
+function initParticles(){
+  var container=document.getElementById('scene1Particles');
+  for(var i=0;i<25;i++){
+    var p=document.createElement('div');
+    p.className='s1-particle';
+    p.style.left=(Math.random()*100)+'%';
+    p.style.top=(80+Math.random()*20)+'%';
+    p.style.animationDuration=(6+Math.random()*8)+'s';
+    p.style.animationDelay=(Math.random()*6)+'s';
+    p.style.width=p.style.height=(2+Math.random()*3)+'px';
+    container.appendChild(p);
+  }
+}
+
+function initScrollObserver(){
+  var elements=document.querySelectorAll('.photo-moment, .final-wrap');
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting) e.target.classList.add('visible');
+    });
+  },{threshold:0.2});
+  elements.forEach(function(m){ obs.observe(m); });
+}
+
+function initPetals(){
+  var ring=document.getElementById('petalRing');
+  var petals=['🌸','🌺','✨','💮','🌹'];
+  for(var i=0;i<20;i++){
+    var p=document.createElement('div');
+    p.className='petal';
+    p.textContent=petals[Math.floor(Math.random()*petals.length)];
+    p.style.left=(Math.random()*100)+'%';
+    p.style.top=(60+Math.random()*40)+'%';
+    p.style.animationDuration=(8+Math.random()*10)+'s';
+    p.style.animationDelay=(Math.random()*8)+'s';
+    p.style.fontSize=(0.6+Math.random()*0.8)+'rem';
+    ring.appendChild(p);
+  }
+}
+</script>
+</body>
+</html>
