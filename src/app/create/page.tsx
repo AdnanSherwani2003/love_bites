@@ -28,6 +28,7 @@ export default function CreateLoveCode() {
     // AI Generated State
     const [generatedMessage, setGeneratedMessage] = useState('')
     const [generatedCode, setGeneratedCode] = useState('')
+    const [previewImage, setPreviewImage] = useState<string | null>(null)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const supabase = createClient()
@@ -232,7 +233,7 @@ export default function CreateLoveCode() {
                 localStorage.setItem('lovePhotos', JSON.stringify(photos))
 
                 setStep(6)
-                spawnConfetti()
+                router.push(`/view/${data.code}`)
             } else {
                 alert("Failed to save Love Code: " + data.error)
             }
@@ -269,13 +270,24 @@ export default function CreateLoveCode() {
     }
 
     const handlePinChange = (index: number, value: string) => {
+        const cleaned = value.replace(/[^0-9]/g, '') // only numbers
         const newPin = [...pin]
-        newPin[index] = value.replace(/[^0-9]/g, '') // only numbers
+        newPin[index] = cleaned
         setPin(newPin)
+
         if (errors.pin) setErrors(prev => ({ ...prev, pin: false }))
-        if (value && index < 3) {
+
+        // Only move to next input if we actually entered a number
+        if (cleaned && index < 3) {
             const nextInput = document.getElementById(`pin-${index + 1}`)
             if (nextInput) nextInput.focus()
+        }
+    }
+
+    const handleBackspace = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Backspace' && !pin[index] && index > 0) {
+            const prevInput = document.getElementById(`pin-${index - 1}`)
+            if (prevInput) prevInput.focus()
         }
     }
 
@@ -432,10 +444,17 @@ export default function CreateLoveCode() {
 
                     <div className="photo-grid">
                         {photos.map((src, i) => (
-                            <div key={i} className="photo-slot filled" onClick={() => removePhoto(i)}>
+                            <div key={i} className="photo-slot filled" onClick={() => setPreviewImage(src)}>
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={src} alt="Uploaded" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }} />
-                                <div className="photo-label">Remove</div>
+                                <button
+                                    className="photo-remove-btn"
+                                    onClick={(e) => { e.stopPropagation(); removePhoto(i); }}
+                                    title="Remove photo"
+                                >
+                                    ✕
+                                </button>
+                                <div className="photo-label">Preview</div>
                             </div>
                         ))}
                         {[...Array(5 - photos.length)].map((_, i) => (
@@ -505,28 +524,10 @@ export default function CreateLoveCode() {
                 <span className="wm" style={{ bottom: '12%', left: '-4%', transform: 'rotate(-8deg)' }}>yours</span>
                 <div className="create-content">
                     <span className="create-badge">♥ Step 5 of 5</span>
-                    <h1 className="create-h1">Make it<br /><em>truly yours</em></h1>
-                    <p className="subtext">Pick a template style for how your photos will appear.</p>
+                    <h1 className="create-h1">Secure your<br /><em>Love Code</em></h1>
+                    <p className="subtext">Set a secret hint and PIN that only the two of you know.</p>
 
-                    <div className="template-row">
-                        {[
-                            { label: 'Film Strip', icon: '🎞️' },
-                            { label: 'Polaroid Wall', icon: '📷' },
-                            { label: 'Slideshow', icon: '🎬' },
-                            { label: 'Timeline', icon: '⏱️' },
-                        ].map(t => (
-                            <div
-                                key={t.label}
-                                className={`template-opt ${template === t.label ? 'selected' : ''}`}
-                                onClick={() => setTemplate(t.label)}
-                            >
-                                <div className="t-icon">{t.icon}</div>
-                                <div className="t-label">{t.label}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="form-group" style={{ marginTop: '32px' }}>
+                    <div className="form-group" style={{ marginTop: '0' }}>
                         <label>Secret unlock code hint</label>
                         <input
                             type="text"
@@ -548,6 +549,7 @@ export default function CreateLoveCode() {
                                 placeholder="•"
                                 value={pin[i]}
                                 onChange={e => handlePinChange(i, e.target.value)}
+                                onKeyDown={e => handleBackspace(e, i)}
                             />
                         ))}
                     </div>
@@ -559,42 +561,22 @@ export default function CreateLoveCode() {
                     <div className="btn-row">
                         <button className="btn-secondary" onClick={() => setStep(4.5)} disabled={loading}>← Back</button>
                         <button className="btn-primary" onClick={handleNext} disabled={loading}>
-                            {loading ? 'Generating...' : 'Lock & Share ♥'}
+                            {loading ? 'Generating...' : 'View Love Code ♥'}
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* SCREEN 6: SHARE */}
-            <div className={`screen ${step === 6 ? 'active' : ''}`}>
-                <div id="confettiContainer" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}></div>
-                <div className="create-content">
-                    <div className="success-icon">♥</div>
-                    <span className="create-badge">♥ Your Love Code is Live!</span>
-                    <h1 className="create-h1">Ready to<br /><em>make them cry</em></h1>
-                    <p className="subtext">Share the link. They&apos;ll see a locked screen until they enter your secret code.</p>
-
-                    <div className="share-link-box">
-                        <div className="link-text">lovebites.app/view/{generatedCode}</div>
-                        <button className="copy-btn" onClick={(e) => {
-                            navigator.clipboard.writeText(`http://localhost:3000/view/${generatedCode}`)
-                            const tgt = e.target as HTMLButtonElement
-                            tgt.textContent = 'Copied!'
-                            setTimeout(() => tgt.textContent = 'Copy', 2000)
-                        }}>Copy</button>
+            {/* IMAGE PREVIEW MODAL */}
+            {previewImage && (
+                <div className="preview-modal-overlay" onClick={() => setPreviewImage(null)}>
+                    <div className="preview-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="preview-close-btn" onClick={() => setPreviewImage(null)}>✕</button>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={previewImage} alt="Large Preview" className="preview-modal-image" />
                     </div>
-
-                    <div className="share-grid">
-                        <div className="share-btn"><span className="s-icon">💬</span>iMessage</div>
-                        <div className="share-btn"><span className="s-icon">💚</span>WhatsApp</div>
-                        <div className="share-btn"><span className="s-icon">✉️</span>Email</div>
-                    </div>
-
-                    <Link href={`/view/${generatedCode}`} className="btn-primary" target="_blank">
-                        👀 View Love Code
-                    </Link>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

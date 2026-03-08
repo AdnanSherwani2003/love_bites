@@ -6,8 +6,40 @@ import { useHeroEffects } from '@/hooks/useHeroEffects'
 import Link from 'next/link'
 import Image from 'next/image'
 
+import { createClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+
 export default function HomePage() {
   useHeroEffects()
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClient()
+  const router = useRouter()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data?.user || null)
+    }
+    getUser()
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null)
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [supabase.auth])
+
+  const handleCreateClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (user) {
+      router.push('/pricing')
+    } else {
+      router.push('/login?next=/pricing')
+    }
+  }
 
   return (
     <>
@@ -44,7 +76,7 @@ export default function HomePage() {
             </p>
 
             <div className="hero-actions reveal-up" style={{ transitionDelay: '0.3s' }}>
-              <Link href="/create" className="btn-primary hero-cta">
+              <Link href="/pricing" onClick={handleCreateClick} className="btn-primary hero-cta">
                 <span>♥</span> Create Your Love Code
               </Link>
               <a href="#examples" className="btn-outline-hero">View Demo</a>
@@ -230,7 +262,7 @@ export default function HomePage() {
           <div className="jrn-cta" id="jrn-cta">
             <p className="jrn-cta-e">Your love story deserves to be remembered</p>
             <h2 className="jrn-cta-t">&quot;Ready to create a moment<br />they&apos;ll never forget?&quot;</h2>
-            <Link href="/create" className="jrn-cta-btn">♥ Create Your Love Code</Link>
+            <Link href="/pricing" onClick={handleCreateClick} className="jrn-cta-btn">♥ Create Your Love Code</Link>
           </div>
         </section>
       </main>

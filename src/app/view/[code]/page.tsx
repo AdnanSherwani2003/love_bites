@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import './view.css'
 
 // --- THEME DATA MAPPED DIRECTLY FROM LEGACY ---
@@ -15,6 +15,7 @@ const THEMES: Record<string, any> = {
 
 export default function ViewLoveCodePage() {
     const params = useParams()
+    const router = useRouter()
     const code = Array.isArray(params?.code) ? params.code[0] : params?.code
 
     const [data, setData] = useState<any>(null)
@@ -25,6 +26,7 @@ export default function ViewLoveCodePage() {
     const [pin, setPin] = useState(['', '', '', ''])
     const [themeConfig, setThemeConfig] = useState<any>(null)
     const [error, setError] = useState('')
+    const [isShaking, setIsShaking] = useState(false)
 
     // Heart Burst ref to spawn hearts dynamically
     const burstRef = useRef<HTMLDivElement>(null)
@@ -95,13 +97,17 @@ export default function ViewLoveCodePage() {
     }, [unlocked])
 
     const handlePinChange = (index: number, val: string) => {
+        const cleaned = val.replace(/[^0-9]/g, '')
         const newPin = [...pin]
-        newPin[index] = val.replace(/[^0-9]/g, '')
+        newPin[index] = cleaned
         setPin(newPin)
-        if (val && index < 3) {
+
+        // Only move to next input if we actually entered a number
+        if (cleaned && index < 3) {
             const nextInput = document.getElementById(`vd-${index + 1}`)
             if (nextInput) nextInput.focus()
         }
+        if (isShaking) setIsShaking(false)
     }
 
     const handleBackspace = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
@@ -115,7 +121,8 @@ export default function ViewLoveCodePage() {
         const entered = pin.join('')
         // In legacy, any code unlocked if no backend. We enforce pin if it exists in data
         if (data?.lock_pin && entered !== data.lock_pin && data.lock_pin.length === 4) {
-            alert("Incorrect Pin. Please try again.")
+            setIsShaking(true)
+            setTimeout(() => setIsShaking(false), 600)
             setPin(['', '', '', ''])
             return
         }
@@ -146,8 +153,12 @@ export default function ViewLoveCodePage() {
         setTimeout(() => setUnlocked(true), 1200)
     }
 
-    if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Love Code...</div>
-    if (error || !data || !themeConfig) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><h2>{error || 'Not Found'}</h2></div>
+    const handleSendClick = () => {
+        router.push(`/checkout/${code}`)
+    }
+
+    if (loading) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg1)', color: 'var(--text)' }}>Loading Love Code...</div>
+    if (error || !data || !themeConfig) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg1)', color: 'var(--text)' }}><h2>{error || 'Not Found'}</h2></div>
 
     const photos = data.photo_urls && data.photo_urls.length > 0 ? data.photo_urls : ['p1', 'p2', 'p3', 'p4', 'p5'] // Default placeholders if NO photos
 
@@ -180,12 +191,12 @@ export default function ViewLoveCodePage() {
                     <h2 className="lock-title">Someone left you<br /><em>something special</em></h2>
                     <p className="lock-sub">Enter your secret code to unlock it</p>
 
-                    <div className="lock-digits">
+                    <div className={`lock-digits ${isShaking ? 'shake' : ''}`}>
                         {[0, 1, 2, 3].map(i => (
                             <input
                                 key={i}
                                 id={`vd-${i}`}
-                                className="lock-digit"
+                                className={`lock-digit ${isShaking ? 'has-error' : ''}`}
                                 maxLength={1}
                                 type="text"
                                 placeholder="·"
@@ -196,7 +207,9 @@ export default function ViewLoveCodePage() {
                         ))}
                     </div>
 
-                    <p className="lock-hint">Hint: {data.lock_hint || 'A 4 digit code they shared'} 💌</p>
+                    <p className={`lock-hint ${isShaking ? 'has-error' : ''}`}>
+                        {isShaking ? "Oops! That's not the secret code 🥺" : (data.lock_hint ? `Hint: ${data.lock_hint}` : 'Hint: A 4 digit code they shared')} 💌
+                    </p>
 
                     <button
                         className="unlock-btn"
@@ -258,18 +271,6 @@ export default function ViewLoveCodePage() {
                             {photos.map((src: string, i: number) => {
                                 const pStyle = themeConfig.photoStyle[i] || 'style-polaroid'
                                 const isReal = src.startsWith('http') || src.startsWith('data:')
-                                const captionStr = pStyle === 'style-polaroid' ? `<div class="polaroid-caption">${themeConfig.tags[i]}</div>` : ''
-
-                                let imgHtmlAttr = ''
-                                let contentTag = ''
-
-                                if (isReal) {
-                                    const aspect = pStyle === 'style-cinematic' ? 'aspect-ratio:16/9;' : (pStyle === 'style-polaroid' ? 'aspect-ratio:1/1;' : 'aspect-ratio:4/5;')
-                                    imgHtmlAttr = `width:100%;height:100%;object-fit:cover;display:block;${aspect}`
-                                } else {
-                                    const aspect = pStyle === 'style-polaroid' ? 'aspect-ratio:1/1;' : (pStyle === 'style-cinematic' ? 'height:100%;' : 'aspect-ratio:4/5;')
-                                    imgHtmlAttr = aspect
-                                }
 
                                 return (
                                     <React.Fragment key={i}>
@@ -336,8 +337,17 @@ export default function ViewLoveCodePage() {
                         </div>
                     </section>
 
+                    {/* --- SHARE SECTION --- */}
+                    <section className="share-section">
+                        <h2 className="lock-title" style={{ color: 'white' }}>Love the preview?<br /><em>Send it to them now</em></h2>
+                        <button className="share-cta-btn" onClick={handleSendClick}>
+                            Send to your loved one ♥
+                        </button>
+                    </section>
+
                 </div>
             )}
+
         </>
     )
 }

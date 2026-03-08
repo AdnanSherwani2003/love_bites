@@ -40,6 +40,16 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
         router.refresh()
     }
 
+    const handleCreateClick = (e: React.MouseEvent) => {
+        e.preventDefault()
+        if (user) {
+            router.push('/pricing')
+        } else {
+            router.push('/login?next=/pricing')
+        }
+        closeMenu()
+    }
+
     const closeMenu = () => setMenuOpen(false)
 
     return (
@@ -74,7 +84,7 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
                         ) : (
                             <Link href="/login" className="btn-ghost">Sign In</Link>
                         )}
-                        <Link href="/create" className="btn-primary-sm">Create Love Code</Link>
+                        <Link href="/pricing" onClick={handleCreateClick} className="btn-primary-sm">Create Love Code</Link>
                     </div>
 
                     <button
@@ -146,7 +156,7 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
                 </div>
 
                 <div className="menu-footer">
-                    <Link href="/create" className="menu-btn-create" id="menuBtnCreate" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={closeMenu}>
+                    <Link href="/pricing" onClick={handleCreateClick} className="menu-btn-create" id="menuBtnCreate" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         ♥ Create Your Love Code
                     </Link>
                     {user ? (

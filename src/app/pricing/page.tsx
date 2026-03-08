@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
@@ -8,22 +8,78 @@ import { useScrollReveal } from '@/hooks/useScrollReveal'
 
 function FaqItem({ question, answer }: { question: string, answer: string }) {
     const [isOpen, setIsOpen] = useState(false)
+    const itemRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (itemRef.current && !itemRef.current.contains(event.target as Node)) {
+                setIsOpen(false)
+            }
+        }
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside)
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [isOpen])
 
     return (
-        <div className={`faq-item ${isOpen ? 'active' : ''}`}>
+        <div className={`faq-item ${isOpen ? 'open' : ''}`} ref={itemRef}>
             <button className="faq-q" onClick={() => setIsOpen(!isOpen)}>
                 <span className="faq-q-text">{question}</span>
-                <span className="faq-icon" style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>+</span>
+                <span className="faq-icon">+</span>
             </button>
-            <div className="faq-a" style={{ display: isOpen ? 'block' : 'none' }}>
+            <div className="faq-a">
                 <p>{answer}</p>
             </div>
         </div>
     )
 }
 
+function Toast({ message, visible, onHide }: { message: string, visible: boolean, onHide: () => void }) {
+    useEffect(() => {
+        if (visible) {
+            const timer = setTimeout(onHide, 3000)
+            return () => clearTimeout(timer)
+        }
+    }, [visible, onHide])
+
+    if (!visible) return null
+
+    return (
+        <div style={{
+            position: 'fixed',
+            bottom: '30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--crimson)',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 30px rgba(192, 49, 79, 0.3)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            animation: 'reveal-up 0.4s ease-out'
+        }}>
+            <span style={{ fontSize: '1.2rem' }}>✨</span>
+            <span style={{ fontWeight: 500 }}>{message}</span>
+        </div>
+    )
+}
+
 export default function PricingPage() {
     useScrollReveal()
+    const [toast, setToast] = useState<{ visible: boolean, message: string }>({ visible: false, message: '' })
+
+    const showComingSoon = () => {
+        setToast({ visible: true, message: 'True Love & Forever plans are coming soon! Stay tuned.' })
+    }
+
     return (
         <div className="pricing-body-page">
             <Navbar forceScrolled />
@@ -62,7 +118,7 @@ export default function PricingPage() {
                                     <li>Secret 4-digit unlock code</li>
                                     <li>Shareable private link</li>
                                 </ul>
-                                <Link href="/create" className="plan-btn outline">♥ Get Started</Link>
+                                <Link href="/create" className="plan-btn outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
                             </div>
 
                             <div className="plan-card popular">
@@ -86,7 +142,7 @@ export default function PricingPage() {
                                     <li>Shareable private link</li>
                                     <li>Reaction notifications</li>
                                 </ul>
-                                <Link href="/create" className="plan-btn filled">♥ Create Your Love Code</Link>
+                                <button onClick={showComingSoon} className="plan-btn filled" style={{ width: '100%', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>♥ Get Started</button>
                             </div>
 
                             <div className="plan-card">
@@ -110,7 +166,7 @@ export default function PricingPage() {
                                     <li>Reaction notifications</li>
                                     <li>Priority support</li>
                                 </ul>
-                                <Link href="/create" className="plan-btn outline">♥ Get Forever Love</Link>
+                                <button onClick={showComingSoon} className="plan-btn outline" style={{ width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}>♥ Get Started</button>
                             </div>
                         </div>
 
@@ -129,27 +185,27 @@ export default function PricingPage() {
 
                             <FaqItem
                                 question="Is this really a one-time payment?"
-                                answer="Yes — absolutely. You pay once and your plan is yours forever. No monthly fees, no renewals, no hidden charges. Just a single payment for a moment that lasts a lifetime."
+                                answer="Yes — absolutely. You pay once and your digital love experience is yours to keep. No monthly fees, no renewals, no hidden charges. Just a single payment for a moment that will be cherished a lifetime."
                             />
                             <FaqItem
-                                question="What is a Love Code?"
-                                answer="A Love Code is a private, beautifully animated experience built from your photos, feelings, and an AI-written message. You lock it with a secret code only your partner would know — and when they unlock it, they see something they'll never forget."
+                                question="What exactly is a Love Code?"
+                                answer="Think of it as a private digital time capsule. It's a beautifully animated experience built from your shared memories, AI-tailored messages, and custom visuals. It blooms into life only when your partner enters the secret code you've set."
                             />
                             <FaqItem
                                 question="Can I upgrade my plan later?"
-                                answer="Yes — you can upgrade at any time. You'll only pay the difference between your current plan and the new one. Your existing Love Codes and data are always preserved."
+                                answer="Of course! Our True Love and Forever plans are launching very soon. You'll be able to upgrade seamlessly by just paying the difference. Your existing memories and Love Codes will always remain safe and preserved."
                             />
                             <FaqItem
                                 question="How does the secret unlock code work?"
-                                answer="You set a 4-digit code — something only your partner would know, like the date you first met or a special number. You can also add a hint to guide them. They enter the code on their screen and your Love Code unlocks just for them."
+                                answer="When you create your Love Code, you'll set a 4-digit key — something only the two of you know (like your anniversary or the date of your first kiss). You can add a playful hint to guide them. It adds that perfect layer of shared intimacy."
                             />
                             <FaqItem
-                                question="Is my data private and secure?"
-                                answer="Completely. Your photos, messages, and Love Codes are end-to-end encrypted and private. Only the person with your unique link and secret code can ever see what you created."
+                                question="Is my data and privacy protected?"
+                                answer="Your privacy is our highest priority. Every Love Code, photo, and message is end-to-end encrypted. We never share your data — it's a private world built only for you and your partner to explore."
                             />
                             <FaqItem
-                                question="What payment methods are accepted?"
-                                answer="We accept all major UPI apps (GPay, PhonePe, Paytm), debit and credit cards, and net banking. All payments are processed securely."
+                                question="What payment methods can I use?"
+                                answer="We want your experience to be as smooth as possible. We accept all major UPI apps (GPay, PhonePe, Paytm), along with all Indian and international Debit/Credit cards and Net Banking options."
                             />
 
                         </div>
@@ -158,6 +214,11 @@ export default function PricingPage() {
             </main>
 
             <Footer />
+            <Toast
+                message={toast.message}
+                visible={toast.visible}
+                onHide={() => setToast({ ...toast, visible: false })}
+            />
         </div>
     )
 }
