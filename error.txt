@@ -1,0 +1,31 @@
+remote: error: GH013: Repository rule violations found for refs/heads/update-changes.        
+remote: 
+remote: - GITHUB PUSH PROTECTION        
+remote:   —————————————————————————————————————————        
+remote:     Resolve the following violations before pushing again        
+remote: 
+remote:     - Push cannot contain secrets        
+remote: 
+remote:             
+remote:      (?) Learn how to resolve a blocked push        
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push        
+remote:             
+remote:      (?) This repository does not have Secret Scanning enabled, but is eligible. Enable Secret Scanning to view and manage detected secrets.        
+remote:      Visit the repository settings page, https://github.com/AdnanSherwani2003/love_bites/settings/security_analysis        
+remote:             
+remote:             
+remote:       —— Groq API Key ——————————————————————————————————————        
+remote:        locations:        
+remote:          - commit: 73a5cf8ce6c8e084ca893ab5054844a9d8b24dd8        
+remote:            path: src/components/plan149/GrandAmour149.jsx:226        
+remote:          - commit: 73a5cf8ce6c8e084ca893ab5054844a9d8b24dd8        
+remote:            path: src/components/plan49/SweetStart49.jsx:145        
+remote:             
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.        
+remote:        https://github.com/AdnanSherwani2003/love_bites/security/secret-scanning/unblock-secret/3AltQNGmiOY62STsw00piVNr1hw        
+remote:             
+remote: 
+remote: 
+To https://github.com/AdnanSherwani2003/love_bites.git
+ ! [remote rejected] update-changes -> update-changes (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/AdnanSherwani2003/love_bites.git'

@@ -75,6 +75,7 @@ function Toast({ message, visible, onHide }: { message: string, visible: boolean
 export default function PricingPage() {
     useScrollReveal()
     const [toast, setToast] = useState<{ visible: boolean, message: string }>({ visible: false, message: '' })
+    const [isGrandAmourHovered, setIsGrandAmourHovered] = useState(false)
 
     const showComingSoon = () => {
         setToast({ visible: true, message: 'True Love & Forever plans are coming soon! Stay tuned.' })
@@ -116,9 +117,10 @@ export default function PricingPage() {
                                     <li>AI-written personal message</li>
                                     <li>Up to 5 photo uploads</li>
                                     <li>Secret 4-digit unlock code</li>
+                                    <li>Custom unlock hint message</li>
                                     <li>Shareable private link</li>
                                 </ul>
-                                <Link href="/create" className="plan-btn outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
+                                <Link href="/create-49" className="plan-btn outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
                             </div>
 
                             <div className="plan-card popular">
@@ -132,41 +134,89 @@ export default function PricingPage() {
                                 <p className="plan-once">one-time payment</p>
                                 <div className="plan-divider"></div>
                                 <ul className="plan-features">
-                                    <li>3 Love Code creations</li>
-                                    <li>All moods & occasions</li>
+                                    <li>1 Love Code creation</li>
+                                    <li>3 moods & 1 occasion selection</li>
                                     <li>AI-written personal message</li>
-                                    <li>Up to 20 photo uploads</li>
-                                    <li>5 premium templates</li>
+                                    <li>Up to 5 photo uploads</li>
+                                    <li>5 premium photo frames (auto-curated)</li>
+                                    <li>One cinematic video (crafted by our team)</li>
                                     <li>Secret 4-digit unlock code</li>
                                     <li>Custom unlock hint message</li>
                                     <li>Shareable private link</li>
-                                    <li>Reaction notifications</li>
+                                    <li>Delivered via Email, WhatsApp or Instagram</li>
+                                    <li>Scheduled delivery (date & time)</li>
                                 </ul>
-                                <button onClick={showComingSoon} className="plan-btn filled" style={{ width: '100%', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>♥ Get Started</button>
+                                <Link href="/create-99" className="plan-btn filled" style={{ width: '100%', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
                             </div>
 
-                            <div className="plan-card">
-                                <div className="plan-name">Forever Love</div>
-                                <p className="plan-tagline">For the ones who love deeply — unlimited codes, every occasion, for life.</p>
+                            <div className="plan-card" style={{
+                                border: '2px solid rgba(139,0,56,0.3)',
+                                background: 'white',
+                                boxShadow: isGrandAmourHovered ? '0 28px 64px rgba(139,0,56,0.25)' : '0 8px 40px rgba(139,0,56,0.15)',
+                                transform: isGrandAmourHovered ? 'scale(1.02) translateY(-14px)' : 'scale(1.02)',
+                                position: 'relative',
+                                zIndex: 2,
+                                transition: 'all 0.3s ease',
+                                cursor: 'pointer'
+                            }}
+                            onMouseEnter={() => setIsGrandAmourHovered(true)}
+                            onMouseLeave={() => setIsGrandAmourHovered(false)}>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-12px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    background: 'linear-gradient(135deg, #8b0038, #c4304f)',
+                                    color: 'white',
+                                    padding: '6px 20px',
+                                    borderRadius: '9999px',
+                                    fontSize: '11px',
+                                    fontWeight: 'bold',
+                                    letterSpacing: '0.5px',
+                                    zIndex: 10
+                                }}>✨ MOST PREMIUM</div>
+                                <div className="plan-name" style={{
+                                    background: 'linear-gradient(135deg, #8b0038, #c4304f)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text',
+                                    fontFamily: 'Playfair Display, serif'
+                                }}>Grand Amour</div>
+                                <p className="plan-tagline">The ultimate love experience — crafted for those who believe love deserves to be extraordinary.</p>
                                 <div className="plan-price-wrap">
-                                    <span className="plan-currency">₹</span>
-                                    <span className="plan-amount">149</span>
+                                    <span className="plan-currency" style={{ color: '#8b0038' }}>₹</span>
+                                    <span className="plan-amount" style={{ color: '#8b0038' }}>149</span>
                                 </div>
                                 <p className="plan-once">one-time payment</p>
                                 <div className="plan-divider"></div>
-                                <ul className="plan-features">
+                                <ul className="plan-features" style={{ color: '#8b0038' }}>
                                     <li>Unlimited Love Code creations</li>
-                                    <li>All moods & occasions</li>
+                                    <li>All moods & all occasions</li>
                                     <li>AI-written personal message</li>
-                                    <li>Unlimited photo uploads</li>
-                                    <li>All premium templates</li>
-                                    <li>Secret unlock code + hint</li>
-                                    <li>Cinematic slideshow mode</li>
-                                    <li>Background music option</li>
-                                    <li>Reaction notifications</li>
-                                    <li>Priority support</li>
+                                    <li>Up to 10 photo uploads</li>
+                                    <li>5 premium photo frames (auto-curated)</li>
+                                    <li>1 cinematic video — crafted by our team</li>
+                                    <li>Secret 4-digit unlock code + hint</li>
+                                    <li>Optional background music</li>
+                                    <li>Choose two delivery option via WhatsApp, email or Instagram</li>
+                                    <li>Scheduled delivery (date & time)</li>
+                                    <li>You'll know the moment they open your love code</li>
+                                    <li>See how long they spent with your love code</li>
+                                    <li>The can reply back with attached photo</li>
+                                    <li>Get an instant email for every update</li>
                                 </ul>
-                                <button onClick={showComingSoon} className="plan-btn outline" style={{ width: '100%', cursor: 'pointer', fontFamily: 'inherit' }}>♥ Get Started</button>
+                                <Link href="/create-149" className="plan-btn filled" style={{ 
+                                    width: '100%', 
+                                    cursor: 'pointer', 
+                                    fontFamily: 'inherit',
+                                    background: 'linear-gradient(135deg, #8b0038, #c4304f)',
+                                    border: 'none',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>♛ Get Started</Link>
                             </div>
                         </div>
 
