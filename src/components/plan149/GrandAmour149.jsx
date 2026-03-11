@@ -219,29 +219,31 @@ const GrandAmour149 = ({ onComplete }) => {
     const occasionLabel = occasions.find(o => o.id === selectedOccasion)?.label;
     
     try {
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const response = await fetch("/api/generate-message", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [{
-            role: "user",
-            content: `Write a poetic, deeply romantic, and soul-stirring love message (approx 150-200 words) for a LoveBites digital experience. 
-            Recipient: ${partnerName}
-            Sender: ${yourName}
-            Occasion: ${occasionLabel}
-            Moods: ${moodLabels}
-            Context: ${theirStory}
-            
-            Format it with clear paragraphs. Make it feel cinematic and timeless.`
-          }]
+          moods: selectedMoods.map(id => moodsData.find(m => m.id === id)?.label),
+          occasion: occasionLabel,
+          yourName,
+          partnerName,
+          partnerDesc: theirStory
         })
       });
+      
       const data = await response.json();
-      setGeneratedMessage(data.choices[0].message.content);
+      
+      if (data.error) {
+         throw new Error(data.details || data.error);
+      }
+      
+      if (data.message) {
+        setGeneratedMessage(data.message);
+      } else {
+        throw new Error("Invalid response format from API");
+      }
     } catch (error) {
       console.error("AI Error:", error);
       setGeneratedMessage("My love, words often fall short of the depth I feel for you. You are the light in my quietest moments and the joy in my loudest laughs. Being with you feels like finally coming home. Forever isn't enough, but it's a start.");
@@ -279,7 +281,7 @@ const GrandAmour149 = ({ onComplete }) => {
       display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", width: "100%"
     },
     logo: {
-      fontFamily: THEME.serif, fontStyle: "italic", fontSize: "24px", color: THEME.rose, fontWeight: "bold"
+      fontFamily: THEME.serif, fontStyle: "italic", fontSize: "24px", color: THEME.rose, fontWeight: "bold", cursor: "pointer"
     },
     pill: {
       background: "linear-gradient(135deg, #9b1a3a, #c4304f)", padding: "6px 16px", borderRadius: "20px",
@@ -357,7 +359,7 @@ const GrandAmour149 = ({ onComplete }) => {
       <div style={styles.container}>
         {/* HEADER */}
         <header style={styles.header}>
-          <div style={styles.logo}>💗 LoveBites</div>
+          <div style={styles.logo} onClick={() => window.location.href = "/"}>💗 LoveBites</div>
           <div style={styles.pill}>GRAND AMOUR ₹149</div>
         </header>
 

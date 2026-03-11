@@ -57,34 +57,19 @@ export default function AIMagicPage() {
             `}`
 
         try {
-            const res = await fetch('https://api.anthropic.com/v1/messages', {
+            const res = await fetch('/api/ai-magic', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 1000,
-                    messages: [{ role: 'user', content: prompt }]
-                })
+                body: JSON.stringify({ feeling, mood: selectedMood })
             })
 
+            if (!res.ok) throw new Error('Generation failed')
+
             const data = await res.json()
-
-            let raw = ''
-            if (data.content && data.content.length > 0) {
-                for (let i = 0; i < data.content.length; i++) {
-                    if (data.content[i].type === 'text') {
-                        raw += data.content[i].text
-                    }
-                }
-            }
-
-            const cleaned = raw.replace(/```json|```/g, '').trim()
-            const parsed = JSON.parse(cleaned)
-
             setResult({
-                opening: parsed.opening || '',
-                message: parsed.message || '',
-                closing: parsed.closing || ''
+                opening: data.opening || '',
+                message: data.message || '',
+                closing: data.closing || ''
             })
 
             setTimeout(() => {

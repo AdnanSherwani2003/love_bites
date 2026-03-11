@@ -387,6 +387,17 @@ nav.scrolled {
     padding-top: 70px;
     /* navbar height */
 }
+#hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15vh;
+    background: linear-gradient(to bottom, transparent, #fce4ec);
+    z-index: 2;
+    pointer-events: none;
+}
 
 .hero-bg {
     position: absolute;
@@ -1097,7 +1108,7 @@ nav.scrolled {
     white-space: nowrap;
     box-shadow: 0 4px 16px rgba(232, 68, 90, 0.1);
     opacity: 0;
-    animation: floatPhrase linear infinite;
+    animation: floatPhrase 15s linear forwards;
 }
 
 @keyframes floatPhrase {
@@ -4327,4 +4338,156 @@ body.menu-open .toast-container {
         text-align: center;
         align-items: center;
     }
+}
+/* --------------------------------------------------------------------------
+   GIFTS PAGE STYLES
+   -------------------------------------------------------------------------- */
+.gifts-page {
+    min-height: 100vh;
+    background: #fff5f7;
+    padding-top: 80px; 
+}
+
+.gifts-hero {
+    padding: 6rem 1rem 4rem;
+    text-align: center;
+}
+
+.gifts-hero h1 {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    color: var(--text-dark);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.gifts-hero p {
+    font-size: 1.25rem;
+    color: var(--text-mid);
+    max-width: 800px;
+    margin: 0 auto 3rem;
+    line-height: 1.6;
+}
+
+.gifts-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: #ffeef0;
+    color: var(--rose);
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2rem;
+}
+
+.gifts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    padding: 0 1rem 6rem;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+.gift-card {
+    background: white;
+    border-radius: 2rem;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    transition: all 0.5s cubic-bezier(.4, 0, .2, 1);
+    box-shadow: 0 10px 40px rgba(232, 68, 90, 0.05);
+}
+
+.gift-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 60px rgba(232, 68, 90, 0.12);
+}
+
+.gift-card-img-wrap {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+}
+
+.gift-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s ease;
+}
+
+.gift-card:hover .gift-card-img-wrap img {
+    transform: scale(1.1);
+}
+
+.gift-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(107, 48, 64, 0.8), transparent);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+}
+
+.gift-card-category {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.gift-icon-float {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.gift-card-body {
+    padding: 2rem;
+}
+
+.gift-card-body p {
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.gift-explore-btn {
+    background: none;
+    border: none;
+    color: var(--rose);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: gap 0.3s ease;
+}
+
+.gift-card:hover .gift-explore-btn {
+    gap: 12px;
+}
+
+.gifts-cta-section {
+    background: white;
+    padding: 6rem 1rem;
+    text-align: center;
+    position: relative;
+}
+
+.gifts-cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.gifts-cta-section h2 {
+    font-size: 2.5rem;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .gifts-hero h1 { font-size: 2.2rem; }
+    .gifts-grid { grid-template-columns: 1fr; }
 }

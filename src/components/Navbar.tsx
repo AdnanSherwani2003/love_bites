@@ -70,9 +70,8 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
                     </Link>
 
                     <ul className="nav-links">
-                        <li><Link href="/#how-it-works">How It Works</Link></li>
                         <li><Link href="/#journey">Love Stories</Link></li>
-                        <li><Link href="/occasions">Occasions</Link></li>
+                        <li><Link href="/gifts">Gifts</Link></li>
                         <li><Link href="/ai-magic">AI Magic <span className="badge">New</span></Link></li>
                         <li><Link href="/pricing">Pricing</Link></li>
                         <li><Link href="/about">About Us</Link></li>
@@ -136,6 +135,16 @@ export default function Navbar({ forceScrolled = false }: { forceScrolled?: bool
                             <div className="menu-item-text">
                                 <span className="menu-item-label">Love Stories</span>
                                 <span className="menu-item-sub">Get inspired by real love codes</span>
+                            </div>
+                        </div>
+                        <span className="menu-arrow">›</span>
+                    </Link>
+                    <Link href="/gifts" className="menu-item" onClick={closeMenu}>
+                        <div className="menu-item-left">
+                            <div className="menu-item-icon icon-rose">🎁</div>
+                            <div className="menu-item-text">
+                                <span className="menu-item-label">Gifts</span>
+                                <span className="menu-item-sub">Curated gifts for your loved one</span>
                             </div>
                         </div>
                         <span className="menu-arrow">›</span>

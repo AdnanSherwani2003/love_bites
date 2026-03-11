@@ -138,28 +138,28 @@ Their story: ${theirStory}
 Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
 
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const res = await fetch("/api/generate-message", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 400,
-          temperature: 0.9
+          moods: [moodLabel],
+          occasion: occasionLabel,
+          yourName,
+          partnerName,
+          partnerDesc: theirStory
         })
       });
       
       const data = await res.json();
       
       if (data.error) {
-         throw new Error(data.error.message || "Unknown API error");
+         throw new Error(data.details || data.error);
       }
       
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        setGeneratedMessage(data.choices[0].message.content);
+      if (data.message) {
+        setGeneratedMessage(data.message);
       } else {
         throw new Error("Invalid response format from API");
       }
@@ -198,7 +198,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
     },
     container: { width: "100%", maxWidth: "800px", zIndex: 1, position: "relative" },
     header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px", width: "100%" },
-    logo: { fontFamily: THEME.serif, fontStyle: "italic", fontSize: "24px", color: THEME.rose, fontWeight: "bold" },
+    logo: { fontFamily: THEME.serif, fontStyle: "italic", fontSize: "24px", color: THEME.rose, fontWeight: "bold", cursor: "pointer" },
     pill: {
       background: "linear-gradient(135deg, #9b1a3a, #c4304f)", padding: "4px 12px", borderRadius: "20px",
       fontSize: "11px", fontWeight: "bold", letterSpacing: "1px", color: "white"
@@ -261,7 +261,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
       <div style={styles.container}>
         {/* HEADER */}
         <header style={styles.header}>
-          <div style={styles.logo}>💗 LoveBites</div>
+          <div style={styles.logo} onClick={() => window.location.href = "/"}>💗 LoveBites</div>
           <div style={styles.pill}>SWEET START ₹49</div>
         </header>
 

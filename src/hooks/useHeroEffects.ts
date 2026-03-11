@@ -25,7 +25,7 @@ export function useHeroEffects() {
             container.appendChild(heart)
             setTimeout(() => heart.remove(), duration * 1000)
         }
-        const heartInterval = setInterval(createHeart, 300)
+        const heartInterval = setInterval(createHeart, 1000)
 
         // ── FLOATING PHRASES ──
         const phrases = [
@@ -41,23 +41,36 @@ export function useHeroEffects() {
             { text: 'I love you to the moon 🌙', color: 'rgba(232,68,90,0.1)' },
         ]
         const zones = [
-            { left: '2%', bottom: '-60px' }, { left: '8%', bottom: '-60px' },
-            { left: '72%', bottom: '-60px' }, { left: '80%', bottom: '-60px' },
+            { left: '4%', bottom: '-60px' }, { left: '12%', bottom: '-60px' },
+            { left: '76%', bottom: '-60px' }, { left: '84%', bottom: '-60px' },
         ]
+        let lastZoneIndex = -1
         function spawnPhrase() {
             const phraseContainer = document.getElementById('floatingPhrases')
             if (!phraseContainer) return
+            
             const p = phrases[Math.floor(Math.random() * phrases.length)]
-            const zone = zones[Math.floor(Math.random() * zones.length)]
+            
+            // Pick a zone that is far from the last one
+            let zoneIndex = Math.floor(Math.random() * zones.length)
+            if (zoneIndex === lastZoneIndex) {
+                zoneIndex = (zoneIndex + 1) % zones.length
+            }
+            lastZoneIndex = zoneIndex
+            const zone = zones[zoneIndex]
+            
             const el = document.createElement('div')
             el.className = 'float-phrase'
             el.textContent = p.text
-            el.style.cssText = `left:${zone.left};bottom:${zone.bottom};background:${p.color};animation-duration:${Math.random() * 8 + 10}s;animation-delay:0s;`
+            // Removed duration override from here to use the 15s fixed in CSS
+            el.style.cssText = `left:${zone.left};bottom:${zone.bottom};background:${p.color};animation-delay:0s;`
             phraseContainer.appendChild(el)
-            setTimeout(() => el.remove(), 18000)
+            
+            // Remove after the 15s animation finishes
+            setTimeout(() => el.remove(), 15500)
         }
-        const phraseInterval = setInterval(spawnPhrase, 2200)
-        setTimeout(() => { spawnPhrase(); spawnPhrase() }, 600)
+        const phraseInterval = setInterval(spawnPhrase, 12000)
+        setTimeout(() => { spawnPhrase() }, 600)
 
         // ── CHAT BUBBLES ──
         const conversations = [
@@ -86,7 +99,7 @@ export function useHeroEffects() {
                 }, i * 1200)
             })
         }
-        const bubbleInterval = setInterval(spawnConversation, 6000)
+        const bubbleInterval = setInterval(spawnConversation, 12000)
         setTimeout(spawnConversation, 1500)
 
         // ── TOASTS ──
@@ -99,10 +112,14 @@ export function useHeroEffects() {
             { icon: '✨', iconClass: 'green', title: '500th Love Code milestone!', msg: 'Our community keeps growing 🎊', time: '1h ago' },
         ]
         let toastIndex = 0
+        let userHasScrolled = false
+        const toastTimeouts: ReturnType<typeof setTimeout>[] = []
+
         function showToast() {
-            if (!isMounted) return
+            if (!isMounted || userHasScrolled) return
             const toastContainer = document.getElementById('toastContainer')
             if (!toastContainer) return
+            
             const existing = toastContainer.querySelectorAll<HTMLElement>('.toast.show')
             if (existing.length >= 3) {
                 const oldest = existing[0]
@@ -110,19 +127,50 @@ export function useHeroEffects() {
                 oldest.classList.add('hide')
                 setTimeout(() => oldest.remove(), 400)
             }
+            
             const data = toasts[toastIndex % toasts.length]
             toastIndex++
             const toast = document.createElement('div')
             toast.className = 'toast'
             toast.innerHTML = `<div class="toast-icon ${data.iconClass}">${data.icon}</div><div class="toast-body"><div class="toast-title">${data.title}</div><div class="toast-msg">${data.msg}</div></div><div class="toast-time">${data.time}</div><div class="toast-progress"></div>`
             toastContainer.appendChild(toast)
+            
             requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')))
-            setTimeout(() => { toast.classList.remove('show'); toast.classList.add('hide'); setTimeout(() => toast.remove(), 400) }, 4500)
+            
+            const hideTimeout = setTimeout(() => { 
+                toast.classList.remove('show')
+                toast.classList.add('hide') 
+                setTimeout(() => toast.remove(), 400) 
+            }, 4500)
+            toastTimeouts.push(hideTimeout)
         }
-        setTimeout(() => showToast(), 800)
-        setTimeout(() => showToast(), 3000)
-        setTimeout(() => showToast(), 5500)
+
         const toastInterval = setInterval(showToast, 5000)
+        
+        toastTimeouts.push(setTimeout(() => showToast(), 800))
+        toastTimeouts.push(setTimeout(() => showToast(), 3000))
+        toastTimeouts.push(setTimeout(() => showToast(), 5500))
+
+        const stopToastsOnScroll = () => {
+            if (window.scrollY > 20 && !userHasScrolled) {
+                userHasScrolled = true
+                clearInterval(toastInterval)
+                toastTimeouts.forEach(clearTimeout)
+                
+                // Dim/remove existing ones immediately for a cleaner "exit"
+                const container = document.getElementById('toastContainer')
+                if (container) {
+                    const activeToasts = container.querySelectorAll('.toast')
+                    activeToasts.forEach(t => {
+                        t.classList.remove('show')
+                        t.classList.add('hide')
+                        setTimeout(() => t.remove(), 400)
+                    })
+                }
+                window.removeEventListener('scroll', stopToastsOnScroll)
+            }
+        }
+        window.addEventListener('scroll', stopToastsOnScroll)
 
         // ── BG SHAPES ──
         const heartChars = ['♥', '♡', '❣️', '❦']
@@ -180,6 +228,7 @@ export function useHeroEffects() {
             clearInterval(bubbleInterval)
             clearInterval(toastInterval)
             clearInterval(bgShapeInterval)
+            window.removeEventListener('scroll', stopToastsOnScroll)
             io.disconnect()
 
             // Clear containers to prevent flash of duplicated old content on remount

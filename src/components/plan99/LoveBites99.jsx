@@ -298,8 +298,9 @@ export const LockScreen = ({ data = mockData, onUnlock }) => {
                 <div style={{ fontSize: '32px', marginBottom: '8px' }}>💌</div>
                 <h1 style={{
                     fontSize: '22px', fontFamily: THEME.serif, color: THEME.roseRed,
-                    fontStyle: 'italic', letterSpacing: '1px', margin: 0
-                }}>LoveBites</h1>
+                    fontStyle: 'italic', letterSpacing: '1px', margin: 0,
+                    cursor: 'pointer'
+                }} onClick={() => window.location.href = "/"}>LoveBites</h1>
                 <p style={{
                     fontSize: '13px', color: 'rgba(255,248,240,0.5)', marginTop: '6px'
                 }}>Someone created a special love message for you.</p>
@@ -453,7 +454,7 @@ export const LockScreen = ({ data = mockData, onUnlock }) => {
     );
 };
 
-export const PreviewScreen = ({ data = mockData }) => {
+export const PreviewScreen = ({ data = mockData, isViewer = false }) => {
     useEffect(() => {
         const style = document.createElement("style");
         style.id = "lovebites-animations";
@@ -822,51 +823,53 @@ export const PreviewScreen = ({ data = mockData }) => {
                     )}
                 </div>
 
-                {/* SECTION 6 — CONFIRM & PAY */}
-                <div style={{ textAlign: 'center', marginTop: '56px', paddingBottom: '80px' }}>
-                    <div style={{ borderTop: '1px solid rgba(155,26,58,0.15)', marginBottom: '40px' }} />
+                {/* SECTION 6 — CONFIRM & PAY (Hide if viewer) */}
+                {!isViewer && (
+                    <div style={{ textAlign: 'center', marginTop: '56px', paddingBottom: '80px' }}>
+                        <div style={{ borderTop: '1px solid rgba(155,26,58,0.15)', marginBottom: '40px' }} />
 
-                    <div style={{
-                        background: 'rgba(155,26,58,0.06)', border: '1px solid rgba(155,26,58,0.15)',
-                        borderRadius: '16px', padding: '24px', maxWidth: '400px', margin: '0 auto 28px'
-                    }}>
-                        <div style={{ color: THEME.roseRed, fontFamily: THEME.serif, fontSize: '16px' }}>
-                            True Love Plan · ₹99 one-time
+                        <div style={{
+                            background: 'rgba(155,26,58,0.06)', border: '1px solid rgba(155,26,58,0.15)',
+                            borderRadius: '16px', padding: '24px', maxWidth: '400px', margin: '0 auto 28px'
+                        }}>
+                            <div style={{ color: THEME.roseRed, fontFamily: THEME.serif, fontSize: '16px' }}>
+                                True Love Plan · ₹99 one-time
+                            </div>
+                            <div style={{ color: 'rgba(255,248,240,0.5)', fontFamily: THEME.sans, fontSize: '12px', opacity: 0.5, marginTop: '10px' }}>
+                                3 Love Code creations · AI message · 5 framed photos · Cinematic video · Secret unlock
+                            </div>
                         </div>
-                        <div style={{ color: 'rgba(255,248,240,0.5)', fontFamily: THEME.sans, fontSize: '12px', opacity: 0.5, marginTop: '10px' }}>
-                            3 Love Code creations · AI message · 5 framed photos · Cinematic video · Secret unlock
-                        </div>
+
+                        <button style={{
+                            background: 'linear-gradient(135deg, #7a1030, #c4304f, #7a1030)',
+                            backgroundSize: '200% auto',
+                            animation: 'goldShimmer 3s linear infinite',
+                            color: THEME.cream, fontFamily: THEME.serif, fontStyle: 'italic',
+                            fontSize: '18px', padding: '20px 64px', borderRadius: '50px',
+                            border: 'none', cursor: 'pointer',
+                            boxShadow: '0 8px 32px rgba(155,26,58,0.4)',
+                            transition: 'all 0.3s ease'
+                        }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-3px)';
+                                e.currentTarget.style.boxShadow = '0 16px 48px rgba(155,26,58,0.6)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 8px 32px rgba(155,26,58,0.4)';
+                            }}
+                        >
+                            Confirm & Pay ₹99 💳
+                        </button>
                     </div>
-
-                    <button style={{
-                        background: 'linear-gradient(135deg, #7a1030, #c4304f, #7a1030)',
-                        backgroundSize: '200% auto',
-                        animation: 'goldShimmer 3s linear infinite',
-                        color: THEME.cream, fontFamily: THEME.serif, fontStyle: 'italic',
-                        fontSize: '18px', padding: '20px 64px', borderRadius: '50px',
-                        border: 'none', cursor: 'pointer',
-                        boxShadow: '0 8px 32px rgba(155,26,58,0.4)',
-                        transition: 'all 0.3s ease'
-                    }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-3px)';
-                            e.currentTarget.style.boxShadow = '0 16px 48px rgba(155,26,58,0.6)';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 8px 32px rgba(155,26,58,0.4)';
-                        }}
-                    >
-                        Confirm & Pay ₹99 💳
-                    </button>
-                </div>
+                )}
 
             </div>
         </div>
     );
 };
 
-const LoveBites99 = ({ data = mockData }) => {
+const LoveBites99 = ({ data = mockData, isViewer = false }) => {
     const [screen, setScreen] = useState("lock"); // "lock" | "preview"
 
     return (
@@ -874,7 +877,7 @@ const LoveBites99 = ({ data = mockData }) => {
             {screen === "lock" ? (
                 <LockScreen data={data} onUnlock={() => setScreen("preview")} />
             ) : (
-                <PreviewScreen data={data} />
+                <PreviewScreen data={data} isViewer={isViewer} />
             )}
         </>
     );

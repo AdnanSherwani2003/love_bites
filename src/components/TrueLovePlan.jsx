@@ -235,7 +235,8 @@ const TrueLovePlan = ({ onComplete }) => {
             fontStyle: "italic",
             fontSize: "24px",
             fontWeight: "bold",
-            color: "#ff6b8a"
+            color: "#ff6b8a",
+            cursor: "pointer"
         },
         badge: {
             background: "rgba(233, 69, 96, 0.2)",
@@ -826,7 +827,7 @@ const TrueLovePlan = ({ onComplete }) => {
 
             {/* Header */}
             <header style={s.header}>
-                <div style={s.logo}>
+                <div style={s.logo} onClick={() => window.location.href = "/"}>
                     💗 LoveBites
                 </div>
                 <div style={s.badge}>

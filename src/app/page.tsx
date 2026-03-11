@@ -132,10 +132,6 @@ export default function HomePage() {
             <div className="jrn-pair">
               <div className="jrn-img">
                 <Image src="/images/gallery/img_1.jpg" alt="Couple laughing in park" width={600} height={400} />
-                <div className="jrn-img-cap">
-                  <div className="jrn-img-tag">🌿 Joy &amp; Laughter</div>
-                  <div className="jrn-img-q">&quot;The way you laugh is my favourite sound in the world.&quot;</div>
-                </div>
               </div>
               <div className="jrn-story">
                 <div className="jrn-story-name">Arjun S. · Mumbai</div>
@@ -151,10 +147,6 @@ export default function HomePage() {
             <div className="jrn-pair flip">
               <div className="jrn-img">
                 <Image src="/images/gallery/img_2.jpg" alt="Couple dancing in rain" width={600} height={400} />
-                <div className="jrn-img-cap">
-                  <div className="jrn-img-tag">🌧️ Spontaneous Love</div>
-                  <div className="jrn-img-q">&quot;Some of the best moments were never planned.&quot;</div>
-                </div>
               </div>
               <div className="jrn-story">
                 <div className="jrn-story-name">Vikram K. · New Delhi</div>
@@ -165,31 +157,12 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* TAGS CARD */}
-          <div className="jrn-tags-wrap">
-            <div className="jrn-tc" id="jrn-tc">
-              <div className="jrn-tc-l">Celebrate Every Moment</div>
-              <div className="jrn-tags">
-                <span className="jrn-tag">💍 Proposals</span>
-                <span className="jrn-tag">🎂 Birthdays</span>
-                <span className="jrn-tag">💌 Long Distance</span>
-                <span className="jrn-tag">🌅 Anniversaries</span>
-                <span className="jrn-tag">🕯️ Just Because</span>
-                <span className="jrn-tag">🌙 Midnight Surprises</span>
-                <span className="jrn-tag">✈️ Reunions</span>
-              </div>
-            </div>
-          </div>
 
           {/* PAIR 3 */}
           <div className="jrn-wrap">
             <div className="jrn-pair">
               <div className="jrn-img">
                 <Image src="/images/gallery/img_3.jpg" alt="Indian couple with candles" width={600} height={400} />
-                <div className="jrn-img-cap">
-                  <div className="jrn-img-tag">🕯️ Intimacy</div>
-                  <div className="jrn-img-q">&quot;In the warmth of us, I found my forever.&quot;</div>
-                </div>
               </div>
               <div className="jrn-story">
                 <div className="jrn-story-name">Priya R. · Bengaluru</div>
@@ -213,10 +186,6 @@ export default function HomePage() {
             <div className="jrn-pair flip">
               <div className="jrn-img">
                 <Image src="/images/gallery/img_4.jpg" alt="Anniversary dinner" width={600} height={400} />
-                <div className="jrn-img-cap">
-                  <div className="jrn-img-tag">🥂 Anniversaries</div>
-                  <div className="jrn-img-q">&quot;To us. To every year we choose each other again.&quot;</div>
-                </div>
               </div>
               <div className="jrn-story">
                 <div className="jrn-story-name">Rohit M. · Hyderabad</div>
