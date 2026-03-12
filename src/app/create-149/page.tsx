@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import GrandAmour149 from '@/components/plan149/GrandAmour149';
-import { LockScreen, PreviewScreen } from '@/components/plan99/LoveBites99';
+import { LockScreen, Preview99 } from '@/components/plan99/LoveBites99';
 import { dataURLtoFile } from '@/utils/file';
 
 export default function Create149Page() {
@@ -141,7 +141,7 @@ export default function Create149Page() {
 
             {currentView === "preview" && (
                 <div className="relative">
-                    <PreviewScreen data={formData} />
+                    <Preview99 data={formData} />
                     <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center z-50">
                         <button 
                             onClick={handleFinalSubmit}
