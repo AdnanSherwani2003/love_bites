@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const TrueLovePlan = ({ onComplete }) => {
     // --- STATE VARIABLES ---
@@ -9,6 +9,7 @@ const TrueLovePlan = ({ onComplete }) => {
     const [partnerName, setPartnerName] = useState("");
     const [theirStory, setTheirStory] = useState("");
     const [photos, setPhotos] = useState([null, null, null, null, null]);
+    const [photoMemories, setPhotoMemories] = useState(['', '', '', '', '']);
     const [videoPhotos, setVideoPhotos] = useState([null, null, null, null, null]);
     const [activePhotoSlot, setActivePhotoSlot] = useState(null);
     const [activeVideoSlot, setActiveVideoSlot] = useState(null);
@@ -28,6 +29,18 @@ const TrueLovePlan = ({ onComplete }) => {
     const [hoveredBtn, setHoveredBtn] = useState(null);
     const photoRef = useRef(null);
     const videoPhotoRef = useRef(null);
+
+    useEffect(() => {
+        const style = document.createElement("style");
+        style.textContent = `
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(8px); }
+                to   { opacity: 1; transform: translateY(0);   }
+            }
+        `;
+        document.head.appendChild(style);
+        return () => { document.head.removeChild(style); };
+    }, []);
 
     // --- DATA ---
     const frames = [
@@ -79,7 +92,7 @@ const TrueLovePlan = ({ onComplete }) => {
         switch (step) {
             case 0: return selectedMoods.length > 0;
             case 1: return selectedOccasion !== null;
-            case 2: return theirStory.trim().length > 10;
+            case 2: return theirStory.trim().length > 10 && yourName.trim().length > 0 && partnerName.trim().length > 0;
             case 3: return photos.some(p => p !== null);
             case 4: return true; // skippable
             case 5: return generatedMessage.length > 0;
@@ -100,6 +113,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     unlockCode: unlockCode,
                     generatedMessage: generatedMessage,
                     photos: photos,
+                    photoMemories: photoMemories,
                 });
             }
             return;
@@ -153,11 +167,33 @@ const TrueLovePlan = ({ onComplete }) => {
             const newPhotos = [...photos];
             newPhotos[index] = null;
             setPhotos(newPhotos);
+            
+            // Also reset the memory when photo is removed
+            const newMemories = [...photoMemories];
+            newMemories[index] = '';
+            setPhotoMemories(newMemories);
         } else {
             const newVideoPhotos = [...videoPhotos];
             newVideoPhotos[index] = null;
             setVideoPhotos(newVideoPhotos);
         }
+    };
+
+    const updateMemory = (index, value) => {
+        const updated = [...photoMemories];
+        updated[index] = value.slice(0, 120);
+        setPhotoMemories(updated);
+    };
+
+    const getPlaceholder = (index) => {
+        const placeholders = [
+            "Where it all began...",
+            "A moment I'll never forget...",
+            "This day felt like magic...",
+            "Our favourite place...",
+            "I wish we could go back...",
+        ];
+        return placeholders[index];
     };
 
     const generateVideo = () => {
@@ -168,7 +204,7 @@ const TrueLovePlan = ({ onComplete }) => {
         }, 3000);
     };
 
-    const generateAIByGroq = async () => {
+    const generateAIMessage = async () => {
         setIsGenerating(true);
         const moodsStr = selectedMoods.map(id => moodsData.find(m => m.id === id)?.label).join(", ");
         const occasionLabel = occasions.find(o => o.id === selectedOccasion)?.label;
@@ -192,7 +228,13 @@ const TrueLovePlan = ({ onComplete }) => {
 
             if (data.error) {
                 console.error('Server error:', data);
-                throw new Error(data.details || data.error);
+                const errorMessage = data.details || data.error || 'Unknown server error occurred';
+                throw new Error(errorMessage);
+            }
+
+            if (!data.message) {
+                console.error('Invalid response format:', data);
+                throw new Error('Invalid response from server: missing message');
             }
 
             setGeneratedMessage(data.message);
@@ -997,30 +1039,153 @@ const TrueLovePlan = ({ onComplete }) => {
                         </h1>
                         <p style={s.subtext}>Upload up to 5 photos — they'll appear in your chosen frame</p>
 
-                        <div style={s.gridPhotos}>
-                            {photos.map((photo, i) => (
-                                <div
-                                    key={i}
-                                    onClick={() => !photo && handlePhotoUpload(i, 'photo')}
-                                    style={s.photoSlot(photo !== null)}
-                                >
-                                    {photo ? (
-                                        <>
-                                            <img src={photo} alt={`Moment ${i + 1}`} style={s.photoImg} />
-                                            <div style={{ ...s.photoFrame, borderColor: frames[selectedFrame].border }} />
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); removePhoto(i, 'photo'); }}
-                                                style={s.btnRemovePhoto}
-                                            >
-                                                ✕
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span style={{ fontSize: "24px", opacity: 0.4 }}>+</span>
-                                            <span style={s.photoLabel}>Photo {i + 1}</span>
-                                        </>
+                        <div style={{
+                            display: window.innerWidth < 600 ? "grid" : "flex",
+                            flexDirection: "row",
+                            gap: window.innerWidth < 600 ? 10 : 12,
+                            width: "100%",
+                            maxWidth: 760,
+                            flexWrap: "nowrap",
+                            overflow: "visible",
+                            gridTemplateColumns: window.innerWidth < 600 ? "repeat(2, 1fr)" : "none",
+                        }}>
+                            {[0, 1, 2, 3, 4].map(index => (
+                                <div key={index} style={{
+                                    flex: window.innerWidth < 600 ? "none" : "1 1 0",
+                                    minWidth: 0,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 6,
+                                    gridColumn: window.innerWidth < 600 && index === 4 ? "span 2" : "span 1",
+                                }}>
+
+                                    {/* PHOTO SLOT */}
+                                    <div style={{
+                                        width: "100%",
+                                        aspectRatio: "1/1",
+                                        borderRadius: 10,
+                                        border: photos[index] 
+                                            ? "1.5px solid rgba(196,48,79,0.5)"
+                                            : "1.5px dashed rgba(255,255,255,0.1)",
+                                        overflow: "hidden",
+                                        cursor: "pointer",
+                                        position: "relative",
+                                        background: "rgba(255,255,255,0.04)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexDirection: "column",
+                                        gap: 8,
+                                        transition: "border 0.3s",
+                                    }}
+                                        onClick={() => !photos[index] && handlePhotoUpload(index, 'photo')}
+                                    >
+                                        {photos[index] ? (
+                                            <>
+                                                <img 
+                                                    src={photos[index]} 
+                                                    alt={`Moment ${index + 1}`} 
+                                                    style={{ 
+                                                        width: "100%", 
+                                                        height: "100%", 
+                                                        objectFit: "cover",
+                                                        filter: "sepia(0.15) contrast(1.05)"
+                                                    }} 
+                                                />
+                                                <div style={{ 
+                                                    position: "absolute",
+                                                    inset: 0,
+                                                    border: "3px solid",
+                                                    borderColor: frames[selectedFrame].border,
+                                                    pointerEvents: "none",
+                                                    opacity: 0.6
+                                                }} />
+                                                <div
+                                                    onClick={(e) => { e.stopPropagation(); removePhoto(index, 'photo'); }}
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 6, right: 6,
+                                                        width: 20, height: 20,
+                                                        borderRadius: "50%",
+                                                        background: "rgba(0,0,0,0.6)",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        cursor: "pointer",
+                                                        fontSize: 10,
+                                                        color: "white",
+                                                    }}
+                                                >✕</div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div style={{
+                                                    fontSize: 16,
+                                                    color: "rgba(255,255,255,0.2)",
+                                                }}>+</div>
+                                                <div style={{
+                                                    fontSize: 8,
+                                                    letterSpacing: 1.5,
+                                                    color: "rgba(255,255,255,0.18)",
+                                                    textTransform: "uppercase",
+                                                    fontFamily: "sans-serif",
+                                                }}>Photo {index + 1}</div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* MEMORY INPUT — only when photo uploaded */}
+                                    {photos[index] && (
+                                        <div style={{ width: "100%" }}>
+                                            <div style={{
+                                                fontSize: 7,
+                                                letterSpacing: 1.5,
+                                                color: "rgba(196,48,79,0.5)",
+                                                textTransform: "uppercase",
+                                                fontFamily: "sans-serif",
+                                                marginBottom: 3,
+                                            }}>✦ memory</div>
+                                            <textarea
+                                                value={photoMemories[index]}
+                                                onChange={e => updateMemory(index, e.target.value)}
+                                                placeholder={getPlaceholder(index)}
+                                                maxLength={120}
+                                                rows={2}
+                                                style={{
+                                                    width: "100%",
+                                                    background: "rgba(255,255,255,0.04)",
+                                                    border: "1px solid rgba(196,48,79,0.18)",
+                                                    borderRadius: 6,
+                                                    padding: "5px 8px",
+                                                    color: "#fff8f0",
+                                                    fontSize: 10,
+                                                    fontFamily: "Georgia, serif",
+                                                    fontStyle: "italic",
+                                                    lineHeight: 1.4,
+                                                    resize: "none",
+                                                    outline: "none",
+                                                }}
+                                                onFocus={e =>
+                                                    e.target.style.border =
+                                                    "1px solid rgba(196,48,79,0.55)"
+                                                }
+                                                onBlur={e =>
+                                                    e.target.style.border =
+                                                    "1px solid rgba(196,48,79,0.18)"
+                                                }
+                                            />
+                                            <div style={{
+                                                fontSize: 7,
+                                                color: "rgba(255,255,255,0.18)",
+                                                textAlign: "right",
+                                                fontFamily: "sans-serif",
+                                                marginTop: 2,
+                                            }}>
+                                                {photoMemories[index].length}/120
+                                            </div>
+                                        </div>
                                     )}
+
                                 </div>
                             ))}
                         </div>
@@ -1136,7 +1301,7 @@ const TrueLovePlan = ({ onComplete }) => {
                         {!generatedMessage ? (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", padding: "48px 0" }}>
                                 <button
-                                    onClick={generateAIByGroq}
+                                    onClick={generateAIMessage}
                                     disabled={isGenerating}
                                     style={s.btnAIGenerate(isGenerating)}
                                 >
@@ -1169,7 +1334,7 @@ const TrueLovePlan = ({ onComplete }) => {
                                 </div>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", justifyContent: "center" }}>
                                     <button
-                                        onClick={generateAIByGroq}
+                                        onClick={generateAIMessage}
                                         disabled={isGenerating}
                                         style={s.btnRegenerate}
                                     >

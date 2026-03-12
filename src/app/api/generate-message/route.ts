@@ -1,11 +1,23 @@
 export async function POST(req: Request) {
     try {
+        console.log('=== API CALL STARTED ===');
+        
         const apiKey = process.env.OPENROUTER_API_KEY;
+        console.log('API Key exists:', !!apiKey);
+        console.log('API Key length:', apiKey?.length || 0);
+        
         if (!apiKey) {
-            return Response.json({ error: 'OpenRouter API key not configured' }, { status: 500 });
+            console.error('OpenRouter API key not configured in environment variables');
+            return Response.json({ 
+                error: 'OpenRouter API key not configured', 
+                details: 'Please set OPENROUTER_API_KEY in your environment variables'
+            }, { status: 500 });
         }
 
-        const { moods, occasion, yourName, partnerName, partnerDesc } = await req.json();
+        const requestBody = await req.json();
+        console.log('Request body:', JSON.stringify(requestBody, null, 2));
+        
+        const { moods, occasion, yourName, partnerName, partnerDesc } = requestBody;
 
         const systemPrompt = `You are a world-class romantic writer and emotional guide for the LoveBites app. 
 Your task is to write a deeply personal, vulnerable, and heartfelt love message.
@@ -26,6 +38,8 @@ Occasion: ${occasion}
 Emotions/Moods: ${Array.isArray(moods) ? moods.join(', ') : moods}
 Our Story/Context: ${partnerDesc || 'A special bond that words can barely describe.'}`;
 
+        console.log('Making OpenRouter API call...');
+        
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -44,14 +58,42 @@ Our Story/Context: ${partnerDesc || 'A special bond that words can barely descri
             })
         });
 
+        console.log('OpenRouter Response Status:', response.status, response.statusText);
+        console.log('OpenRouter Response Headers:', Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `API error: ${response.status}`);
+            const errorText = await response.text();
+            console.error('OpenRouter API Error:', response.status, errorText);
+            
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch {
+                errorData = { error: errorText };
+            }
+            
+            return Response.json({ 
+                error: 'OpenRouter API error', 
+                details: errorData.error?.message || errorData.error || `API error: ${response.status} ${response.statusText}`,
+                status: response.status 
+            }, { status: 500 });
         }
 
         const data = await response.json();
+        console.log('OpenRouter Response Data:', JSON.stringify(data, null, 2));
+        
         const message = data.choices[0]?.message?.content;
+        console.log('Extracted Message:', message);
 
+        if (!message) {
+            console.error('No message found in OpenRouter response');
+            return Response.json({ 
+                error: 'No message generated', 
+                details: 'OpenRouter response missing message content'
+            }, { status: 500 });
+        }
+
+        console.log('=== API CALL SUCCESS ===');
         return Response.json({ message });
     } catch (error: any) {
         console.error('Message Generation Error:', error);
