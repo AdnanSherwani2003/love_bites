@@ -122,7 +122,7 @@ const useScrollReveal = (delay = 0) => {
 };
 
 // --- MAIN COMPONENT ---
-export default function Preview99({ data }) {
+export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
     // Deep merge or fallback logic to ensure we always have valid arrays and strings
     const resolvedData = React.useMemo(() => {
         if (!data) return mockData;
@@ -504,7 +504,7 @@ export default function Preview99({ data }) {
                 { text: "Celebrate You", emoji: "⭐", year },
                 { text: "Sunshine", emoji: "🌟", year },
             ],
-            valentines: [
+            valentine: [
                 { text: "My Valentine", emoji: "💝", year },
                 { text: "With Love", emoji: "❤️", year },
                 { text: "Heart & Soul", emoji: "💗", year },
@@ -588,7 +588,7 @@ export default function Preview99({ data }) {
         
         // Use mood label to pick consistently 
         // (not random — same mood always picks same quote)
-        const moodSeed = moods && moods.length > 0 
+        const moodSeed = moods && moods.length > 0 && moods[0]?.label
             ? moods[0].label.length % pool.length 
             : 0;
         
@@ -606,7 +606,7 @@ export default function Preview99({ data }) {
             "Forever Yours": "I want a lifetime with you.",
             "Missing You": "I wish you were here right now."
         };
-        const activeLabel = moods[0]?.label || "Deeply in Love";
+        const activeLabel = moods && moods.length > 0 ? moods[0]?.label || "Deeply in Love" : "Deeply in Love";
         return moodPool[activeLabel] || "Every moment with you is a gift.";
     };
 
@@ -1258,58 +1258,67 @@ export default function Preview99({ data }) {
                 </div>
             </section>
 
-            {/* VIDEO PLACEHOLDER */}
-            <section style={{ maxWidth: "800px", margin: "100px auto" }}>
-                <div style={{ textAlign: "center", marginBottom: "32px" }}>
-                    <p style={{ fontSize: "10px", letterSpacing: "4px", color: config.colors.primary, textTransform: "uppercase" }}>✦ YOUR CINEMATIC LOVE FILM ✦</p>
-                    <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", marginTop: "12px" }}>A <em>film</em> crafted for you</h2>
-                </div>
-                <div style={{
-                    width: "100%", height: "320px", borderRadius: "20px",
-                    background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)",
-                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px"
-                }}>
-                    <div style={{ fontSize: "48px", opacity: 0.3 }}>🎬</div>
-                    <p style={{ fontSize: "12px", letterSpacing: "2px", color: "rgba(255,255,255,0.2)", cursor: "default" }}>YOUR CINEMATIC VIDEO WILL APPEAR HERE</p>
-                </div>
-            </section>
+            {/* VIDEO PLACEHOLDER - Hidden for Tier 49 */}
+            {tier !== "49" && (
+                <section style={{ maxWidth: "800px", margin: "100px auto" }}>
+                    <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                        <p style={{ fontSize: "10px", letterSpacing: "4px", color: config.colors.primary, textTransform: "uppercase" }}>✦ YOUR CINEMATIC LOVE FILM ✦</p>
+                        <h2 style={{ fontFamily: "Georgia, serif", fontSize: "24px", marginTop: "12px" }}>A <em>film</em> crafted for you</h2>
+                    </div>
+                    <div style={{
+                        width: "100%", height: "320px", borderRadius: "20px",
+                        background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)",
+                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px"
+                    }}>
+                        <div style={{ fontSize: "48px", opacity: 0.3 }}>🎬</div>
+                        <p style={{ fontSize: "12px", letterSpacing: "2px", color: "rgba(255,255,255,0.2)", cursor: "default" }}>YOUR CINEMATIC VIDEO WILL APPEAR HERE</p>
+                    </div>
+                </section>
+            )}
 
             <Divider />
 
-            {/* ENDING + CONFIRM & PAY */}
-            <section style={{ maxWidth: "600px", margin: "100px auto 0", textAlign: "center" }}>
-                <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: "16px", color: "rgba(255,248,240,0.35)", marginBottom: "60px" }}>
-                    🔑 "Unlocked with a secret code from someone who loves you."
-                </p>
-                
-                <div style={{ marginBottom: "80px" }}>
-                    <div style={{ fontSize: "36px", marginBottom: "16px" }}>💌</div>
-                    <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: "18px", color: "rgba(255,255,255,0.8)", marginBottom: "8px" }}>
-                        Some memories deserve to last forever.
+            {/* ENDING + CONFIRM & PAY - Only show if onConfirm is provided (creation flow) */}
+            {tier && onConfirm && (
+                <section style={{ maxWidth: "600px", margin: "100px auto 0", textAlign: "center" }}>
+                    <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: "16px", color: "rgba(255,248,240,0.35)", marginBottom: "60px" }}>
+                        🔑 "Unlocked with a secret code from someone who loves you."
                     </p>
-                    <p style={{ fontSize: "12px", letterSpacing: "3px", color: config.colors.primary, fontWeight: "bold" }}>CREATED WITH LOVEBITES</p>
-                </div>
+                    
+                    <div style={{ marginBottom: "80px" }}>
+                        <div style={{ fontSize: "36px", marginBottom: "16px" }}>💌</div>
+                        <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: "18px", color: "rgba(255,255,255,0.8)", marginBottom: "8px" }}>
+                            Some memories deserve to last forever.
+                        </p>
+                        <p style={{ fontSize: "12px", letterSpacing: "3px", color: config.colors.primary, fontWeight: "bold" }}>CREATED WITH LOVEBITES</p>
+                    </div>
 
-                <div style={{
-                    background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: "24px", padding: "40px 20px", position: "relative", overflow: "hidden"
-                }}>
-                    <div style={{ fontSize: "32px", marginBottom: "16px" }}>💗</div>
-                    <h3 style={{ fontFamily: "Georgia, serif", fontSize: "22px", marginBottom: "8px" }}>Ready to send this love story?</h3>
-                    <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
-                        We'll deliver it to {resolvedData.recipientName} exactly as you see it.
-                    </p>
-                    <button style={{
-                        background: `linear-gradient(45deg, ${config.colors.secondary}, ${config.colors.primary}, ${config.colors.secondary})`,
-                        backgroundSize: "200% auto", color: "#fff",
-                        border: "none", borderRadius: "50px", padding: "18px 56px",
-                        fontSize: "18px", fontWeight: "bold", cursor: "pointer",
-                        animation: "shimmerPay 3s linear infinite, pulseGlow 2s infinite ease-in-out"
+                    <div style={{
+                        background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: "24px", padding: "40px 20px", position: "relative", overflow: "hidden"
                     }}>
-                        💳 Confirm & Pay ₹99
-                    </button>
-                </div>
-            </section>
+                        <div style={{ fontSize: "32px", marginBottom: "16px" }}>💗</div>
+                        <h3 style={{ fontFamily: "Georgia, serif", fontSize: "22px", marginBottom: "8px" }}>Ready to send this love story?</h3>
+                        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.5)", marginBottom: "32px" }}>
+                            We'll deliver it to {resolvedData.recipientName} exactly as you see it.
+                        </p>
+                        <button 
+                            onClick={onConfirm}
+                            disabled={isSubmitting}
+                            style={{
+                                background: `linear-gradient(45deg, ${config.colors.secondary}, ${config.colors.primary}, ${config.colors.secondary})`,
+                                backgroundSize: "200% auto", color: "#fff",
+                                border: "none", borderRadius: "50px", padding: "18px 56px",
+                                fontSize: "18px", fontWeight: "bold", cursor: "pointer",
+                                opacity: isSubmitting ? 0.7 : 1,
+                                animation: "shimmerPay 3s linear infinite, pulseGlow 2s infinite ease-in-out"
+                            }}
+                        >
+                            {isSubmitting ? "Processing..." : `💳 Pay ₹${tier} & send to your love ones`}
+                        </button>
+                    </div>
+                </section>
+            )}
         </div>
     );
 }

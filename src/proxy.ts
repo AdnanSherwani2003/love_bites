@@ -35,11 +35,18 @@ export async function proxy(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // If there is no user and they are trying to access the /create route, redirect to login
-    if (!user && request.nextUrl.pathname.startsWith('/create')) {
+    // If they are trying to access the legacy /create route, redirect them to /pricing
+    if (request.nextUrl.pathname === '/create') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/pricing'
+        return NextResponse.redirect(url)
+    }
+
+    // If there is no user and they are trying to access any protected /-create route, redirect to login with next=/pricing
+    if (!user && request.nextUrl.pathname.startsWith('/create-')) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
-        url.searchParams.set('next', request.nextUrl.pathname)
+        url.searchParams.set('next', '/pricing')
         return NextResponse.redirect(url)
     }
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import LoveBitesLogo from "../LoveBitesLogo";
 
 /**
  * Grand Amour ₹149 Plan Component
@@ -20,6 +21,7 @@ const GrandAmour149 = ({ onComplete }) => {
 
   // --- STATE VARIABLES ---
   const [step, setStep] = useState(0);
+  const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
   const [selectedMoods, setSelectedMoods] = useState([]); // max 5
   const [selectedOccasion, setSelectedOccasion] = useState(null);
   const [yourName, setYourName] = useState("");
@@ -49,6 +51,7 @@ const GrandAmour149 = ({ onComplete }) => {
   const [notifView, setNotifView] = useState(true);
   const [notifReply, setNotifReply] = useState(true);
   const [activeTab, setActiveTab] = useState("Romantic");
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [hoveredBtn, setHoveredBtn] = useState(null);
 
@@ -117,15 +120,16 @@ const GrandAmour149 = ({ onComplete }) => {
 
   // --- HELPERS ---
   const canProceed = () => {
-    if (step === 0) return selectedMoods.length > 0;
-    if (step === 1) return selectedOccasion !== null;
-    if (step === 2) return theirStory.trim().length > 10;
-    if (step === 3) return photos.some(p => p !== null);
-    if (step === 4) return true; // video skippable
-    if (step === 5) return true; // music optional
-    if (step === 6) return destructMode !== null;
-    if (step === 7) return generatedMessage.length > 0;
-    if (step === 8) return unlockCode.every(c => c !== "") && deliveryMethod !== null && notifyEmail.length > 0;
+    if (step === 0) return createFor !== null;
+    if (step === 1) return selectedMoods.length > 0;
+    if (step === 2) return selectedOccasion !== null;
+    if (step === 3) return theirStory.trim().length > 10;
+    if (step === 4) return photos.some(p => p !== null);
+    if (step === 5) return true; // video skippable
+    if (step === 6) return true; // music optional
+    if (step === 7) return destructMode !== null;
+    if (step === 8) return generatedMessage.length > 0;
+    if (step === 9) return unlockCode.every(c => c !== "") && deliveryMethod !== null && notifyEmail.length > 0;
     return true;
   };
 
@@ -144,10 +148,14 @@ const GrandAmour149 = ({ onComplete }) => {
   };
 
   const handleNext = () => {
-    if (step === 8 && canProceed()) {
+    if (step === 9 && canProceed()) {
       if (onComplete) {
         onComplete({
-          step, selectedMoods, selectedOccasion, yourName, partnerName, theirStory,
+          createFor,
+          step, 
+          selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id) || { id, label: id, emoji: "❤️" }), 
+          selectedOccasion: occasions.find(o => o.id === selectedOccasion) || { id: "anniversary", label: "Anniversary", emoji: "💑" },
+          yourName, partnerName, theirStory,
           photos, videoPhotos, selectedFrame, musicEnabled, musicTab, selectedTrack,
           uploadedMusic, destructMode, generatedMessage, unlockCode: unlockCode.join(""), hintMessage,
           deliveryMethod, recipientContact, deliveryDate, deliveryTime, notifyEmail,
@@ -179,24 +187,64 @@ const GrandAmour149 = ({ onComplete }) => {
     }
   };
 
-  const handleFileChange = (e, type) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (type === 'photo') {
-        const newPhotos = [...photos];
-        newPhotos[activePhotoSlot] = event.target.result;
-        setPhotos(newPhotos);
-      } else if (type === 'video') {
-        const newVideoPhotos = [...videoPhotos];
-        newVideoPhotos[activeVideoSlot] = event.target.result;
-        setVideoPhotos(newVideoPhotos);
-      } else if (type === 'music') {
+  const handleFileChange = async (e, type) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    if (type === 'music') {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
         setUploadedMusic({ name: file.name, url: event.target.result });
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const processFiles = async (fileList, currentList, setList, maxSlots, activeSlot) => {
+      const newList = [...currentList];
+      let filesToProcess = fileList;
+      
+      // Calculate how many slots are actually available total
+      const emptySlotsCount = newList.filter(p => p === null).length;
+      if (emptySlotsCount === 0 && newList[activeSlot] !== null) return; // No room at all unless overwriting active
+
+      const fileDataPromises = filesToProcess.map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const results = await Promise.all(fileDataPromises);
+      
+      let resultIdx = 0;
+      // First, try to fill from the active slot
+      if (newList[activeSlot] === null) {
+        newList[activeSlot] = results[resultIdx++];
+      } else {
+        // If active slot is full, we overwrite it with the FIRST file selected
+        newList[activeSlot] = results[resultIdx++];
       }
+
+      // Then fill remaining available slots
+      for (let i = 0; i < maxSlots && resultIdx < results.length; i++) {
+        if (newList[i] === null) {
+          newList[i] = results[resultIdx++];
+        }
+      }
+      setList(newList);
     };
-    reader.readAsDataURL(file);
+
+    if (type === 'photo') {
+      await processFiles(files, photos, setPhotos, 10, activePhotoSlot);
+    } else if (type === 'video') {
+      await processFiles(files, videoPhotos, setVideoPhotos, 5, activeVideoSlot);
+    }
+
+    // Reset input
+    e.target.value = "";
   };
 
   const removeFile = (index, type) => {
@@ -291,7 +339,7 @@ const GrandAmour149 = ({ onComplete }) => {
       marginBottom: "40px", width: "100%"
     },
     progressGrid: {
-      display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: "6px", marginBottom: "8px"
+      display: "grid", gridTemplateColumns: "repeat(10, 1fr)", gap: "6px", marginBottom: "8px"
     },
     stepBar: (idx) => ({
       height: "4px", borderRadius: "2px",
@@ -356,28 +404,102 @@ const GrandAmour149 = ({ onComplete }) => {
       <div style={styles.orbTop} />
       <div style={styles.orbBottom} />
 
+      {/* IMAGE PREVIEW MODAL */}
+      {previewImage && (
+        <div 
+          onClick={() => setPreviewImage(null)}
+          style={{
+            position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
+            background: "rgba(0,0,0,0.9)", zIndex: 9999, display: "flex", 
+            alignItems: "center", justifyContent: "center", padding: "20px",
+            backdropFilter: "blur(10px)", animation: "fadeIn 0.3s ease"
+          }}
+        >
+          <div 
+            style={{
+              position: "absolute", top: "30px", right: "30px", 
+              background: "rgba(255,255,255,0.1)", borderRadius: "50%", 
+              width: "44px", height: "44px", display: "flex", alignItems: "center", 
+              justifyContent: "center", color: "white", fontSize: "24px", cursor: "pointer",
+              border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(5px)"
+            }}
+            onClick={() => setPreviewImage(null)}
+          >
+            ✕
+          </div>
+          <img 
+            src={previewImage} 
+            alt="Preview" 
+            style={{ 
+              maxWidth: "95vw", maxHeight: "85vh", borderRadius: "16px",
+              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)", objectFit: "contain",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }} 
+            onClick={(e) => e.stopPropagation()} 
+          />
+        </div>
+      )}
+
       <div style={styles.container}>
         {/* HEADER */}
         <header style={styles.header}>
-          <div style={styles.logo} onClick={() => window.location.href = "/"}>💗 LoveBites</div>
+          <div style={styles.logo} onClick={() => window.location.href = "/"}>
+            <LoveBitesLogo size={24} />
+          </div>
           <div style={styles.pill}>GRAND AMOUR ₹149</div>
         </header>
 
         {/* PROGRESS BAR */}
         <div style={styles.progressBox}>
           <div style={styles.progressGrid}>
-            {Array(9).fill(0).map((_, i) => (
+            {Array(10).fill(0).map((_, i) => (
               <div key={i} style={styles.stepBar(i)} />
             ))}
           </div>
-          <div style={styles.stepCounter}>{step + 1} of 9 steps</div>
+          <div style={styles.stepCounter}>{step + 1} of 10 steps</div>
         </div>
 
         {/* MAIN STEPS */}
         <main style={styles.main}>
           
-          {/* STEP 0: MOOD */}
+          {/* STEP 0: CREATE FOR */}
           {step === 0 && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={styles.stepHeader}>
+                <div style={styles.stepTag}>Beginning</div>
+                <h1 style={styles.heading}>Who are you <i style={{ color: THEME.rose }}>creating this for?</i></h1>
+                <p style={styles.subheading}>Let's personalize the experience</p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "340px", margin: "0 auto" }}>
+                {[
+                  { id: 'her', label: 'Create for Her' },
+                  { id: 'him', label: 'Create for Him' }
+                ].map(opt => (
+                  <div
+                    key={opt.id}
+                    onClick={() => setCreateFor(opt.id)}
+                    style={{
+                      padding: "20px 24px", borderRadius: "16px", textAlign: "center", cursor: "pointer", transition: "0.3s",
+                      border: createFor === opt.id ? `2px solid ${THEME.rose}` : "1px solid rgba(255,255,255,0.1)",
+                      background: createFor === opt.id ? "rgba(155,26,58,0.2)" : "rgba(255,255,255,0.03)",
+                      transform: createFor === opt.id ? "translateY(-2px)" : "translateY(0)",
+                      boxShadow: createFor === opt.id ? `0 8px 24px rgba(155,26,58,0.3)` : "none"
+                    }}
+                  >
+                    <div style={{ 
+                      fontWeight: "bold", fontSize: "16px", letterSpacing: "0.5px",
+                      fontFamily: THEME.sans,
+                      color: createFor === opt.id ? "white" : "rgba(255,255,255,0.8)" 
+                    }}>{opt.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 1: MOOD */}
+          {step === 1 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step One</div>
@@ -387,7 +509,7 @@ const GrandAmour149 = ({ onComplete }) => {
 
               {/* Tabs */}
               <div style={{ display: "flex", gap: "8px", overflowX: "auto", marginBottom: "24px", paddingBottom: "8px" }}>
-                {["Romantic", "Emotional", "Fun", "Deep", "Occasion"].map(tab => (
+                {["Romantic", "Emotional", "Fun", "Deep"].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -445,8 +567,8 @@ const GrandAmour149 = ({ onComplete }) => {
             </div>
           )}
 
-          {/* STEP 1: OCCASION */}
-          {step === 1 && (
+          {/* STEP 2: OCCASION */}
+          {step === 2 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Two</div>
@@ -484,8 +606,8 @@ const GrandAmour149 = ({ onComplete }) => {
             </div>
           )}
 
-          {/* STEP 2: STORY */}
-          {step === 2 && (
+          {/* STEP 3: STORY */}
+          {step === 3 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Three</div>
@@ -526,8 +648,8 @@ const GrandAmour149 = ({ onComplete }) => {
             </div>
           )}
 
-          {/* STEP 3: PHOTOS */}
-          {step === 3 && (
+          {/* STEP 4: PHOTOS */}
+          {step === 4 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Four</div>
@@ -539,7 +661,7 @@ const GrandAmour149 = ({ onComplete }) => {
                 {photos.map((photo, i) => (
                   <div 
                     key={i} 
-                    onClick={() => handleFileUpload(i, 'photo')}
+                    onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i, 'photo')}
                     style={{ 
                       aspectRatio: "1/1", borderRadius: "12px", background: photo ? "none" : "rgba(255,255,255,0.03)",
                       border: photo ? `2px solid ${frames[i % 5].border}` : "1px dashed rgba(255,255,255,0.1)",
@@ -561,12 +683,12 @@ const GrandAmour149 = ({ onComplete }) => {
               <p style={{ textAlign: "center", fontSize: "11px", color: "rgba(255,248,240,0.3)", fontStyle: "italic" }}>
                 * Frames are automatically curated based on your mood & occasion
               </p>
-              <input type="file" ref={photoRef} onChange={(e) => handleFileChange(e, 'photo')} style={{ display: "none" }} accept="image/*" />
+              <input type="file" ref={photoRef} onChange={(e) => handleFileChange(e, 'photo')} style={{ display: "none" }} accept="image/*" multiple />
             </div>
           )}
 
-          {/* STEP 4: VIDEO */}
-          {step === 4 && (
+          {/* STEP 5: VIDEO */}
+          {step === 5 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Five</div>
@@ -578,7 +700,7 @@ const GrandAmour149 = ({ onComplete }) => {
                 {videoPhotos.map((photo, i) => (
                   <div 
                     key={i} 
-                    onClick={() => handleFileUpload(i, 'video')}
+                    onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i, 'video')}
                     style={{ 
                       aspectRatio: "1/1", borderRadius: "12px", background: photo ? "none" : "rgba(255,255,255,0.03)",
                       border: "1px dashed rgba(255,255,255,0.1)",
@@ -604,12 +726,12 @@ const GrandAmour149 = ({ onComplete }) => {
                   <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,248,240,0.5)", lineHeight: "1.5" }}>Our team crafts it based on your mood & occasion to ensure it's absolutely perfect.</p>
                 </div>
               </div>
-              <input type="file" ref={videoPhotoRef} onChange={(e) => handleFileChange(e, 'video')} style={{ display: "none" }} accept="image/*,video/*" />
+              <input type="file" ref={videoPhotoRef} onChange={(e) => handleFileChange(e, 'video')} style={{ display: "none" }} accept="image/*,video/*" multiple />
             </div>
           )}
 
-          {/* STEP 5: BACKGROUND MUSIC */}
-          {step === 5 && (
+          {/* STEP 6: BACKGROUND MUSIC */}
+          {step === 6 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Six</div>
@@ -627,7 +749,7 @@ const GrandAmour149 = ({ onComplete }) => {
                     position: "absolute", top: "3px", left: musicEnabled ? "33px" : "3px", transition: "0.3s"
                   }} />
                 </div>
-                <span style={{ marginLeft: "12px", fontSize: "14px", color: musicEnabled ? "white" : "rgba(255,248,240,0.4)" }}>Add background music</span>
+                <span style={{ marginLeft: "12px", fontSize: "14px", color: musicEnabled ? "white" : "rgba(255,255,255,0.4)" }}>Add background music</span>
               </div>
 
               <div style={{ opacity: musicEnabled ? 1 : 0.3, pointerEvents: musicEnabled ? "auto" : "none", transition: "0.3s" }}>
@@ -683,8 +805,8 @@ const GrandAmour149 = ({ onComplete }) => {
             </div>
           )}
 
-          {/* STEP 6: SELF-DESTRUCT */}
-          {step === 6 && (
+          {/* STEP 7: SELF-DESTRUCT */}
+          {step === 7 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Seven</div>
@@ -726,8 +848,8 @@ const GrandAmour149 = ({ onComplete }) => {
             </div>
           )}
 
-          {/* STEP 7: AI MESSAGE */}
-          {step === 7 && (
+          {/* STEP 8: AI MESSAGE */}
+          {step === 8 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Eight</div>
@@ -769,8 +891,8 @@ const GrandAmour149 = ({ onComplete }) => {
             </div>
           )}
 
-          {/* STEP 8: DELIVERY */}
-          {step === 8 && (
+          {/* STEP 9: DELIVERY */}
+          {step === 9 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Nine</div>
@@ -832,8 +954,18 @@ const GrandAmour149 = ({ onComplete }) => {
               <div style={{ marginBottom: "40px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "bold", color: THEME.rose, marginBottom: "16px", display: "block" }}>DELIVERY DATE & TIME</label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                  <input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} style={{ padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", outline: "none" }} />
-                  <input type="time" value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} style={{ padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", outline: "none" }} />
+                  <input 
+                    type="date" value={deliveryDate} 
+                    onChange={(e) => setDeliveryDate(e.target.value)} 
+                    onClick={(e) => e.target.showPicker()}
+                    style={{ padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", outline: "none", cursor: "pointer" }} 
+                  />
+                  <input 
+                    type="time" value={deliveryTime} 
+                    onChange={(e) => setDeliveryTime(e.target.value)} 
+                    onClick={(e) => e.target.showPicker()}
+                    style={{ padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "white", outline: "none", cursor: "pointer" }} 
+                  />
                 </div>
               </div>
 
@@ -902,7 +1034,7 @@ const GrandAmour149 = ({ onComplete }) => {
             <div style={{ flex: 1 }} />
             
             {/* Conditional Skip Label */}
-            {(step === 4 || (step === 5 && !musicEnabled)) && (
+            {(step === 5 || (step === 6 && !musicEnabled)) && (
               <button 
                 onClick={handleNext} 
                 style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", marginRight: "20px", fontWeight: "bold" }}
@@ -917,7 +1049,7 @@ const GrandAmour149 = ({ onComplete }) => {
               onMouseLeave={() => setHoveredBtn(null)}
               style={styles.btnNext(canProceed())}
             >
-              {step === 8 ? "Preview & Pay ₹149 💗" : "Continue →"}
+                {step === 9 ? "Review Grand Amour ₹149 💗" : "Continue Checkout →"}
             </button>
           </div>
         </footer>

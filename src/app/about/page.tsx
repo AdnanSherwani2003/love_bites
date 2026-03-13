@@ -113,7 +113,7 @@ export default function AboutPage() {
                         <div className="about-cta animate-on-scroll">
                             <h3>Ready to create something <em>unforgettable?</em></h3>
                             <p>Join hundreds of people who&apos;ve already made someone feel truly special.</p>
-                            <a href="/create" className="cta-btn">♥ Create Your Love Code</a>
+                            <a href="/pricing" className="cta-btn">♥ Create Your Love Code</a>
                             <p className="cta-trust">
                                 <span>500+</span> Love Codes sent &nbsp;·&nbsp;
                                 <span>4.9★</span> rating &nbsp;·&nbsp;

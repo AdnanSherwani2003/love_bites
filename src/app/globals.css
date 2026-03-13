@@ -4349,36 +4349,60 @@ body.menu-open .toast-container {
 }
 
 .gifts-hero {
-    padding: 6rem 1rem 4rem;
+    padding: 100px 24px 80px;
     text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.gifts-hero .badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(192, 49, 79, 0.28);
+    color: #c0314f;
+    border-radius: 50px;
+    padding: 6px 18px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
 }
 
 .gifts-hero h1 {
-    font-size: clamp(2.5rem, 8vw, 4rem);
-    color: var(--text-dark);
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    line-height: 1.15;
+    margin-bottom: 20px;
+}
+
+/* Top line: small + faded */
+.gifts-hero h1 .h1-top {
+    display: block;
+    font-size: clamp(1.3rem, 2.8vw, 1.75rem);
+    font-weight: 700;
+    color: rgba(139, 10, 42, 0.6);
+    letter-spacing: 0.01em;
+    margin-bottom: 4px;
+}
+
+/* Bottom line: large + italic */
+.gifts-hero h1 .h1-bottom {
+    display: block;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    font-weight: 900;
+    font-style: italic;
+    color: #8b0a2a;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
 }
 
 .gifts-hero p {
-    font-size: 1.25rem;
-    color: var(--text-mid);
-    max-width: 800px;
-    margin: 0 auto 3rem;
-    line-height: 1.6;
-}
-
-.gifts-badge {
-    display: inline-block;
-    padding: 0.5rem 1.5rem;
-    background: #ffeef0;
-    color: var(--rose);
-    border-radius: 100px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 2rem;
+    color: rgba(90, 90, 90, 0.72);
+    font-size: 0.97rem;
+    line-height: 1.65;
+    margin: 20px auto 0;
+    font-weight: 300;
+    max-width: 600px;
 }
 
 .gifts-grid {
@@ -4432,6 +4456,7 @@ body.menu-open .toast-container {
 }
 
 .gift-card-category {
+    font-family: 'Playfair Display', serif;
     color: white;
     font-size: 1.5rem;
     font-weight: 700;
@@ -4482,8 +4507,9 @@ body.menu-open .toast-container {
 }
 
 .gifts-cta-section h2 {
-    font-size: 2.5rem;
-    color: var(--text-dark);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    color: #8b0a2a;
     margin-bottom: 1.5rem;
 }
 

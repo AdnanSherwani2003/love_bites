@@ -5,61 +5,56 @@ export default function LoveBitesLogo({
     <div style={{ 
       display: "flex", 
       alignItems: "center", 
-      gap: 8 
+      gap: 10 
     }}>
       <div style={{ 
-        width: size, 
-        height: size * 0.9,
-        animation: "heartbeat 1.4s ease-in-out infinite",
-        filter: "drop-shadow(0 0 8px rgba(232,48,74,0.6))",
+        width: size * 1.1, 
+        height: size,
+        animation: "heart-pump 1.2s infinite cubic-bezier(0.4, 0, 0.2, 1)",
+        filter: "drop-shadow(0 2px 8px rgba(225, 29, 72, 0.4))",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
       }}>
         <svg
-          viewBox="0 0 100 90"
+          viewBox="0 0 24 24"
           style={{ width: "100%", height: "100%" }}
           xmlns="http://www.w3.org/2000/svg"
         >
-          <defs>
-            <linearGradient id="logoHeartGrad"
-              x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"  stopColor="#ff6b8a" />
-              <stop offset="100%" stopColor="#e8304a" />
-            </linearGradient>
-          </defs>
           <path
-            d="M50 85 C50 85 5 55 5 28 
-               C5 12 17 2 30 2 
-               C38 2 45 6 50 13 
-               C55 6 62 2 70 2 
-               C83 2 95 12 95 28 
-               C95 55 50 85 50 85Z"
-            fill="url(#logoHeartGrad)"
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            fill="#e11d48"
           />
         </svg>
       </div>
       <span style={{
-        fontFamily: "Georgia, serif",
+        fontFamily: "'Playfair Display', Georgia, serif",
         fontSize: size,
-        fontWeight: 600,
-        color: "#fff8f0",
-        letterSpacing: 1,
+        fontWeight: 800,
+        color: "#e11d48",
+        letterSpacing: -0.5,
+        display: "flex",
+        alignItems: "center"
       }}>
-        Love{" "}
+        Love&nbsp;
         <em style={{ 
-          color: "#c4304f", 
-          fontStyle: "italic" 
+          color: "#e11d48", 
+          fontStyle: "italic",
+          fontWeight: 600
         }}>
           Bites
         </em>
+        <span style={{ color: "#e11d48", marginLeft: "1px" }}>.</span>
       </span>
       
-      {/* Heartbeat animation */}
       <style>{`
-        @keyframes heartbeat {
-          0%,100% { transform: scale(1);    }
-          14%     { transform: scale(1.22); }
-          28%     { transform: scale(1);    }
-          42%     { transform: scale(1.10); }
-          70%     { transform: scale(1);    }
+        @keyframes heart-pump {
+          0% { transform: scale(1); }
+          15% { transform: scale(1.22); }
+          30% { transform: scale(1); }
+          45% { transform: scale(1.15); }
+          60% { transform: scale(1); }
+          100% { transform: scale(1); }
         }
       `}</style>
     </div>

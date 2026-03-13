@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import LoveBitesLogo from "../LoveBitesLogo";
 
 /**
  * Sweet Start ₹49 Plan Component
@@ -33,11 +34,7 @@ const SweetStart49 = ({ onComplete }) => {
     { id: "happy", emoji: "😄", label: "Happy with You", sub: "You make my life joyful", cat: "Fun" },
     { id: "forever_yours", emoji: "💍", label: "Forever Yours", sub: "I want a lifetime with you", cat: "Deep" },
     { id: "soulmate", emoji: "🌙", label: "Soulmate Feeling", sub: "You feel like my other half", cat: "Deep" },
-    { id: "passionate", emoji: "🔥", label: "Passionate", sub: "My love for you burns intensely", cat: "Deep" },
-    { id: "birthday_love", emoji: "🎂", label: "Birthday Love", sub: "Celebrating you today", cat: "Occasion" },
-    { id: "proposal", emoji: "💍", label: "Proposal Mood", sub: "Ready to ask you forever", cat: "Occasion" },
-    { id: "missing_you", emoji: "💌", label: "Missing You", sub: "I wish you were here", cat: "Occasion" },
-    { id: "celebrating", emoji: "🎉", label: "Celebrating Us", sub: "Celebrating our love", cat: "Occasion" },
+    { id: "passionate", emoji: "🔥", label: "Passionate", sub: "My love for you burns intensely", cat: "Deep" }
   ];
 
   const OCCASIONS = [
@@ -52,6 +49,7 @@ const SweetStart49 = ({ onComplete }) => {
 
   // --- STATE ---
   const [step, setStep] = useState(0);
+  const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
   const [selectedMood, setSelectedMood] = useState(null); // only 1 mood
   const [selectedOccasion, setSelectedOccasion] = useState(null);
   const [yourName, setYourName] = useState("");
@@ -67,16 +65,18 @@ const SweetStart49 = ({ onComplete }) => {
   const [isEditing, setIsEditing] = useState(false); // New state for editing message
   const [activeTab, setActiveTab] = useState("Romantic");
   const [hoveredBtn, setHoveredBtn] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null); // Preview modal state
   const photoRef = useRef(null);
 
   // --- HELPERS ---
   const canProceed = () => {
-    if (step === 0) return selectedMood !== null;
-    if (step === 1) return selectedOccasion !== null;
-    if (step === 2) return yourName.trim() && partnerName.trim() && theirStory.trim().length > 10;
-    if (step === 3) return photos.some(p => p !== null);
-    if (step === 4) return generatedMessage.length > 0;
-    if (step === 5) return unlockCode.length === 4;
+    if (step === 0) return createFor !== null;
+    if (step === 1) return selectedMood !== null;
+    if (step === 2) return selectedOccasion !== null;
+    if (step === 3) return yourName.trim() && partnerName.trim() && theirStory.trim().length > 10;
+    if (step === 4) return photos.some(p => p !== null);
+    if (step === 5) return generatedMessage.length > 0;
+    if (step === 6) return unlockCode.length === 4;
     return true;
   };
 
@@ -85,10 +85,10 @@ const SweetStart49 = ({ onComplete }) => {
   };
 
   const handleNext = () => {
-    if (step === 5 && canProceed()) {
+    if (step === 6 && canProceed()) {
       if (onComplete) {
         onComplete({
-          selectedMood, selectedOccasion, yourName, partnerName, theirStory,
+          createFor, selectedMood, selectedOccasion, yourName, partnerName, theirStory,
           photos, selectedFrame, unlockCode, hintMessage,
           generatedMessage
         });
@@ -106,15 +106,44 @@ const SweetStart49 = ({ onComplete }) => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const newPhotos = [...photos];
-      newPhotos[activePhotoSlot] = event.target.result;
-      setPhotos(newPhotos);
-    };
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    
+    const newPhotos = [...photos];
+    let slotsFilled = 0;
+
+    // We can only fill up to 5 photos total across all slots
+    // Start filling from the active slot first
+    
+    files.forEach(file => {
+      // Find the next available slot starting from the one clicked
+      let targetSlot = activePhotoSlot + slotsFilled;
+      
+      // If we go beyond the active slot downwards, look for any empty slot from beginning
+      if (targetSlot >= 5 || newPhotos[targetSlot] !== null) {
+          targetSlot = newPhotos.findIndex(p => p === null);
+      }
+      
+      // Stop if there are no empty slots left (max 5 photos)
+      if (targetSlot === -1 || targetSlot >= 5) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPhotos(prev => {
+           const updated = [...prev];
+           updated[targetSlot] = event.target.result;
+           return updated;
+        });
+      };
+      reader.readAsDataURL(file);
+      
+      // Occupy slot so the next file moves on to the next
+      newPhotos[targetSlot] = "loading"; 
+      slotsFilled++;
+    });
+
+    // reset input value so selecting the same file again triggers
+    if (photoRef.current) photoRef.current.value = "";
   };
 
   const removePhoto = (index) => {
@@ -204,7 +233,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
       fontSize: "11px", fontWeight: "bold", letterSpacing: "1px", color: "white"
     },
     progressBox: { marginBottom: "40px", width: "100%" },
-    progressGrid: { display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px", marginBottom: "8px" },
+    progressGrid: { display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "6px", marginBottom: "8px" },
     stepBar: (idx) => ({
       height: "4px", borderRadius: "2px",
       background: idx <= step ? "linear-gradient(90deg, #9b1a3a, #c4304f)" : "rgba(255,255,255,0.08)",
@@ -261,7 +290,9 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
       <div style={styles.container}>
         {/* HEADER */}
         <header style={styles.header}>
-          <div style={styles.logo} onClick={() => window.location.href = "/"}>💗 LoveBites</div>
+          <div style={styles.logo} onClick={() => window.location.href = "/"}>
+            <LoveBitesLogo size={24} />
+          </div>
           <div style={styles.pill}>SWEET START ₹49</div>
         </header>
 
@@ -269,11 +300,15 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
         <div style={styles.progressBox}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
             <div style={{ fontSize: "11px", fontFamily: THEME.sans, color: "rgba(255,255,255,0.3)", letterSpacing: "2px" }}>PROGRESS</div>
-            <div style={styles.stepCounter}>{step + 1} of 6 steps</div>
+            <div style={styles.stepCounter}>{step + 1} of 7 steps</div>
           </div>
           <div style={styles.progressGrid}>
-            {Array(6).fill(0).map((_, i) => (
-              <div key={i} style={styles.stepBar(i)} />
+            {Array(7).fill(0).map((_, i) => (
+              <div key={i} style={{
+                height: "4px", borderRadius: "2px",
+                background: i <= step ? "linear-gradient(90deg, #9b1a3a, #c4304f)" : "rgba(255,255,255,0.08)",
+                transition: "0.5s"
+              }} />
             ))}
           </div>
         </div>
@@ -281,8 +316,44 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
         {/* STEPS */}
         <main style={{ paddingBottom: "100px" }}>
           
-          {/* STEP 0: MOOD */}
+          {/* STEP 0: CREATE FOR */}
           {step === 0 && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={styles.stepHeader}>
+                <div style={styles.stepTag}>BEGINNING</div>
+                <h1 style={styles.heading}>Who are you <i style={{ color: THEME.rose }}>creating this for?</i></h1>
+                <p style={{ color: "rgba(255,248,240,0.5)", fontSize: "16px" }}>Let's personalize the experience</p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "340px", margin: "0 auto" }}>
+                {[
+                  { id: 'her', label: 'Create for Her' },
+                  { id: 'him', label: 'Create for Him' }
+                ].map(opt => (
+                  <div
+                    key={opt.id}
+                    onClick={() => setCreateFor(opt.id)}
+                    style={{
+                      padding: "20px 24px", borderRadius: "16px", textAlign: "center", cursor: "pointer", transition: "0.3s",
+                      border: createFor === opt.id ? `2px solid ${THEME.rose}` : "1px solid rgba(255,255,255,0.08)",
+                      background: createFor === opt.id ? "rgba(155,26,58,0.15)" : "rgba(255,255,255,0.03)",
+                      transform: createFor === opt.id ? "translateY(-2px)" : "translateY(0)",
+                      boxShadow: createFor === opt.id ? `0 8px 24px rgba(155,26,58,0.2)` : "none"
+                    }}
+                  >
+                    <div style={{ 
+                      fontWeight: "bold", fontSize: "16px", letterSpacing: "0.5px",
+                      fontFamily: THEME.sans,
+                      color: createFor === opt.id ? "white" : "rgba(255,255,255,0.8)" 
+                    }}>{opt.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 1: MOOD */}
+          {step === 1 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>STEP ONE</div>
@@ -292,7 +363,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
 
               {/* Tabs */}
               <div style={{ display: "flex", gap: "8px", overflowX: "auto", marginBottom: "24px", paddingBottom: "8px" }}>
-                {["Romantic", "Emotional", "Fun", "Deep", "Occasion"].map(tab => (
+                {["Romantic", "Emotional", "Fun", "Deep"].map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -354,8 +425,8 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 1: OCCASION */}
-          {step === 1 && (
+          {/* STEP 2: OCCASION */}
+          {step === 2 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>STEP TWO</div>
@@ -389,8 +460,8 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 2: STORY */}
-          {step === 2 && (
+          {/* STEP 3: STORY */}
+          {step === 3 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>STEP THREE</div>
@@ -429,8 +500,8 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 3: PHOTOS */}
-          {step === 3 && (
+          {/* STEP 4: PHOTOS */}
+          {step === 4 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>STEP FOUR</div>
@@ -442,7 +513,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 {photos.map((photo, i) => (
                   <div 
                     key={i} 
-                    onClick={() => handleFileUpload(i)}
+                    onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i)}
                     style={{ 
                       aspectRatio: "1", borderRadius: "16px", cursor: "pointer", position: "relative",
                       background: photo ? "none" : "rgba(255,255,255,0.06)",
@@ -458,7 +529,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                         <div style={{ 
                           position: "absolute", bottom: 0, left: 0, width: "100%", height: "30%", 
                           background: "linear-gradient(to top, rgba(155,26,58,0.4), transparent)",
-                          border: "3px solid rgba(155,26,58,0.4)", pointerEvents: "none"
+                          pointerEvents: "none"
                         }} />
                         <div onClick={(e) => { e.stopPropagation(); removePhoto(i); }} style={{ position: "absolute", top: "4px", right: "4px", background: "rgba(0,0,0,0.5)", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "12px" }}>✕</div>
                       </>
@@ -472,12 +543,12 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 ))}
               </div>
 
-              <input type="file" ref={photoRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/*" />
+              <input type="file" ref={photoRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/*" multiple />
             </div>
           )}
 
-          {/* STEP 4: MESSAGE */}
-          {step === 4 && (
+          {/* STEP 5: MESSAGE */}
+          {step === 5 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>STEP FIVE</div>
@@ -524,9 +595,6 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                         </span>
                       ) : "✨ Generate My Message"}
                     </button>
-                    <p style={{ marginTop: "16px", color: "rgba(255,255,255,0.3)", fontSize: "12px", fontStyle: "italic" }}>
-                      Powered by AI — crafted for your love story
-                    </p>
                   </div>
                 ) : (
                   <div style={{ width: '100%', maxWidth: '600px' }}>
@@ -540,7 +608,6 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                         <textarea
                           value={generatedMessage}
                           onChange={(e) => setGeneratedMessage(e.target.value)}
-                          onBlur={() => setIsEditing(false)}
                           autoFocus
                           style={{ 
                             width: "100%", minHeight: "200px", background: "transparent", border: "none", 
@@ -583,8 +650,8 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 5: DELIVER */}
-          {step === 5 && (
+          {/* STEP 6: DELIVER */}
+          {step === 6 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>FINAL STEP</div>
@@ -657,6 +724,41 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
 
         </main>
 
+        {/* IMAGE PREVIEW MODAL */}
+        {previewImage && (
+          <div 
+            onClick={() => setPreviewImage(null)}
+            style={{
+              position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
+              background: "rgba(0,0,0,0.85)", zIndex: 100, display: "flex", 
+              alignItems: "center", justifyContent: "center", padding: "20px",
+              backdropFilter: "blur(5px)", animation: "fadeIn 0.3s ease"
+            }}
+          >
+            <div 
+              style={{
+                position: "absolute", top: "20px", right: "20px", 
+                background: "rgba(255,255,255,0.2)", borderRadius: "50%", 
+                width: "40px", height: "40px", display: "flex", alignItems: "center", 
+                justifyContent: "center", color: "white", fontSize: "20px", cursor: "pointer",
+                border: "1px solid rgba(255,255,255,0.4)"
+              }}
+              onClick={() => setPreviewImage(null)}
+            >
+              ✕
+            </div>
+            <img 
+              src={previewImage} 
+              alt="Preview" 
+              style={{ 
+                maxWidth: "100%", maxHeight: "90vh", borderRadius: "12px",
+                boxShadow: "0 10px 40px rgba(0,0,0,0.5)", objectFit: "contain"
+              }} 
+              onClick={(e) => e.stopPropagation()} 
+            />
+          </div>
+        )}
+
         {/* FOOTER NAV */}
         <footer style={styles.footer}>
           <div style={styles.navInner}>
@@ -676,7 +778,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 ...(hoveredBtn === "next" && canProceed() && { filter: "brightness(1.1)", transform: "scale(1.02)" })
               }}
             >
-              {step === 5 ? "Preview & Pay ₹49 💗" : "Continue →"}
+              {step === 6 ? "Preview & Pay ₹49 💗" : "Continue →"}
             </button>
           </div>
         </footer>

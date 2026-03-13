@@ -34,6 +34,11 @@ export default function CreateLoveCode() {
     const supabase = createClient()
     const router = useRouter()
 
+    // Redirect to pricing immediately
+    useEffect(() => {
+        router.replace('/pricing')
+    }, [router])
+
     const handleSignOut = async () => {
         await supabase.auth.signOut()
         router.push('/')

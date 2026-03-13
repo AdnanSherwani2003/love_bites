@@ -118,16 +118,12 @@ export default function Create99Page() {
 
             {currentView === "preview" && (
                 <div className="relative">
-                    <Preview99 data={formData} />
-                    <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center z-50">
-                        <button 
-                            onClick={handleFinalSubmit}
-                            disabled={isSubmitting}
-                            className="bg-gradient-to-r from-[#7a1030] to-[#c4304f] text-white font-bold px-12 py-4 rounded-full shadow-2xl hover:scale-105 transition-all disabled:opacity-50"
-                        >
-                            {isSubmitting ? "Generating Link..." : "Confirm & Send Premium Plan ✉️"}
-                        </button>
-                    </div>
+                    <Preview99 
+                        data={formData} 
+                        tier="99" 
+                        onConfirm={handleFinalSubmit}
+                        isSubmitting={isSubmitting}
+                    />
                 </div>
             )}
         </div>

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import LoveBitesLogo from "./LoveBitesLogo";
 
 const TrueLovePlan = ({ onComplete }) => {
     // --- STATE VARIABLES ---
     const [step, setStep] = useState(0);
+    const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
     const [selectedMoods, setSelectedMoods] = useState([]); // max 3
     const [selectedOccasion, setSelectedOccasion] = useState(null);
     const [yourName, setYourName] = useState("");
@@ -27,6 +29,7 @@ const TrueLovePlan = ({ onComplete }) => {
     const [deliveryTime, setDeliveryTime] = useState("");
     const [activeTab, setActiveTab] = useState("Romantic");
     const [hoveredBtn, setHoveredBtn] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
     const photoRef = useRef(null);
     const videoPhotoRef = useRef(null);
 
@@ -65,11 +68,7 @@ const TrueLovePlan = ({ onComplete }) => {
         { id: "happy", label: "Happy with You", subtitle: "You make my life joyful", emoji: "😄", category: "Fun" },
         { id: "forever", label: "Forever Yours", subtitle: "I want a lifetime with you", emoji: "💍", category: "Deep" },
         { id: "soulmate", label: "Soulmate Feeling", subtitle: "You feel like my other half", emoji: "🌙", category: "Deep" },
-        { id: "passionate", label: "Passionate", subtitle: "My love for you burns intensely", emoji: "🔥", category: "Deep" },
-        { id: "birthday", label: "Birthday Love", subtitle: "Celebrating you today", emoji: "🎂", category: "Occasion" },
-        { id: "proposal", label: "Proposal Mood", subtitle: "Ready to ask you forever", emoji: "💍", category: "Occasion" },
-        { id: "missing", label: "Missing You", subtitle: "I wish you were here", emoji: "💌", category: "Occasion" },
-        { id: "celebrating", label: "Celebrating Us", subtitle: "Celebrating our love", emoji: "🎉", category: "Occasion" },
+        { id: "passionate", label: "Passionate", subtitle: "My love for you burns intensely", emoji: "🔥", category: "Deep" }
     ];
 
     const occasions = [
@@ -90,21 +89,23 @@ const TrueLovePlan = ({ onComplete }) => {
     // --- HELPERS ---
     const canProceed = () => {
         switch (step) {
-            case 0: return selectedMoods.length > 0;
-            case 1: return selectedOccasion !== null;
-            case 2: return theirStory.trim().length > 10 && yourName.trim().length > 0 && partnerName.trim().length > 0;
-            case 3: return photos.some(p => p !== null);
-            case 4: return true; // skippable
-            case 5: return generatedMessage.length > 0;
-            case 6: return unlockCode.length === 4 && deliveryMethod !== null;
+            case 0: return createFor !== null;
+            case 1: return selectedMoods.length > 0;
+            case 2: return selectedOccasion !== null;
+            case 3: return theirStory.trim().length > 10 && yourName.trim().length > 0 && partnerName.trim().length > 0;
+            case 4: return photos.some(p => p !== null);
+            case 5: return true; // skippable
+            case 6: return generatedMessage.length > 0;
+            case 7: return unlockCode.length === 4 && deliveryMethod !== null;
             default: return false;
         }
     };
 
     const handleNext = () => {
-        if (step === 6 && canProceed()) {
+        if (step === 7 && canProceed()) {
             if (onComplete) {
                 onComplete({
+                    createFor,
                     recipientName: partnerName,
                     senderName: yourName,
                     selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id)),
@@ -143,23 +144,45 @@ const TrueLovePlan = ({ onComplete }) => {
         }
     };
 
-    const handleFileChange = (e, type) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    const handleFileChange = async (e, type) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            if (type === 'photo') {
-                const newPhotos = [...photos];
-                newPhotos[activePhotoSlot] = event.target.result;
-                setPhotos(newPhotos);
-            } else {
-                const newVideoPhotos = [...videoPhotos];
-                newVideoPhotos[activeVideoSlot] = event.target.result;
-                setVideoPhotos(newVideoPhotos);
+        const readAsDataURL = (file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        if (type === 'photo') {
+            const newPhotos = [...photos];
+            let currentSlot = activePhotoSlot;
+            
+            for (let i = 0; i < files.length; i++) {
+                if (i > 0) {
+                    currentSlot = newPhotos.findIndex(p => p === null);
+                }
+                if (currentSlot === -1 || currentSlot >= 5) break; // no slots left
+                
+                newPhotos[currentSlot] = await readAsDataURL(files[i]);
             }
-        };
-        reader.readAsDataURL(file);
+            setPhotos(newPhotos);
+        } else {
+            const newVideoPhotos = [...videoPhotos];
+            let currentSlot = activeVideoSlot;
+            
+            for (let i = 0; i < files.length; i++) {
+                if (i > 0) {
+                    currentSlot = newVideoPhotos.findIndex(p => p === null);
+                }
+                if (currentSlot === -1 || currentSlot >= 5) break; 
+                
+                newVideoPhotos[currentSlot] = await readAsDataURL(files[i]);
+            }
+            setVideoPhotos(newVideoPhotos);
+        }
+        
+        e.target.value = null;
     };
 
     const removePhoto = (index, type) => {
@@ -319,7 +342,7 @@ const TrueLovePlan = ({ onComplete }) => {
         },
         progressBarGrid: {
             display: "grid",
-            gridTemplateColumns: "repeat(7, 1fr)",
+            gridTemplateColumns: "repeat(8, 1fr)",
             gap: "8px"
         },
         main: {
@@ -833,7 +856,8 @@ const TrueLovePlan = ({ onComplete }) => {
             padding: "12px 16px",
             color: "#fff",
             fontFamily: "sans-serif",
-            outline: "none"
+            outline: "none",
+            cursor: "pointer"
         },
         scheduleNote: {
             fontSize: "12px",
@@ -850,8 +874,52 @@ const TrueLovePlan = ({ onComplete }) => {
     return (
         <div style={s.wrapper}>
             {/* Hidden Inputs */}
-            <input type="file" hidden ref={photoRef} accept="image/*" onChange={(e) => handleFileChange(e, 'photo')} />
-            <input type="file" hidden ref={videoPhotoRef} accept="image/*" onChange={(e) => handleFileChange(e, 'video')} />
+            <input type="file" hidden ref={photoRef} accept="image/*" multiple onChange={(e) => handleFileChange(e, 'photo')} />
+            <input type="file" hidden ref={videoPhotoRef} accept="image/*" multiple onChange={(e) => handleFileChange(e, 'video')} />
+
+            {/* Image Preview Modal */}
+            {previewImage && (
+                <div 
+                    onClick={() => setPreviewImage(null)}
+                    style={{
+                        position: 'fixed',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        backgroundColor: 'rgba(0,0,0,0.85)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px',
+                        backdropFilter: 'blur(5px)'
+                    }}
+                >
+                    <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); setPreviewImage(null); }}
+                            style={{
+                                position: 'absolute',
+                                top: '-40px', right: 0,
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'white',
+                                fontSize: '30px',
+                                cursor: 'pointer'
+                            }}
+                        >×</button>
+                        <img 
+                            src={previewImage} 
+                            style={{ 
+                                maxWidth: '100%', 
+                                maxHeight: '90vh', 
+                                objectFit: 'contain',
+                                borderRadius: '12px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                            }} 
+                            alt="Full-size preview"
+                        />
+                    </div>
+                </div>
+            )}
 
             <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -870,7 +938,7 @@ const TrueLovePlan = ({ onComplete }) => {
             {/* Header */}
             <header style={s.header}>
                 <div style={s.logo} onClick={() => window.location.href = "/"}>
-                    💗 LoveBites
+                    <LoveBitesLogo size={24} />
                 </div>
                 <div style={s.badge}>
                     TRUE LOVE ₹99
@@ -881,10 +949,10 @@ const TrueLovePlan = ({ onComplete }) => {
             <div style={s.progressContainer}>
                 <div style={s.progressHeader}>
                     <div style={s.progressLabel}>Progress</div>
-                    <div style={s.progressStepCount}>{step + 1} of 7 steps</div>
+                    <div style={s.progressStepCount}>{step + 1} of 8 steps</div>
                 </div>
                 <div style={s.progressBarGrid}>
-                    {[...Array(7)].map((_, i) => (
+                    {[...Array(8)].map((_, i) => (
                         <div key={i} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                             <div style={{
                                 height: "2px",
@@ -901,6 +969,42 @@ const TrueLovePlan = ({ onComplete }) => {
             <main style={s.main}>
                 {step === 0 && (
                     <div>
+                        <label style={s.stepLabel}>Beginning</label>
+                        <h1 style={s.heading}>
+                            Who are you <br />
+                            <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>creating this for?</span>
+                        </h1>
+                        <p style={s.subtext}>Let's personalize the experience</p>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "340px", margin: "0 auto" }}>
+                            {[
+                                { id: 'her', label: 'Create for Her' },
+                                { id: 'him', label: 'Create for Him' }
+                            ].map(opt => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => setCreateFor(opt.id)}
+                                    style={{
+                                        ...s.cardMood(createFor === opt.id),
+                                        padding: '20px 24px',
+                                        textAlign: 'center',
+                                        width: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <div style={{ 
+                                        fontWeight: "bold", fontSize: "16px", letterSpacing: "0.5px",
+                                        fontFamily: "sans-serif"
+                                    }}>{opt.label}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {step === 1 && (
+                    <div>
                         <label style={s.stepLabel}>Step One</label>
                         <h1 style={s.heading}>
                             How does your heart <br />
@@ -910,7 +1014,7 @@ const TrueLovePlan = ({ onComplete }) => {
 
                         {/* Tabs */}
                         <div style={s.tabContainer}>
-                            {["Romantic", "Emotional", "Fun", "Deep", "Occasion"].map(tab => (
+                            {["Romantic", "Emotional", "Fun", "Deep"].map(tab => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -958,7 +1062,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     </div>
                 )}
 
-                {step === 1 && (
+                {step === 2 && (
                     <div>
                         <label style={s.stepLabel}>Step Two</label>
                         <h1 style={s.heading}>
@@ -984,7 +1088,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     </div>
                 )}
 
-                {step === 2 && (
+                {step === 3 && (
                     <div>
                         <label style={s.stepLabel}>Step Three</label>
                         <h1 style={s.heading}>
@@ -1031,7 +1135,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     </div>
                 )}
 
-                {step === 3 && (
+                {step === 4 && (
                     <div>
                         <label style={s.stepLabel}>Step Four</label>
                         <h1 style={s.heading}>
@@ -1085,11 +1189,13 @@ const TrueLovePlan = ({ onComplete }) => {
                                                 <img 
                                                     src={photos[index]} 
                                                     alt={`Moment ${index + 1}`} 
+                                                    onClick={(e) => { e.stopPropagation(); setPreviewImage(photos[index]); }}
                                                     style={{ 
                                                         width: "100%", 
                                                         height: "100%", 
                                                         objectFit: "cover",
-                                                        filter: "sepia(0.15) contrast(1.05)"
+                                                        filter: "sepia(0.15) contrast(1.05)",
+                                                        cursor: "pointer"
                                                     }} 
                                                 />
                                                 <div style={{ 
@@ -1207,7 +1313,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     </div>
                 )}
 
-                {step === 4 && (
+                {step === 5 && (
                     <div>
                         <label style={s.stepLabel}>Step Five</label>
                         <h1 style={s.heading}>
@@ -1224,7 +1330,12 @@ const TrueLovePlan = ({ onComplete }) => {
                                 >
                                     {photo ? (
                                         <>
-                                            <img src={photo} alt={`Image ${i + 1}`} style={s.photoImg} />
+                                            <img 
+                                                src={photo} 
+                                                alt={`Image ${i + 1}`} 
+                                                style={{ ...s.photoImg, cursor: 'pointer' }} 
+                                                onClick={(e) => { e.stopPropagation(); setPreviewImage(photo); }}
+                                            />
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); removePhoto(i, 'video'); }}
                                                 style={s.btnRemovePhoto}
@@ -1274,7 +1385,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     </div>
                 )}
 
-                {step === 5 && (
+                {step === 6 && (
                     <div>
                         <label style={s.stepLabel}>Step Six</label>
                         <h1 style={s.heading}>
@@ -1351,7 +1462,7 @@ const TrueLovePlan = ({ onComplete }) => {
                         )}
                     </div>
                 )}
-                {step === 6 && (
+                {step === 7 && (
                     <div>
                         <label style={s.stepLabel}>Step Seven</label>
                         <h1 style={s.heading}>
@@ -1430,6 +1541,7 @@ const TrueLovePlan = ({ onComplete }) => {
                                         type="date"
                                         value={deliveryDate}
                                         onChange={(e) => setDeliveryDate(e.target.value)}
+                                        onClick={(e) => e.target.showPicker()}
                                         style={s.scheduleInput}
                                     />
                                 </div>
@@ -1439,6 +1551,7 @@ const TrueLovePlan = ({ onComplete }) => {
                                         type="time"
                                         value={deliveryTime}
                                         onChange={(e) => setDeliveryTime(e.target.value)}
+                                        onClick={(e) => e.target.showPicker()}
                                         style={s.scheduleInput}
                                     />
                                 </div>
@@ -1483,7 +1596,7 @@ const TrueLovePlan = ({ onComplete }) => {
                                 transform: "translateY(-2px) scale(1.02)",
                                 boxShadow: "0 12px 35px rgba(233,69,96,0.55)"
                             }),
-                            ...(hoveredBtn === 'next' && step === 6 && {
+                            ...(hoveredBtn === 'next' && step === 7 && {
                                 transform: "translateY(-3px) scale(1.03)",
                                 boxShadow: "0 16px 45px rgba(233,69,96,0.6)",
                                 background: "linear-gradient(135deg, #ff2d55, #ff8fa3)",
@@ -1491,7 +1604,7 @@ const TrueLovePlan = ({ onComplete }) => {
                             })
                         }}
                     >
-                        {step === 6 ? "Preview & Pay ₹99 💗" : step === 4 ? "Continue →" : "Continue →"}
+                        {step === 7 ? "Preview & Pay ₹99 💗" : step === 4 ? "Continue →" : "Continue →"}
                     </button>
                 </div>
             </footer>

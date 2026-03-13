@@ -74,5 +74,5 @@ export default function PremiumPlanViewer() {
     }
 
     // Render the premium experience for all plans
-    return <LoveBites99 data={plan.mappedData} isViewer={true} />;
+    return <LoveBites99 data={plan.mappedData} isViewer={true} tier={plan.tier} />;
 }

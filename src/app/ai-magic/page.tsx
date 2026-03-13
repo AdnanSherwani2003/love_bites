@@ -176,7 +176,7 @@ export default function AIMagicPage() {
                                 <p>Love what you see? <strong>Turn this into a full Love Code</strong> with photos, music & a secret unlock.</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                     <button className="ai-regen-btn" onClick={handleGenerate}>↺ Regenerate</button>
-                                    <Link href="/create" className="ai-cta-btn">♥ Create Love Code →</Link>
+                                    <Link href="/pricing" className="ai-cta-btn">♥ Create Love Code →</Link>
                                 </div>
                             </div>
                         </div>

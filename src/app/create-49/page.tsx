@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import SweetStart49 from '@/components/plan49/SweetStart49';
-import { LockScreen, PreviewScreen } from '@/components/plan99/LoveBites99';
+import { LockScreen, Preview99 } from '@/components/plan99/LoveBites99';
 import { dataURLtoFile } from '@/utils/file';
 
 export default function Create49Page() {
@@ -126,16 +126,12 @@ export default function Create49Page() {
 
             {currentView === "preview" && (
                 <div className="relative">
-                    <PreviewScreen data={formData} />
-                    <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center z-50">
-                        <button 
-                            onClick={handleFinalSubmit}
-                            disabled={isSubmitting}
-                            className="bg-gradient-to-r from-[#9b1a3a] to-[#c4304f] text-white font-bold px-12 py-4 rounded-full shadow-2xl hover:scale-105 transition-all disabled:opacity-50"
-                        >
-                            {isSubmitting ? "Generating Link..." : "Confirm & Send Plan ₹49 ✉️"}
-                        </button>
-                    </div>
+                    <Preview99 
+                        data={formData} 
+                        tier="49" 
+                        onConfirm={handleFinalSubmit}
+                        isSubmitting={isSubmitting}
+                    />
                 </div>
             )}
         </div>

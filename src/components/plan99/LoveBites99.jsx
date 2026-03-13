@@ -459,7 +459,7 @@ export const LockScreen = ({ data = mockData, onUnlock }) => {
 
 // PreviewScreen is now handled by the imported Preview99 component in ./lovebites_99_preview
 
-const LoveBites99 = ({ data = mockData, isViewer = false }) => {
+const LoveBites99 = ({ data = mockData, isViewer = false, tier }) => {
     const [screen, setScreen] = useState("lock"); // "lock" | "preview"
 
     return (
@@ -467,7 +467,7 @@ const LoveBites99 = ({ data = mockData, isViewer = false }) => {
             {screen === "lock" ? (
                 <LockScreen data={data} onUnlock={() => setScreen("preview")} />
             ) : (
-                <Preview99 data={data} />
+                <Preview99 data={data} tier={tier} />
             )}
         </>
     );

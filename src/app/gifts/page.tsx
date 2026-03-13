@@ -34,11 +34,12 @@ export default function GiftsPage() {
       {/* HERO SECTION */}
       <section className="gifts-hero">
         <div className="container">
-          <span className="gifts-badge">
+          <span className="badge">
             The Art of Giving
           </span>
-          <h1 style={{ marginTop: '1rem' }}>
-            Curated Gifts for Your <span className="text-rose">Special Someone</span>
+          <h1>
+            <span className="h1-top">Curated Gifts for Your</span>
+            <span className="h1-bottom">Special Someone</span>
           </h1>
           <p>
             Elegant gifts paired with your Love Code to make every moment unforgettable. 
