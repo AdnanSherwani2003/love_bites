@@ -74,7 +74,7 @@ const SweetStart49 = ({ onComplete }) => {
     if (step === 1) return selectedMood !== null;
     if (step === 2) return selectedOccasion !== null;
     if (step === 3) return yourName.trim() && partnerName.trim() && theirStory.trim().length > 10;
-    if (step === 4) return photos.some(p => p !== null);
+    if (step === 4) return true; // Photos are optional
     if (step === 5) return generatedMessage.length > 0;
     if (step === 6) return unlockCode.length === 4;
     return true;

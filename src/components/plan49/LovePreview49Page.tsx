@@ -1,62 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
-import SweetStart49 from '@/components/plan49/SweetStart49';
+import React, { useState, useEffect } from 'react';
 import { LockScreen, Preview99 } from '@/components/plan99/LoveBites99';
 import { dataURLtoFile } from '@/utils/file';
-import { useRouter } from 'next/navigation';
 
-export default function Create49Page() {
-    const [currentView, setCurrentView] = useState("create"); // "create" | "lock" | "preview" | "success"
+interface LovePreview49PageProps {
+    occasionId: string;
+    themeColor?: string;
+}
+
+export default function LovePreview49Page({ occasionId, themeColor = '#c4304f' }: LovePreview49PageProps) {
+    const [currentView, setCurrentView] = useState("lock");
     const [formData, setFormData] = useState<any>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shareSlug, setShareSlug] = useState("");
     const [submitError, setSubmitError] = useState("");
-    const router = useRouter();
 
-    const handleComplete = (data: any) => {
-        // Map 49-plan fields to standard format for LockScreen/PreviewScreen
-        const mappedData = {
-            senderName: data.yourName,
-            recipientName: data.partnerName,
-            partnerDesc: data.theirStory,
-            selectedMoods: [{ emoji: "❤️", label: data.selectedMood || "Love" }],
-            occasion: { 
-                id: data.selectedOccasion, 
-                emoji: data.selectedOccasion === 'anniversary' ? "💑" : 
-                       data.selectedOccasion === 'birthday' ? "🎂" : 
-                       data.selectedOccasion === 'valentines' ? "💝" : 
-                       data.selectedOccasion === 'just_because' ? "🌸" : 
-                       data.selectedOccasion === 'proposal' ? "💍" : 
-                       data.selectedOccasion === 'long_distance' ? "✈️" : "🌸",
-                label: data.selectedOccasion?.split('_').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ') || "Just Because" 
-            },
-            generatedMessage: data.generatedMessage,
-            photos: data.photos,
-            unlockCode: data.unlockCode,
-            hintMessage: data.hintMessage
-        };
-        
-        // Save to localStorage for the preview route
-        try {
-            localStorage.setItem('pendingLoveBite_49', JSON.stringify(mappedData));
-        } catch (e) {
-            console.warn("LocalStorage quota exceeded, trying to save without photos");
-            try {
-                const dataWithoutPhotos = { ...mappedData, photos: [] };
-                localStorage.setItem('pendingLoveBite_49', JSON.stringify(dataWithoutPhotos));
-                alert("Some photos were too large for the local preview and will be skipped. They will still be uploaded on final submission! ❤️");
-            } catch (innerError) {
-                console.error("Failed to save even without photos:", innerError);
-                setSubmitError("Your message is too large to preview. Please try shortening it or removing some photos.");
-                return;
-            }
+    useEffect(() => {
+        const savedData = localStorage.getItem('pendingLoveBite_49');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            setFormData(data);
         }
-        
-        // Redirect to occasion-specific preview route
-        const occasionSlug = data.selectedOccasion.replace('_', '-');
-        router.push(`/lovepreview49-${occasionSlug}`);
-    };
+    }, []);
 
     const handleFinalSubmit = async () => {
         setIsSubmitting(true);
@@ -75,7 +41,6 @@ export default function Create49Page() {
             body.append('deliveryMethod', 'link');
             body.append('sendNow', 'true');
 
-            // Handle Photo Uploads
             if (formData.photos && Array.isArray(formData.photos)) {
                 formData.photos.forEach((photo: string, i: number) => {
                     if (photo && photo.startsWith('data:')) {
@@ -94,6 +59,7 @@ export default function Create49Page() {
             if (result.success) {
                 setShareSlug(result.share_slug);
                 setCurrentView("success");
+                localStorage.removeItem('pendingLoveBite_49');
             } else {
                 setSubmitError(result.error || "Failed to save your plan.");
             }
@@ -109,13 +75,13 @@ export default function Create49Page() {
         const link = `${window.location.origin}/lb/${shareSlug}`;
         return (
             <main className="min-h-screen bg-[#0d0008] flex flex-col items-center justify-center px-4 text-white text-center font-serif">
-                <div className="text-62xl mb-6 animate-bounce">💌</div>
-                <h1 className="text-4xl font-bold text-[#c4304f] mb-2">Sweet Start Sent!</h1>
+                <div className="text-6xl mb-6 animate-bounce">💌</div>
+                <h1 className="text-4xl font-bold mb-2" style={{ color: themeColor }}>Sweet Start Sent!</h1>
                 <p className="text-rose-200/60 mb-8 max-w-sm italic">
                     Your love surprise is now part of our legacy. Share the link below.
                 </p>
                 <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 max-w-sm w-full mb-6 backdrop-blur-xl">
-                    <p className="text-[10px] text-[#c4304f] mb-1 font-bold tracking-[3px] uppercase">Secret Share Link</p>
+                    <p className="text-[10px] mb-1 font-bold tracking-[3px] uppercase" style={{ color: themeColor }}>Secret Share Link</p>
                     <p className="text-white font-mono text-sm break-all">{link}</p>
                 </div>
                 <div className="flex flex-col gap-3 w-full max-w-sm">
@@ -124,13 +90,23 @@ export default function Create49Page() {
                             navigator.clipboard.writeText(link);
                             alert("Link copied! ❤️");
                         }}
-                        className="bg-gradient-to-r from-[#9b1a3a] to-[#c4304f] text-white font-bold py-4 rounded-xl shadow-2xl hover:scale-[1.02] transition-all"
+                        className="text-white font-bold py-4 rounded-xl shadow-2xl hover:scale-[1.02] transition-all"
+                        style={{ background: `linear-gradient(135deg, ${themeColor}, #000)` }}
                     >
                         📋 Copy Link
                     </button>
                     <a href="/" className="text-white/40 text-sm hover:text-white transition-colors py-2">Return Home</a>
                 </div>
             </main>
+        );
+    }
+
+    if (!formData) {
+        return (
+            <div className="min-h-screen bg-[#0d0008] flex flex-col items-center justify-center text-white">
+                <p className="mb-4 text-rose-200/60 italic">Deep down, your message is waiting to be born...</p>
+                <a href="/create-49" className="text-rose-400 underline hover:text-rose-300 transition-colors">Start your journey here</a>
+            </div>
         );
     }
 
@@ -142,10 +118,6 @@ export default function Create49Page() {
                 </div>
             )}
 
-            {currentView === "create" && (
-                <SweetStart49 onComplete={handleComplete} />
-            )}
-
             {currentView === "lock" && (
                 <LockScreen
                     data={formData}
@@ -155,9 +127,9 @@ export default function Create49Page() {
 
             {currentView === "preview" && (
                 <div className="relative">
-                    <Preview99 
-                        data={formData} 
-                        tier="49" 
+                    <Preview99
+                        data={formData}
+                        tier="49"
                         onConfirm={handleFinalSubmit}
                         isSubmitting={isSubmitting}
                     />

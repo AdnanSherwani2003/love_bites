@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import LoveBitesLogo from "@/components/LoveBitesLogo";
 import OccasionBackground from "@/components/OccasionBackground";
+import InteractiveCake from "@/components/plan49/effects/InteractiveCake";
 
 // --- GOOGLE FONTS LOADING ---
 const loadFonts = () => {
@@ -112,12 +113,16 @@ const mockData = {
 };
 
 // --- HOOKS ---
-const useScrollReveal = (delay = 0) => {
+const useScrollReveal = (delay = 0, occId, birthdayStage) => {
     const [visible, setVisible] = useState(false);
     useEffect(() => {
-        const t = setTimeout(() => setVisible(true), delay);
-        return () => clearTimeout(t);
-    }, [delay]);
+        if (occId === 'birthday' && birthdayStage === 'ceremony') return;
+        
+        const timer = setTimeout(() => {
+            setVisible(true);
+        }, delay);
+        return () => clearTimeout(timer);
+    }, [delay, occId, birthdayStage]);
     return visible;
 };
 
@@ -155,6 +160,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
     const BODY_MAX = VH - TOP_H - FOLD_H;
 
     const [phase, setPhase] = useState("opening"); // opening | preview
+    const [birthdayStage, setBirthdayStage] = useState("ceremony"); // ceremony | full
     const [letterState, setLetterState] = useState("closed"); // closed | open
     const [scrollProgress, setScrollProgress] = useState(0);
     const [foldHeight, setFoldHeight] = useState(FOLD_H);
@@ -708,10 +714,23 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
             fontFamily: "'Helvetica Neue', sans-serif", position: "relative", overflowX: "hidden",
             padding: "40px 20px 120px"
         }}>
-            <OccasionBackground occasion={occId} />
-            <FloatingParticles />
+            <OccasionBackground occasion={(occId === 'birthday' && birthdayStage === 'ceremony') ? 'birthday_ceremony' : occId} />
+            {occId !== 'birthday' && <FloatingParticles />}
             
-            {/* Logo Burst Particles */}
+            {(occId === 'birthday' && birthdayStage === 'ceremony') ? (
+                <div style={{ padding: "100px 0" }}>
+                   <div style={{ 
+                        display: "flex", alignItems: "center", justifyContent: "center", 
+                        gap: "12px", marginBottom: "60px", position: "relative", zIndex: 10 
+                    }}>
+                        <div style={{ fontSize: "26px", animation: "heartbeat 1.4s ease-in-out infinite" }}>💗</div>
+                        <div style={{ fontSize: "22px", fontFamily: "Georgia, serif", fontStyle: "italic", fontWeight: "bold" }}>LoveBites</div>
+                    </div>
+                    <InteractiveCake onComplete={() => setBirthdayStage('full')} />
+                </div>
+            ) : (
+                <>
+                    {/* Logo Burst Particles */}
             {logoBurst.map(p => (
                 <div key={p.id} style={{
                     position: "fixed", left: p.left, top: p.top, fontSize: "20px",
@@ -730,20 +749,24 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
             ))}
 
             {/* Vertical Side Text */}
-            <div style={{
-                position: "fixed", left: "20px", top: "50%", transform: "translateY(-50%) rotate(-90deg)",
-                fontSize: "9px", letterSpacing: "5px", color: "rgba(196,48,79,0.2)",
-                fontFamily: "sans-serif", whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10
-            }}>
-                love · devotion · forever · yours
-            </div>
-            <div style={{
-                position: "fixed", right: "20px", top: "50%", transform: "translateY(-50%) rotate(90deg)",
-                fontSize: "9px", letterSpacing: "5px", color: "rgba(196,48,79,0.2)",
-                fontFamily: "sans-serif", whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10
-            }}>
-                crafted with heart · lovebites
-            </div>
+            {!(occId === 'birthday' && birthdayStage === 'ceremony') && (
+                <>
+                <div style={{
+                    position: "fixed", left: "20px", top: "50%", transform: "translateY(-50%) rotate(-90deg)",
+                    fontSize: "9px", letterSpacing: "5px", color: "rgba(196,48,79,0.2)",
+                    fontFamily: "sans-serif", whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10
+                }}>
+                    love · devotion · forever · yours
+                </div>
+                <div style={{
+                    position: "fixed", right: "20px", top: "50%", transform: "translateY(-50%) rotate(90deg)",
+                    fontSize: "9px", letterSpacing: "5px", color: "rgba(196,48,79,0.2)",
+                    fontFamily: "sans-serif", whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10
+                }}>
+                    crafted with heart · lovebites
+                </div>
+                </>
+            )}
 
             {/* HEADER */}
             <div style={{ 
@@ -769,26 +792,30 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                 maxWidth: "860px", margin: "0 auto 100px", textAlign: "center",
                 animation: "fadeInUp 1s 0.2s both"
             }}>
-                <div
-                    onClick={handleHeroClick}
-                    style={{
-                        fontSize: 48,
-                        marginBottom: 28,
-                        display: "inline-block",
-                        cursor: "pointer",
-                        animation: heroClicked 
-                            ? {
-                                anniversary: "heroRose 0.6s ease forwards",
-                                birthday: "heroCake 0.7s ease forwards",
-                                valentine: "heroHeart 0.8s ease forwards",
-                                just_because: "heroFlower 0.6s ease forwards",
-                                proposal: "heroRing 0.7s ease forwards",
-                                long_distance: "heroPlane 0.8s ease forwards",
-                            }[occId] || "heroRose 0.6s ease forwards"
-                            : "floatEmoji 4s ease-in-out infinite",
-                        userSelect: "none",
-                    }}
-                >{config.clickEmoji}</div>
+                {occId === 'birthday' && birthdayStage === 'ceremony' ? (
+                    <InteractiveCake onComplete={() => setBirthdayStage('full')} />
+                ) : (
+                    <div
+                        onClick={handleHeroClick}
+                        style={{
+                            fontSize: 48,
+                            marginBottom: 28,
+                            display: "inline-block",
+                            cursor: "pointer",
+                            animation: heroClicked 
+                                ? {
+                                    anniversary: "heroRose 0.6s ease forwards",
+                                    birthday: "heroCake 0.7s ease forwards",
+                                    valentine: "heroHeart 0.8s ease forwards",
+                                    just_because: "heroFlower 0.6s ease forwards",
+                                    proposal: "heroRing 0.7s ease forwards",
+                                    long_distance: "heroPlane 0.8s ease forwards",
+                                }[occId] || "heroRose 0.6s ease forwards"
+                                : "floatEmoji 4s ease-in-out infinite",
+                            userSelect: "none",
+                        }}
+                    >{config.clickEmoji}</div>
+                )}
                 
                 {/* Hero Burst Particles */}
                 {heroBurst.map(b => (
@@ -1319,6 +1346,8 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                     </div>
                 </section>
             )}
+            </>
+        )}
         </div>
     );
 }
