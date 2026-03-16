@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import LoveBitesLogo from "@/components/LoveBitesLogo";
 import OccasionBackground from "@/components/OccasionBackground";
 import InteractiveCake from "@/components/plan49/effects/InteractiveCake";
+import InteractiveOpening from "@/components/InteractiveOpening";
 
 // --- GOOGLE FONTS LOADING ---
 const loadFonts = () => {
@@ -10,7 +11,7 @@ const loadFonts = () => {
     const link = document.createElement("link");
     link.id = "lb-fonts";
     link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;600;700&family=Parisienne&family=Allura&display=swap";
+    link.href = "https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;600;700&family=Parisienne&family=Allura&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap";
     document.head.appendChild(link);
 };
 
@@ -152,23 +153,11 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
     const occId = resolvedData.occasion?.id || "anniversary";
     const config = OCCASION_CONFIG[occId] || OCCASION_CONFIG.anniversary;
 
-    // Scroll constants (defined before use)
-    const VH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const TOP_H = 44;       // torn edge height
-    const FOLD_H = 140;     // fold height (increased from 120)
-    const SCROLL_DIST = 2800; // px to fully unfold
-    const BODY_MAX = VH - TOP_H - FOLD_H;
 
-    const [phase, setPhase] = useState("opening"); // opening | preview
+    const [phase, setPhase] = useState("opening"); // opening | interactive | preview
     const [birthdayStage, setBirthdayStage] = useState("ceremony"); // ceremony | full
-    const [letterState, setLetterState] = useState("closed"); // closed | open
-    const [scrollProgress, setScrollProgress] = useState(0);
-    const [foldHeight, setFoldHeight] = useState(FOLD_H);
-    const [bodyHeight, setBodyHeight] = useState(0);
-    const [showScrollHint, setShowScrollHint] = useState(true);
-    const scrollInnerRef = useRef(null);
-    const scrollBodyRef = useRef(null);
-    const contentTravelRef = useRef(1200); // Default, will be calculated dynamically
+    const [letterOpened, setLetterOpened] = useState(false);
+    const [envelopeState, setEnvelopeState] = useState('idle');
     const [logoBurst, setLogoBurst] = useState([]);
     const [clickBurst, setClickBurst] = useState([]);
     const [typedText, setTypedText] = useState("");
@@ -182,66 +171,6 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
         window.addEventListener("resize", handle);
         return () => window.removeEventListener("resize", handle);
     }, []);
-    
-    // Scroll-driven parchment animation
-    useEffect(() => {
-        if (letterState !== "open") return;
-        
-        // Initialize body height
-        setBodyHeight(BODY_MAX);
-        
-        // Calculate content travel dynamically
-        const calculateContentTravel = () => {
-            if (scrollInnerRef.current) {
-                const totalH = scrollInnerRef.current.scrollHeight;
-                const visibleH = BODY_MAX;
-                contentTravelRef.current = Math.max(0, totalH - visibleH + 80);
-            }
-        };
-        
-        // Make page tall so window is scrollable
-        document.body.style.height = `${window.innerHeight + SCROLL_DIST}px`;
-        document.body.style.overflow = "auto";
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        
-        // Calculate content travel after a short delay to ensure content is rendered
-        setTimeout(calculateContentTravel, 100);
-        
-        const handleScroll = () => {
-            const p = Math.min(window.scrollY / SCROLL_DIST, 1);
-            setScrollProgress(p);
-            
-            // 1. Fold: fast at start (gone by p=0.5)
-            const foldP = Math.min(p / 0.5, 1);
-            const foldH = Math.round(FOLD_H * (1 - foldP));
-            setFoldHeight(foldH);
-            
-            // 2. Body grows to fill fold gap
-            const bodyH = BODY_MAX + (FOLD_H - foldH);
-            setBodyHeight(bodyH);
-            
-            // 3. Content: starts slow, then travels full distance
-            const contentP = Math.max(0, (p - 0.1) / 0.9);
-            const offset = contentP * contentTravelRef.current;
-            if (scrollInnerRef.current) {
-                scrollInnerRef.current.style.transform = `translateY(-${offset}px)`;
-            }
-            
-            // Hide scroll hint after first scroll
-            if (p > 0.01 && showScrollHint) {
-                setShowScrollHint(false);
-            }
-        };
-        
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-            // Restore body on close
-            document.body.style.height = "";
-            document.body.style.overflow = "";
-        };
-    }, [letterState, showScrollHint]);
 
     // --- Keyframes & Fonts Injection ---
     useEffect(() => {
@@ -345,6 +274,22 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                     opacity: 1;
                 }
             }
+            @keyframes floatY {
+                0%,100% { transform: translateY(0px); }
+                50%      { transform: translateY(-8px); }
+            }
+            @keyframes sealPulse {
+                0%,100% { filter: drop-shadow(0 0 8px rgba(196,48,79,0.5)); }
+                50%      { filter: drop-shadow(0 0 20px rgba(196,48,79,0.8)); }
+            }
+            @keyframes fadeInOut {
+                0%,100% { opacity: 0.3; }
+                50%      { opacity: 0.65; }
+            }
+            @keyframes letterReveal {
+                from { opacity:0; transform:translateY(24px) scale(0.97); }
+                to   { opacity:1; transform:translateY(0) scale(1); }
+            }
             
             /* Background Floating */
             @keyframes pFloatUp { 
@@ -379,7 +324,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                 i++;
                 if (i >= text.length) {
                     clearInterval(t);
-                    setTimeout(() => setPhase("preview"), 1600);
+                    setTimeout(() => setPhase("interactive"), 1600);
                 }
             }, 50);
             return () => clearInterval(t);
@@ -429,36 +374,13 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
         setTimeout(() => setClickBurst(prev => prev.filter(p => !particles.includes(p))), 1200);
     };
 
-    const handleOpenLetter = () => {
-        setLetterState("open");
-        // Scroll to top of letter screen
+    const handleOpenEnvelope = () => {
+        if (envelopeState !== 'idle') return;
+        setEnvelopeState('opening');
         setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 100);
-    };
-    
-    const handleCloseLetter = () => {
-        setLetterState("closed");
-        setScrollProgress(0);
-        setFoldHeight(FOLD_H);
-        setBodyHeight(BODY_MAX);
-        setShowScrollHint(true);
-        
-        // Reset content transform
-        if (scrollInnerRef.current) {
-            scrollInnerRef.current.style.transform = "translateY(0)";
-        }
-        
-        // Restore body styles
-        document.body.style.height = "";
-        document.body.style.overflow = "";
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        
-        // Scroll back to envelope section
-        const envelopeSection = document.getElementById("envelope-section");
-        if (envelopeSection) {
-            envelopeSection.scrollIntoView({ behavior: 'smooth' });
-        }
+            setLetterOpened(true);
+            setEnvelopeState('gone');
+        }, 950);
     };
 
     const handleHeroClick = (e) => {
@@ -703,6 +625,17 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                     tap to skip →
                 </div>
             </div>
+        );
+    }
+
+    if (phase === "interactive") {
+        return (
+            <InteractiveOpening 
+                occasion={occId === 'valentine' ? 'valentines' : (occId)}
+                recipientName={resolvedData.recipientName}
+                senderName={resolvedData.senderName}
+                onComplete={() => setPhase("preview")}
+            />
         );
     }
 
@@ -990,277 +923,232 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
 
             <Divider />
 
-            {/* VINTAGE ENVELOPE + LETTER */}
-            <section id="envelope-section" style={{ margin: "100px auto", position: "relative", zIndex: 10, display: "flex", justifyContent: "center" }}>
-                {letterState === "closed" ? (
+            {/* LETTER SECTION */}
+            <section style={{ 
+                width: "100%",
+                maxWidth: "560px",
+                margin: "80px auto",
+                padding: "0 20px"
+            }}>
+                {/* ENVELOPE — shown until opened */}
+                {!letterOpened && envelopeState !== 'gone' && (
                     <div style={{ textAlign: "center" }}>
                         <div 
-                            id="envelope-wrap"
-                            onClick={handleOpenLetter}
+                            onClick={handleOpenEnvelope}
                             style={{
-                                width: "300px", height: "196px", position: "relative", cursor: "pointer",
-                                background: "linear-gradient(160deg, #d4b896, #b8905a)", 
-                                boxShadow: "0 24px 70px rgba(0,0,0,0.65)", display: "flex",
-                                alignItems: "center", justifyContent: "center",
-                                animation: "envelopeFloat 4s ease-in-out infinite"
+                                width: "280px",
+                                height: "180px",
+                                position: "relative",
+                                cursor: "pointer",
+                                margin: "40px auto",
+                                perspective: "600px",
+                                animation: envelopeState === 'idle' ? "floatY 3s ease-in-out infinite" : "none",
+                                transition: "opacity 0.4s, transform 0.4s",
+                                opacity: envelopeState === 'opening' ? 0.8 : 1,
+                                transform: envelopeState === 'opening' ? "scale(0.85)" : "scale(1)"
                             }}
                         >
-                            {/* Top Flap */}
+                            {/* Envelope body (back) */}
                             <div style={{
-                                position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
-                                background: "rgba(0,0,0,0.1)", clipPath: "polygon(0 0, 100% 0, 50% 58%)", zIndex: 2
+                                position: "absolute",
+                                inset: 0,
+                                background: "linear-gradient(160deg, #c8a96e 0%, #b8914e 50%, #a07838 100%)",
+                                borderRadius: "8px 8px 12px 12px",
+                                boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,170,110,0.3), inset 0 -4px 20px rgba(0,0,0,0.2)"
                             }} />
-                            {/* Stamp */}
+                            
+                            {/* Envelope bottom V-shape (front flap) */}
                             <div style={{
-                                position: "absolute", top: "12px", right: "12px", width: "36px", height: "44px",
-                                background: "#fff8f0", padding: "4px", display: "flex", alignItems: "center",
-                                justifyContent: "center", fontSize: "16px", boxShadow: "1px 1px 3px rgba(0,0,0,0.2)"
-                            }}>💗</div>
-                            {/* Wax Seal */}
+                                position: "absolute",
+                                bottom: 0, left: 0, right: 0,
+                                height: "100px",
+                                clipPath: "polygon(0% 0%, 50% 100%, 100% 0%)",
+                                background: "linear-gradient(180deg, #c09050 0%, #a07030 100%)"
+                            }} />
+                            
+                            {/* Left triangle side flap */}
                             <div style={{
-                                position: "absolute", top: "58%", left: "50%", transform: "translate(-50%, -50%)",
-                                width: "52px", height: "52px", borderRadius: "50%",
-                                background: `radial-gradient(circle at 30% 30%, ${config.colors.primary}, ${config.colors.secondary})`,
+                                position: "absolute",
+                                top: 0, left: 0, bottom: 0,
+                                width: "50%",
+                                clipPath: "polygon(0% 0%, 100% 50%, 0% 100%)",
+                                background: "linear-gradient(135deg, #b88840 0%, #9a7030 100%)"
+                            }} />
+                            
+                            {/* Right triangle side flap */}
+                            <div style={{
+                                position: "absolute",
+                                top: 0, right: 0, bottom: 0,
+                                width: "50%",
+                                clipPath: "polygon(100% 0%, 0% 50%, 100% 100%)",
+                                background: "linear-gradient(225deg, #b88840 0%, #9a7030 100%)"
+                            }} />
+                            
+                            {/* Envelope top flap (lid — this animates) */}
+                            <div style={{
+                                position: "absolute",
+                                top: 0, left: 0, right: 0,
+                                height: "100px",
+                                clipPath: "polygon(0% 0%, 50% 100%, 100% 0%)",
+                                background: "linear-gradient(180deg, #d4a870 0%, #b88840 100%)",
+                                transformOrigin: "top center",
+                                transformStyle: "preserve-3d",
+                                transition: "transform 0.5s ease",
+                                transform: envelopeState === 'opening' ? "rotateX(-180deg)" : "rotateX(0deg)"
+                            }} />
+                            
+                            {/* Wax seal on envelope */}
+                            <div style={{
+                                position: "absolute",
+                                top: "50%", left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: "44px", height: "44px",
+                                borderRadius: "50%",
+                                background: "radial-gradient(circle, #c4304f 0%, #8b1830 100%)",
+                                boxShadow: "0 4px 16px rgba(196,48,79,0.5), inset 0 2px 4px rgba(255,255,255,0.2)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: "20px", boxShadow: "0 4px 10px rgba(0,0,0,0.3)", zIndex: 3
+                                fontSize: "20px",
+                                zIndex: 10,
+                                animation: "sealPulse 2s ease-in-out infinite"
                             }}>💌</div>
-                            {/* Address Stubs */}
-                            <div style={{ position: "absolute", bottom: "30px", left: "24px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                                <div style={{ width: "80px", height: "2px", background: "rgba(61,30,8,0.2)" }} />
-                                <div style={{ width: "110px", height: "2px", background: "rgba(61,30,8,0.2)" }} />
-                                <div style={{ width: "60px", height: "2px", background: "rgba(61,30,8,0.2)" }} />
-                            </div>
                         </div>
-                        <p style={{ marginTop: "24px", fontSize: "14px", fontStyle: "italic", color: config.colors.primary, animation: "blink 2s infinite" }}>
-                            tap to open your letter ✦
+                        
+                        {/* "Tap to open" hint */}
+                        <p style={{
+                            fontSize: "11px",
+                            letterSpacing: "2px",
+                            color: "rgba(255,248,240,0.3)",
+                            textTransform: "uppercase",
+                            textAlign: "center",
+                            marginTop: "16px",
+                            animation: "fadeInOut 2s ease-in-out infinite"
+                        }}>
+                            tap to open
                         </p>
                     </div>
-                ) : (
+                )}
+
+                {/* LETTER — shown after opened */}
+                {letterOpened && (
                     <div style={{
-                        position: "fixed",
-                        inset: 0,           // top:0, left:0, right:0, bottom:0
-                        zIndex: 9998,
-                        overflow: "hidden",
-                        display: "flex",
-                        alignItems: "stretch",
-                        justifyContent: "center",
-                        background: "#0d0008",
+                        animation: "letterReveal 0.7s cubic-bezier(0.16,1,0.3,1) both"
                     }}>
-                        {/* Parchment centered, full height */}
+                        {/* Parchment Card */}
                         <div style={{
-                            width: "100%",
-                            maxWidth: 500,
-                            height: "100vh",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "stretch",
-                            filter: "drop-shadow(0 0 40px rgba(0,0,0,0.9))",
-                            animation: "letterSlideIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards"
+                            background: "linear-gradient(160deg, #f5e6c8 0%, #e8d4a0 40%, #dfc88a 100%)",
+                            borderRadius: "16px",
+                            padding: "40px 36px",
+                            position: "relative",
+                            boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 0 60px rgba(180,140,60,0.15)",
+                            border: "1px solid rgba(180,140,60,0.4)",
                         }}>
-                                {/* 1. TORN TOP EDGE */}
+                            {/* Aged paper texture overlay */}
+                            <div style={{
+                                position: "absolute",
+                                inset: 0,
+                                background: "repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180,140,60,0.08) 28px, rgba(180,140,60,0.08) 29px)",
+                                borderRadius: "16px",
+                                pointerEvents: "none"
+                            }} />
+                            
+                            {/* Top decoration */}
+                            <div style={{
+                                textAlign: "center",
+                                marginBottom: "24px",
+                                position: "relative",
+                                zIndex: 1
+                            }}>
+                                <div style={{ fontSize: "24px", marginBottom: "8px" }}>💌</div>
                                 <div style={{
-                                    flexShrink: 0,
-                                    height: TOP_H,
-                                    background: "linear-gradient(180deg, #4a2a08 0%, #6e4420 25%, #a87035 55%, #c89050 80%, #d0a060 100%)",
-                                    clipPath: `polygon(
-                                        0% 55%, 1% 30%, 2.5% 48%, 4% 20%, 5.5% 38%, 7% 12%, 8.5% 32%, 10% 8%,
-                                        11.5% 28%, 13% 5%, 14.5% 24%, 16% 2%, 17.5% 22%, 19% 0%, 20.5% 22%, 22% 4%,
-                                        23.5% 26%, 25% 5%, 26.5% 24%, 28% 3%, 29.5% 25%, 31% 6%, 32.5% 23%, 34% 4%,
-                                        35.5% 27%, 37% 8%, 38.5% 26%, 40% 5%, 41.5% 24%, 43% 7%, 44.5% 25%, 46% 3%,
-                                        47.5% 28%, 49% 9%, 50.5% 27%, 52% 6%, 53.5% 26%, 55% 8%, 56.5% 24%, 58% 5%,
-                                        59.5% 29%, 61% 10%, 62.5% 28%, 64% 7%, 65.5% 25%, 67% 9%, 68.5% 27%, 70% 6%,
-                                        71.5% 30%, 73% 11%, 74.5% 29%, 76% 8%, 77.5% 26%, 79% 10%, 80.5% 28%, 82% 7%,
-                                        83.5% 31%, 85% 12%, 86.5% 30%, 88% 9%, 89.5% 27%, 91% 11%, 92.5% 29%, 94% 8%,
-                                        95.5% 32%, 97% 13%, 98.5% 31%, 100% 10%, 98.5% 46%, 100% 55%,
-                                        100% 100%, 0% 100%
-                                    )`,
-                                    boxShadow: "inset 0 -8px 16px rgba(40,16,0,0.45)",
-                                }} />
-                                {/* 2. PARCHMENT BODY */}
-                                <div ref={scrollBodyRef} id="scrollBody" style={{
-                                    flexShrink: 0,
-                                    width: "100%",
-                                    height: `${bodyHeight}px`,
-                                    overflow: "hidden",
-                                    position: "relative",
-                                    background: `
-                                        linear-gradient(to right, 
-                                            rgba(80,40,5,0.55) 0%, transparent 10%, 
-                                            transparent 90%, rgba(80,40,5,0.55) 100%),
-                                        radial-gradient(ellipse at 50% 30%, 
-                                            rgba(255,238,175,0.45) 0%, transparent 60%),
-                                        linear-gradient(175deg,
-                                            #a07020 0%, #bc8c38 8%, #d4a84e 18%,
-                                            #e8be62 28%, #f0cc72 40%, #f4d47c 52%,
-                                            #eeca70 64%, #dcb458 76%, 
-                                            #c89c40 88%, #aa7e24 100%)`,
+                                    fontFamily: "'Great Vibes', cursive",
+                                    fontSize: "clamp(16px, 3vw, 20px)",
+                                    color: "rgba(80,40,10,0.6)",
+                                    textAlign: "center"
                                 }}>
-                                    <div ref={scrollInnerRef} style={{
-                                        position: "absolute",
-                                        top: 0, left: 0, right: 0,
-                                        padding: "52px 44px 80px 44px",
-                                        minHeight: 2000,
-                                        willChange: "transform",
-                                    }}>
-                                        {/* Ruled lines */}
-                                        {Array.from({ length: 36 }, (_, i) => (
-                                            <div key={i} style={{
-                                                position: "absolute",
-                                                top: `${50 + i * 44}px`,
-                                                left: 44,
-                                                right: 44,
-                                                height: 1,
-                                                background: "rgba(80,45,5,0.1)",
-                                            }} />
-                                        ))}
-                                        
-                                        {/* Floral corner top-left */}
-                                        <div style={{ position: "absolute", top: 10, left: 10, width: "180px", height: "180px", zIndex: 2, pointerEvents: "none", opacity: 0.6 }}>
-                                            <span style={{ position: "absolute", left: '82px', top: '10px', fontSize: '72px', transform: 'rotate(-20deg)', filter: 'sepia(0.3) saturate(1.7)' }}>🌸</span>
-                                            <span style={{ position: "absolute", left: '46px', top: '20px', fontSize: '44px', transform: 'rotate(15deg)', opacity: 0.8 }}>🌺</span>
-                                            <span style={{ position: "absolute", left: '36px', top: '90px', fontSize: '36px', transform: 'rotate(-28deg) scaleX(-1)', opacity: 0.7 }}>🍃</span>
-                                            <span style={{ position: "absolute", left: '28px', top: '120px', fontSize: '32px', transform: 'rotate(20deg)', opacity: 0.6 }}>🌿</span>
-                                            <span style={{ position: "absolute", left: '23px', top: '140px', fontSize: '28px', transform: 'rotate(5deg)', opacity: 0.5 }}>🌷</span>
-                                        </div>
-                                        
-                                        {/* Wax seal top-center */}
-                                        <div style={{
-                                            position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
-                                            width: 42, height: 42, borderRadius: "50%",
-                                            background: `radial-gradient(circle at 30% 30%, ${config.colors.primary}, ${config.colors.secondary})`,
-                                            display: "flex", alignItems: "center", justifyContent: "center",
-                                            fontSize: "18px", boxShadow: "0 4px 10px rgba(0,0,0,0.3)", zIndex: 10
-                                        }}>💌</div>
-                                        
-                                        {/* Age spots */}
-                                        <div style={{
-                                            position: "absolute", top: "20%", right: "15%", width: 120, height: 80,
-                                            background: "radial-gradient(ellipse, rgba(80,40,5,0.12) 0%, transparent 70%)",
-                                            pointerEvents: "none"
-                                        }} />
-                                        <div style={{
-                                            position: "absolute", top: "50%", left: "10%", width: 100, height: 60,
-                                            background: "radial-gradient(ellipse, rgba(80,40,5,0.1) 0%, transparent 70%)",
-                                            pointerEvents: "none"
-                                        }} />
-                                        <div style={{
-                                            position: "absolute", bottom: "25%", right: "20%", width: 80, height: 100,
-                                            background: "radial-gradient(ellipse, rgba(80,40,5,0.14) 0%, transparent 70%)",
-                                            pointerEvents: "none"
-                                        }} />
-                                        
-                                        {/* Letter Content - all lines visible immediately */}
-                                        <div style={{ position: "relative", zIndex: 3 }}>
-                                            {resolvedData.generatedMessage.split('\n').map((line, i) => {
-                                                if (!line.trim()) return <div key={i} style={{ height: "14px" }} />;
-                                                
-                                                const baseStyle = {
-                                                    opacity: 1,
-                                                    transform: "translateY(0px)",
-                                                    textShadow: "0 1px 1px rgba(180,130,60,0.3)",
-                                                    animation: `fadeInUp 0.5s ${0.3 + i * 0.04}s ease forwards`
-                                                };
-
-                                                if (i === 0) {
-                                                    return <h3 key={i} style={{ ...baseStyle, fontFamily: "'Great Vibes', cursive", fontSize: "clamp(30px, 6.5vw, 42px)", color: "#1e0e00", marginBottom: "16px" }}>{line}</h3>;
-                                                }
-                                                
-                                                const totalLines = resolvedData.generatedMessage.split('\n').filter(l => l.trim()).length;
-                                                if (i > totalLines - 3) {
-                                                    return <p key={i} style={{ ...baseStyle, fontFamily: "'Great Vibes', cursive", fontSize: "clamp(28px, 6vw, 38px)", color: "#1e0e00", marginTop: "12px", margin: "4px 0" }}>{line}</p>;
-                                                }
-
-                                                return (
-                                                    <p key={i} style={{ 
-                                                        ...baseStyle, fontFamily: "'Dancing Script', cursive", fontWeight: 600, fontSize: "clamp(26px, 5.5vw, 34px)", color: "#1e0e00", 
-                                                        lineHeight: 1.88, margin: "4px 0"
-                                                    }}>
-                                                        {line}
-                                                    </p>
-                                                );
-                                            })}
-                                        </div>
-                                        
-                                        <p style={{ 
-                                            position: "absolute", bottom: "16px", width: "100%", left: 0, textAlign: "center",
-                                            fontFamily: "'Dancing Script', cursive", color: "rgba(61,30,8,0.15)", fontSize: "14px"
-                                        }}>
-                                            ~ a letter written from the heart ~
-                                        </p>
-                                    </div>
-                                </div>
-                                
-                                {/* 3. FOLD AT BOTTOM */}
-                                <div id="foldWrap" style={{
-                                    flexShrink: 0,
-                                    position: "relative",
-                                    height: `${foldHeight}px`,
-                                    width: "100%",
-                                    overflow: "hidden",
-                                }}>
-                                    {/* Strong crease shadow at top of fold */}
-                                    <div style={{
-                                        position: "absolute",
-                                        top: 0, left: 0, right: 0,
-                                        height: 28,
-                                        background: "linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
-                                        zIndex: 6,
-                                    }} />
-                                    {/* Crease highlight line */}
-                                    <div style={{
-                                        position: "absolute",
-                                        top: 1, left: "5%", right: "5%",
-                                        height: 2,
-                                        background: "linear-gradient(to right, transparent, rgba(255,220,140,0.5) 20%, rgba(255,220,140,0.5) 80%, transparent)",
-                                        zIndex: 7,
-                                    }} />
-                                    {/* Folded parchment (same color as body but slightly darker) */}
-                                    <div style={{
-                                        position: "absolute",
-                                        inset: 0,
-                                        background: "linear-gradient(180deg, #c8a040 0%, #b88c30 30%, #a07020 60%, #8a5c18 80%, #6e4010 100%)",
-                                        clipPath: `polygon(
-                                            0% 0%, 100% 0%,
-                                            100% 72%, 97% 84%, 93% 92%,
-                                            86% 98%, 74% 100%, 60% 98%,
-                                            50% 100%, 40% 98%, 26% 100%,
-                                            14% 98%, 7% 92%, 3% 84%, 0% 72%
-                                        )`,
-                                        boxShadow: "0 24px 60px rgba(0,0,0,0.95), inset 0 10px 24px rgba(20,8,0,0.5)",
-                                    }} />
-                                    
-                                    {/* Scroll hint inside the fold */}
-                                    {showScrollHint && (
-                                        <div style={{
-                                            position: "absolute",
-                                            top: "50%", left: "50%",
-                                            transform: "translate(-50%, -50%)",
-                                            textAlign: "center", zIndex: 8,
-                                            color: "rgba(255, 240, 200, 0.5)",
-                                            pointerEvents: "none"
-                                        }}>
-                                            <div style={{ fontSize: "10px", letterSpacing: "4px", textTransform: "uppercase", marginBottom: "8px" }}>scroll to unfold</div>
-                                            <div style={{ fontSize: "20px", animation: "bounce 2s infinite" }}>↓</div>
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                {/* Close Button */}
-                                <div style={{
-                                    position: "fixed", top: 16, right: 16,
-                                    background: "rgba(0,0,0,0.6)", color: "white",
-                                    padding: "8px 16px", borderRadius: "20px",
-                                    fontSize: "12px", cursor: "pointer", zIndex: 9999,
-                                    fontFamily: "sans-serif", fontWeight: "bold",
-                                    transition: "background 0.3s"
-                                }} onClick={handleCloseLetter}
-                                   onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.8)"}
-                                   onMouseLeave={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.6)"}
-                                >
-                                    ✕ close
+                                    A Letter for {resolvedData.recipientName}
                                 </div>
                             </div>
+                            
+                            {/* Letter content */}
+                            <div style={{
+                                position: "relative",
+                                zIndex: 1,
+                                fontFamily: "'Dancing Script', cursive",
+                                fontSize: "clamp(16px, 3.5vw, 22px)",
+                                lineHeight: 1.9,
+                                color: "#2a1505",
+                                whiteSpace: "pre-wrap"
+                            }}>
+                                {resolvedData.generatedMessage.split('\n').map((line, i) => {
+                                    if (!line.trim()) return <div key={i} style={{ height: "16px" }} />;
+                                    
+                                    // First line as heading
+                                    if (i === 0) {
+                                        return <h3 key={i} style={{
+                                            fontFamily: "'Great Vibes', cursive",
+                                            fontSize: "clamp(18px, 4vw, 24px)",
+                                            color: "rgba(80,40,10,0.7)",
+                                            marginBottom: "16px",
+                                            textAlign: "center"
+                                        }}>{line}</h3>;
+                                    }
+                                    
+                                    // Last few lines as closing
+                                    const totalLines = resolvedData.generatedMessage.split('\n').filter(l => l.trim()).length;
+                                    if (i >= totalLines - 3) {
+                                        return <p key={i} style={{
+                                            fontFamily: "'Dancing Script', cursive",
+                                            fontSize: "clamp(15px, 3vw, 18px)",
+                                            color: "rgba(80,40,10,0.8)",
+                                            marginBottom: "8px",
+                                            textAlign: "right"
+                                        }}>{line}</p>;
+                                    }
+                                    
+                                    // Regular paragraph
+                                    return <p key={i} style={{
+                                        marginBottom: "16px"
+                                    }}>{line}</p>;
+                                })}
+                            </div>
+                            
+                            {/* Closing */}
+                            <div style={{
+                                marginTop: "28px",
+                                textAlign: "right",
+                                position: "relative",
+                                zIndex: 1
+                            }}>
+                                <div style={{
+                                    fontFamily: "'Great Vibes', cursive",
+                                    fontSize: "18px",
+                                    color: "rgba(80,40,10,0.7)",
+                                    marginBottom: "8px"
+                                }}>
+                                    With all my love,
+                                </div>
+                                <div style={{
+                                    fontFamily: "'Dancing Script', cursive",
+                                    fontSize: "22px",
+                                    color: "#2a1505"
+                                }}>
+                                    {resolvedData.senderName}
+                                </div>
+                            </div>
+                            
+                            {/* Bottom decoration */}
+                            <div style={{
+                                textAlign: "center",
+                                fontSize: "14px",
+                                opacity: 0.5,
+                                marginTop: "24px",
+                                position: "relative",
+                                zIndex: 1
+                            }}>
+                                🌸 ✦ 💕 ✦ 🌸
+                            </div>
                         </div>
+                    </div>
                 )}
             </section>
 
