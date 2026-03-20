@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface InteractiveOpeningProps {
   occasion: 'anniversary' | 'valentines' | 'proposal' | 'just_because' | 'long_distance' | 'birthday';
@@ -559,23 +559,42 @@ export default function InteractiveOpening({
     );
   };
 
-  // --- OCCASION 4: ANNIVERSARY ---
-  const AnniversaryScene = () => {
-    const [litCount, setLitCount] = useState(0);
-    const [litCandles, setLitCandles] = useState<boolean[]>([false, false, false]);
+  // --- OCCASION 4 & 6: CAKE (ANNIVERSARY & BIRTHDAY) ---
+  const CakeScene = ({ type }: { type: 'anniversary' | 'birthday' }) => {
+    const isBirthday = type === 'birthday';
+    const [litCandles, setLitCandles] = useState<boolean[]>(isBirthday ? [true, true, true] : [false, false, false]);
+    const [litCount, setLitCount] = useState(isBirthday ? 3 : 0);
 
-    const handleLightCandle = (i: number) => {
-      if (litCandles[i]) return;
-      const next = [...litCandles];
-      next[i] = true;
-      setLitCandles(next);
-      const newCount = litCount + 1;
-      setLitCount(newCount);
-      setInteracted(true);
-      spawnBurst(containerRef.current, 50, 40, 12, ['#ffcc44', '#ff8800', '#d4af37']);
+    const handleCandleClick = (i: number) => {
+      if (isBirthday) {
+        // Blowing out logic for birthday
+        if (!litCandles[i]) return;
+        const next = [...litCandles];
+        next[i] = false;
+        setLitCandles(next);
+        const newCount = litCount - 1;
+        setLitCount(newCount);
+        setInteracted(true);
+        // Small smoke/spark burst when blowing out
+        spawnBurst(containerRef.current, 50, 40, 8, ['#ffffff', '#cccccc', '#999999']);
 
-      if (newCount === 3) {
-        setTimeout(showRevealCard, 1400);
+        if (newCount === 0) {
+          setTimeout(showRevealCard, 1400);
+        }
+      } else {
+        // Lighting logic for anniversary
+        if (litCandles[i]) return;
+        const next = [...litCandles];
+        next[i] = true;
+        setLitCandles(next);
+        const newCount = litCount + 1;
+        setLitCount(newCount);
+        setInteracted(true);
+        spawnBurst(containerRef.current, 50, 40, 12, ['#ffcc44', '#ff8800', '#d4af37']);
+
+        if (newCount === 3) {
+          setTimeout(showRevealCard, 1400);
+        }
       }
     };
 
@@ -588,8 +607,8 @@ export default function InteractiveOpening({
           {litCandles.map((isLit, i) => (
             <div 
               key={i} 
-              onClick={() => handleLightCandle(i)}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: isLit ? 'default' : 'pointer', padding: '10px 5px' }}
+              onClick={() => handleCandleClick(i)}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: (isBirthday ? !isLit : isLit) ? 'default' : 'pointer', padding: '10px 5px' }}
             >
               {/* Flame */}
               <div style={{
@@ -606,8 +625,8 @@ export default function InteractiveOpening({
               <div style={{ width: 2.5, height: 8, background: '#3a2010', borderRadius: 1 }} />
               <div style={{ 
                 width: 10, height: 48, borderRadius: 3, 
-                background: 'linear-gradient(180deg, #edd060, #c9a030)',
-                boxShadow: isLit ? '0 0 15px rgba(212,175,55,0.6)' : 'none'
+                background: isBirthday ? 'linear-gradient(180deg, #ff9eb5, #ff4d6d)' : 'linear-gradient(180deg, #edd060, #c9a030)',
+                boxShadow: isLit ? (isBirthday ? '0 0 15px rgba(255,77,109,0.5)' : '0 0 15px rgba(212,175,55,0.6)') : 'none'
               }} />
             </div>
           ))}
@@ -615,19 +634,19 @@ export default function InteractiveOpening({
         
         {/* Cake Tiers */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.4))' }}>
-          <div style={{ width: 115, height: 60, background: 'linear-gradient(160deg, #d4af37, #a07820)', borderRadius: '6px 6px 0 0', position: 'relative' }}>
+          <div style={{ width: 115, height: 60, background: isBirthday ? 'linear-gradient(160deg, #ff4d6d, #c4304f)' : 'linear-gradient(160deg, #d4af37, #a07820)', borderRadius: '6px 6px 0 0', position: 'relative' }}>
              <div style={{ height: 10, background: 'rgba(255,242,200,0.4)', borderRadius: '6px 6px 0 0' }} />
           </div>
-          <div style={{ width: 175, height: 68, background: 'linear-gradient(160deg, #c49028, #8b6010)', position: 'relative' }}>
+          <div style={{ width: 175, height: 68, background: isBirthday ? 'linear-gradient(160deg, #c4304f, #8b1020)' : 'linear-gradient(160deg, #c49028, #8b6010)', position: 'relative' }}>
              <div style={{ height: 12, background: 'rgba(255,242,200,0.4)' }} />
           </div>
-          <div style={{ width: 235, height: 78, background: 'linear-gradient(160deg, #b07820, #7a5010)', borderRadius: '4px 4px 18px 18px', position: 'relative' }}>
+          <div style={{ width: 235, height: 78, background: isBirthday ? 'linear-gradient(160deg, #8b1020, #5a0810)' : 'linear-gradient(160deg, #b07820, #7a5010)', borderRadius: '4px 4px 18px 18px', position: 'relative' }}>
              <div style={{ height: 14, background: 'rgba(255,242,200,0.4)' }} />
           </div>
-          <div style={{ width: 258, height: 20, background: 'linear-gradient(160deg, #c8a050, #906020)', borderRadius: '50%', marginTop: -5 }} />
+          <div style={{ width: 258, height: 20, background: isBirthday ? 'linear-gradient(160deg, #ff758c, #c4304f)' : 'linear-gradient(160deg, #c8a050, #906020)', borderRadius: '50%', marginTop: -5 }} />
         </div>
 
-        {!interacted && <div className="hint-text">click each candle to light it ✦</div>}
+        {!interacted && <div className="hint-text">{isBirthday ? "click each candle to blow it out ✦" : "click each candle to light it ✦"}</div>}
       </div>
     );
   };
@@ -705,15 +724,13 @@ export default function InteractiveOpening({
     );
   };
 
-  const BirthdayScene = () => <AnniversaryScene />;
-
   const scenes = {
-    anniversary: <AnniversaryScene />,
+    anniversary: <CakeScene type="anniversary" />,
     valentines: <ValentinesScene />,
     proposal: <ProposalScene />,
     just_because: <JustBecauseScene />,
     long_distance: <LongDistanceScene />,
-    birthday: <BirthdayScene />
+    birthday: <CakeScene type="birthday" />
   };
 
   const backgrounds = {
