@@ -324,7 +324,13 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                 i++;
                 if (i >= text.length) {
                     clearInterval(t);
-                    setTimeout(() => setPhase("interactive"), 1600);
+                    setTimeout(() => {
+                        if (occId === 'birthday') {
+                            setPhase("preview");
+                        } else {
+                            setPhase("interactive");
+                        }
+                    }, 1600);
                 }
             }, 50);
             return () => clearInterval(t);
