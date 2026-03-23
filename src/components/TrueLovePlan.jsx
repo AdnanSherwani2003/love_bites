@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import LoveBitesLogo from "./LoveBitesLogo";
+import { removeBackground } from "../lib/removeBackground";
 
 const TrueLovePlan = ({ onComplete }) => {
     // --- STATE VARIABLES ---
@@ -30,7 +31,13 @@ const TrueLovePlan = ({ onComplete }) => {
     const [activeTab, setActiveTab] = useState("Romantic");
     const [hoveredBtn, setHoveredBtn] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
+    const [partnerPhoto, setPartnerPhoto] = useState(null);
+    const [partnerPhotoPreviewUrl, setPartnerPhotoPreviewUrl] = useState(null);
+    const [processedPhotoUrl, setProcessedPhotoUrl] = useState(null);
+    const [bgRemoving, setBgRemoving] = useState(false);
+    const [processingStatus, setProcessingStatus] = useState("");
     const photoRef = useRef(null);
+    const partnerPhotoRef = useRef(null);
     const videoPhotoRef = useRef(null);
 
     useEffect(() => {
@@ -88,6 +95,7 @@ const TrueLovePlan = ({ onComplete }) => {
 
     // --- HELPERS ---
     const canProceed = () => {
+        if (bgRemoving) return false;
         switch (step) {
             case 0: return createFor !== null;
             case 1: return selectedMoods.length > 0;
@@ -101,7 +109,34 @@ const TrueLovePlan = ({ onComplete }) => {
         }
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
+        if (step === 5 && partnerPhoto && !processedPhotoUrl) {
+            setBgRemoving(true);
+            setProcessingStatus("removing background");
+            
+            const statusTimer = setInterval(() => {
+                setProcessingStatus(prev => {
+                    if (prev === "removing background") return "almost ready...";
+                    if (prev === "almost ready...") return "finishing up...";
+                    return prev;
+                });
+            }, 3000);
+
+            try {
+                const resultUrl = await removeBackground(partnerPhoto);
+                setProcessedPhotoUrl(resultUrl);
+                setStep(s => s + 1);
+            } catch (error) {
+                console.error("Background removal failed:", error);
+                setProcessedPhotoUrl(partnerPhotoPreviewUrl);
+                setStep(s => s + 1);
+            } finally {
+                clearInterval(statusTimer);
+                setBgRemoving(false);
+            }
+            return;
+        }
+
         if (step === 7 && canProceed()) {
             if (onComplete) {
                 onComplete({
@@ -115,6 +150,7 @@ const TrueLovePlan = ({ onComplete }) => {
                     generatedMessage: generatedMessage,
                     photos: photos,
                     photoMemories: photoMemories,
+                    partnerPhotoUrl: processedPhotoUrl // Pass the processed photo URL
                 });
             }
             return;
@@ -266,6 +302,43 @@ const TrueLovePlan = ({ onComplete }) => {
             setGeneratedMessage("My dearest, words cannot fully capture the depth of my love for you, but please know that you are my heart's greatest joy and my soul's eternal partner. Every moment with you is a gift I cherish more than words can say. (Error generating message, but our love remains true!)");
         } finally {
             setIsGenerating(false);
+        }
+    };
+
+    const resizeImage = (file, maxSize) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                if (w > maxSize || h > maxSize) {
+                    if (w > h) {
+                        h = Math.round(h * maxSize / w);
+                        w = maxSize;
+                    } else {
+                        w = Math.round(w * maxSize / h);
+                        h = maxSize;
+                    }
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        });
+    };
+
+    const handlePartnerPhotoSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setPartnerPhoto(file);
+            setPartnerPhotoPreviewUrl(url);
+            setProcessedPhotoUrl(null); // Reset processed when new is chosen
         }
     };
 
@@ -875,6 +948,7 @@ const TrueLovePlan = ({ onComplete }) => {
         <div style={s.wrapper}>
             {/* Hidden Inputs */}
             <input type="file" hidden ref={photoRef} accept="image/*" multiple onChange={(e) => handleFileChange(e, 'photo')} />
+            <input type="file" hidden ref={partnerPhotoRef} accept="image/*" onChange={handlePartnerPhotoSelect} />
             <input type="file" hidden ref={videoPhotoRef} accept="image/*" multiple onChange={(e) => handleFileChange(e, 'video')} />
 
             {/* Image Preview Modal */}
@@ -1089,12 +1163,12 @@ const TrueLovePlan = ({ onComplete }) => {
                 )}
 
                 {step === 3 && (
-                    <div>
+                    <div style={{ animation: "fadeInUp 0.6s both" }}>
                         <label style={s.stepLabel}>Step Three</label>
                         <h1 style={s.heading}>
-                            Tell us your <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>love story</span>
+                            Their <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>beautiful story</span>
                         </h1>
-                        <p style={s.subtext}>The more you share, the more personal your AI message will be</p>
+                        <p style={s.subtext}>Tell us about your connection and what makes them special</p>
 
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(1, 1fr)", gap: "16px", marginBottom: "24px" }}>
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -1314,73 +1388,127 @@ const TrueLovePlan = ({ onComplete }) => {
                 )}
 
                 {step === 5 && (
-                    <div>
-                        <label style={s.stepLabel}>Step Five</label>
+                    <div style={{ animation: "fadeInUp 0.6s both", textAlign: 'center', padding: '40px 0' }}>
+                        <label style={s.stepLabel}>Step Five
+                            <span style={{
+                                fontSize: "9px", letterSpacing: "1.5px",
+                                color: 'rgba(255,255,255,0.2)',
+                                textTransform: 'uppercase',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: 20, padding: '2px 8px',
+                                marginLeft: 8, verticalAlign: 'middle'
+                            }}>optional</span>
+                        </label>
                         <h1 style={s.heading}>
-                            Create your <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>cinematic moment</span>
+                            Add a <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>photo of them</span> ✦
                         </h1>
-                        <p style={s.subtext}>Choose 5 photos for your personalized video — can be different from frame photos</p>
+                        <p style={{
+                            fontSize: 16,
+                            color: 'rgba(255,255,255,0.5)',
+                            fontFamily: 'Cormorant Garamond, serif',
+                            fontStyle: 'italic',
+                            maxWidth: '480px',
+                            margin: '0 auto 48px',
+                            lineHeight: 1.6
+                        }}>
+                            We'll remove the background and place them as a beautiful, subtle presence in the background of your LoveBite
+                        </p>
 
-                        <div style={s.gridPhotos}>
-                            {videoPhotos.map((photo, i) => (
-                                <div
-                                    key={i}
-                                    onClick={() => !photo && handlePhotoUpload(i, 'video')}
-                                    style={s.photoSlot(photo !== null)}
-                                >
-                                    {photo ? (
-                                        <>
-                                            <img 
-                                                src={photo} 
-                                                alt={`Image ${i + 1}`} 
-                                                style={{ ...s.photoImg, cursor: 'pointer' }} 
-                                                onClick={(e) => { e.stopPropagation(); setPreviewImage(photo); }}
-                                            />
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); removePhoto(i, 'video'); }}
-                                                style={s.btnRemovePhoto}
-                                            >
-                                                ✕
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span style={{ fontSize: "20px", opacity: 0.4 }}>+</span>
-                                            <span style={s.photoLabel}>Image {i + 1}</span>
-                                        </>
-                                    )}
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: '360px' }}>
+                            <div 
+                                onClick={() => partnerPhotoRef.current.click()}
+                                onMouseEnter={(e) => {
+                                    if (!partnerPhotoPreviewUrl) {
+                                        e.currentTarget.style.border = "1.5px dashed rgba(196,48,79,0.55)";
+                                        e.currentTarget.style.background = "rgba(196,48,79,0.04)";
+                                        e.currentTarget.style.transform = "translateY(-4px)";
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!partnerPhotoPreviewUrl) {
+                                        e.currentTarget.style.border = "1.5px dashed rgba(196,48,79,0.3)";
+                                        e.currentTarget.style.background = "rgba(255,255,255,0.025)";
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                    }
+                                }}
+                                style={{
+                                    width: "280px", height: "340px",
+                                    borderRadius: "24px",
+                                    border: partnerPhotoPreviewUrl ? "1.5px solid rgba(196,48,79,0.5)" : "1.5px dashed rgba(196,48,79,0.3)",
+                                    background: "rgba(255,255,255,0.025)",
+                                    display: "flex", flexDirection: "column",
+                                    alignItems: "center", justifyContent: "center",
+                                    cursor: "pointer", gap: "10px",
+                                    position: "relative", overflow: "hidden",
+                                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                                    boxShadow: partnerPhotoPreviewUrl ? "0 25px 50px -12px rgba(0,0,0,0.5)" : "none"
+                                }}
+                            >
+                                {partnerPhotoPreviewUrl ? (
+                                    <>
+                                        <img 
+                                            src={partnerPhotoPreviewUrl} 
+                                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "22px" }} 
+                                            alt="Partner preview" 
+                                        />
+                                        <button
+                                            onClick={(e) => { 
+                                                e.stopPropagation(); 
+                                                setPartnerPhoto(null); 
+                                                setPartnerPhotoPreviewUrl(null); 
+                                                setProcessedPhotoUrl(null);
+                                            }}
+                                            style={{
+                                                position: "absolute",
+                                                top: "14px", right: "14px",
+                                                width: "32px", height: "32px",
+                                                background: "rgba(0,0,0,0.75)",
+                                                backdropFilter: 'blur(8px)',
+                                                borderRadius: "50%", border: "none", color: "white", fontSize: "16px", cursor: "pointer",
+                                                zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >✕</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div style={{ fontSize: "56px", opacity: 0.25, marginBottom: 16 }}>👤</div>
+                                        <div style={{ fontSize: "13px", letterSpacing: "3px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", fontWeight: 'bold' }}>Choose Photo</div>
+                                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", letterSpacing: "1px", marginTop: 8 }}>JPG, PNG or WEBP</div>
+                                    </>
+                                )}
+                            </div>
+                            
+                            {partnerPhotoPreviewUrl && (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center',
+                                    gap: "10px", marginTop: "32px",
+                                    padding: '10px 20px', borderRadius: '24px',
+                                    background: 'rgba(34,197,94,0.08)',
+                                    border: '1px solid rgba(34,197,94,0.15)',
+                                    animation: 'fadeIn 0.5s ease both'
+                                }}>
+                                    <div style={{
+                                        width: "8px", height: "8px", borderRadius: '50%',
+                                        background: '#22c55e',
+                                        boxShadow: '0 0 12px #22c55e'
+                                    }}/>
+                                    <span style={{
+                                        fontSize: "11px", letterSpacing: "2px",
+                                        color: 'rgba(34,197,94,0.9)',
+                                        textTransform: 'uppercase',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        background will be auto-removed
+                                    </span>
                                 </div>
-                            ))}
+                            )}
                         </div>
 
-                        <div style={{
-                            background: 'rgba(233,69,96,0.08)',
-                            border: '1px solid rgba(233,69,96,0.2)',
-                            borderRadius: '16px',
-                            padding: '24px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px'
-                        }}>
-                            <span style={{ fontSize: '32px' }}>🎬</span>
-                            <div>
-                                <div style={{
-                                    color: '#ff9ab0',
-                                    fontFamily: 'sans-serif',
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                    marginBottom: '4px'
-                                }}>
-                                    Your video is in good hands
-                                </div>
-                                <div style={{
-                                    color: 'rgba(255,255,255,0.45)',
-                                    fontSize: '12px',
-                                    lineHeight: '1.7'
-                                }}>
-                                    Once you complete your order, our team will craft a cinematic video using your photos, tailored to your mood & occasion. It'll be delivered along with your Love Code.
-                                </div>
-                            </div>
+                        <div style={{ marginTop: '80px', opacity: 0.3 }}>
+                             <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                                 ✦ skippable ✦
+                             </p>
                         </div>
                     </div>
                 )}
@@ -1596,16 +1724,65 @@ const TrueLovePlan = ({ onComplete }) => {
                                 transform: "translateY(-2px) scale(1.02)",
                                 boxShadow: "0 12px 35px rgba(233,69,96,0.55)"
                             }),
-                            ...(hoveredBtn === 'next' && step === 7 && {
-                                transform: "translateY(-3px) scale(1.03)",
-                                boxShadow: "0 16px 45px rgba(233,69,96,0.6)",
-                                background: "linear-gradient(135deg, #ff2d55, #ff8fa3)",
-                                letterSpacing: "0.8px"
-                            })
+                            minWidth: "160px",
+                            justifyContent: "center"
                         }}
                     >
-                        {step === 7 ? "Preview & Pay ₹99 💗" : step === 4 ? "Continue →" : "Continue →"}
+                        {bgRemoving ? (
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                                <div style={{
+                                    width: "16px", height: "16px",
+                                    borderRadius: "50%",
+                                    border: "2px solid rgba(255,255,255,0.2)",
+                                    borderTop: "2px solid white",
+                                    animation: "spin 1s linear infinite",
+                                }}/>
+                                <span style={{ fontSize: "9px", textTransform: "uppercase" }}>Processing...</span>
+                            </div>
+                        ) : (
+                            step === 7 ? "Preview & Pay ₹99 💗" : "Next →"
+                        )}
                     </button>
+                    {bgRemoving && (
+                        <div style={{
+                            position: "fixed",
+                            inset: 0,
+                            background: "rgba(13,0,8,0.9)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 1000,
+                            gap: 16
+                        }}>
+                             <div style={{
+                                width: 44, height: 44,
+                                borderRadius: '50%',
+                                border: '3px solid rgba(196,48,79,0.15)',
+                                borderTop: '3px solid #c4304f',
+                                animation: 'spin 1s linear infinite',
+                            }}/>
+                            <div style={{
+                                fontSize: 18,
+                                color: 'rgba(255,255,255,0.8)',
+                                fontFamily: 'Cormorant Garamond, serif',
+                                fontStyle: 'italic',
+                                letterSpacing: '0.5px',
+                            }}>
+                                Preparing your LoveBite...
+                            </div>
+                            <div style={{
+                                fontSize: "11px",
+                                color: 'rgba(255,255,255,0.3)',
+                                letterSpacing: '1px',
+                                textTransform: 'uppercase',
+                                textAlign: 'center',
+                                marginTop: "10px"
+                            }}>
+                                ✨ {processingStatus}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </footer>
         </div>

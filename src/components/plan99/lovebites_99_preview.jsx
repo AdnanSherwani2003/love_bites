@@ -304,7 +304,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                 80% { opacity: 0.4; }
                 100% { transform: translateY(800px) rotate(-360deg); opacity: 0; }
             }
-            
+
             .paper-crinkle { filter: url(#paperCrinkle); }
         `;
         document.head.appendChild(style);
@@ -598,7 +598,10 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
     if (phase === "opening") {
         return (
             <div 
-                onClick={() => setPhase("preview")}
+                onClick={() => {
+                    if (occId === 'birthday') setPhase("preview");
+                    else setPhase("interactive");
+                }}
                 style={{
                     height: "100vh", display: "flex", flexDirection: "column",
                     alignItems: "center", justifyContent: "center", background: config.bg,
@@ -726,64 +729,141 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                 </div>
             </div>
 
-            {/* HERO QUOTE */}
-            <section style={{ 
-                maxWidth: "860px", margin: "0 auto 100px", textAlign: "center",
-                animation: "fadeInUp 1s 0.2s both"
+            {/* HERO QUOTE SECTION */}
+            <div style={{
+                position: 'relative',
+                width: '100%',
+                minHeight: '460px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: isMobile ? '70px 20px 80px' : '70px 40px 80px',
+                overflow: 'hidden',
+                textAlign: 'center',
+                marginBottom: "100px"
             }}>
-                {occId === 'birthday' && birthdayStage === 'ceremony' ? (
-                    <InteractiveCake onComplete={() => setBirthdayStage('full')} />
-                ) : (
-                    <div
-                        onClick={handleHeroClick}
-                        style={{
-                            fontSize: 48,
-                            marginBottom: 28,
-                            display: "inline-block",
-                            cursor: "pointer",
-                            animation: heroClicked 
-                                ? {
-                                    anniversary: "heroRose 0.6s ease forwards",
-                                    birthday: "heroCake 0.7s ease forwards",
-                                    valentine: "heroHeart 0.8s ease forwards",
-                                    just_because: "heroFlower 0.6s ease forwards",
-                                    proposal: "heroRing 0.7s ease forwards",
-                                    long_distance: "heroPlane 0.8s ease forwards",
-                                }[occId] || "heroRose 0.6s ease forwards"
-                                : "floatEmoji 4s ease-in-out infinite",
-                            userSelect: "none",
-                        }}
-                    >{config.clickEmoji}</div>
+                {/* Photo layer — only renders if photo exists */}
+                {resolvedData.partnerPhotoUrl && (
+                    <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'none',
+                        zIndex: 0,
+                    }}>
+                        <img
+                            src={resolvedData.partnerPhotoUrl}
+                            alt=""
+                            style={{
+                                height: '100%',
+                                maxHeight: isMobile ? '380px' : '460px',
+                                width: 'auto',
+                                maxWidth: isMobile ? '90%' : '65%',
+                                objectFit: 'contain',
+                                objectPosition: 'center top',
+
+                                // ── EXACT VALUES — DO NOT CHANGE ──
+                                opacity: isMobile ? 0.15 : 0.20,
+                                '--partner-opacity': isMobile ? 0.15 : 0.20,
+                                mixBlendMode: 'luminosity',
+                                filter: 'grayscale(50%) blur(0.4px)',
+
+                                WebkitMaskImage: `radial-gradient(
+                                    ellipse 50% 50% at 50% 42%,
+                                    black 25%,
+                                    transparent 100%
+                                )`,
+                                maskImage: `radial-gradient(
+                                    ellipse 50% 50% at 50% 42%,
+                                    black 25%,
+                                    transparent 100%
+                                )`,
+
+                                animation: 'partnerPhotoIn 1.8s ease both',
+                            }}
+                        />
+
+                        {/* Edge vignette */}
+                        <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: `radial-gradient(
+                                ellipse 90% 90% at 50% 50%,
+                                transparent 35%,
+                                rgba(13,0,8,0.45) 65%,
+                                rgba(13,0,8,0.9) 100%
+                            )`,
+                            pointerEvents: 'none',
+                        }}/>
+                    </div>
                 )}
-                
-                {/* Hero Burst Particles */}
-                {heroBurst.map(b => (
-                    <div key={b.id} style={{
-                        position: "fixed",
-                        left: b.x, top: b.y,
-                        fontSize: b.size,
-                        pointerEvents: "none",
-                        zIndex: 9999,
-                        animation: `burstFly 1s ${b.delay}s 
-                            cubic-bezier(0.25,0.46,0.45,0.94) forwards`,
-                        "--bx": `${b.bx}px`,
-                        "--by": `${b.by}px`,
-                        "--br": `${b.br}deg`,
-                        userSelect: "none",
-                        transform: "translate(-50%, -50%)",
-                    }}>{config.clickEmoji}</div>
-                ))}
-                
-                <blockquote style={{ 
-                    fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: "clamp(24px,4.5vw,42px)",
-                    lineHeight: 1.4, margin: "0 auto 20px", maxWidth: "680px", color: "rgba(255,255,255,0.95)"
+
+                {/* Quote content — always on top */}
+                <div style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 18,
                 }}>
-                    "{config.heroQuote}"
-                </blockquote>
-                <div style={{ fontSize: "16px", color: config.colors.primary, letterSpacing: "2px", fontWeight: "500" }}>
-                    {config.heroSub.toUpperCase()}
+                    {occId === 'birthday' && birthdayStage === 'ceremony' ? (
+                        <InteractiveCake onComplete={() => setBirthdayStage('full')} />
+                    ) : (
+                        <div
+                            onClick={handleHeroClick}
+                            style={{
+                                fontSize: 48,
+                                marginBottom: 28,
+                                display: "inline-block",
+                                cursor: "pointer",
+                                animation: heroClicked 
+                                    ? {
+                                        anniversary: "heroRose 0.6s ease forwards",
+                                        birthday: "heroCake 0.7s ease forwards",
+                                        valentine: "heroHeart 0.8s ease forwards",
+                                        just_because: "heroFlower 0.6s ease forwards",
+                                        proposal: "heroRing 0.7s ease forwards",
+                                        long_distance: "heroPlane 0.8s ease forwards",
+                                    }[occId] || "heroRose 0.6s ease forwards"
+                                    : "floatEmoji 4s ease-in-out infinite",
+                                userSelect: "none",
+                            }}
+                        >{config.clickEmoji}</div>
+                    )}
+                    
+                    {/* Hero Burst Particles */}
+                    {heroBurst.map(b => (
+                        <div key={b.id} style={{
+                            position: "fixed",
+                            left: b.x, top: b.y,
+                            fontSize: b.size,
+                            pointerEvents: "none",
+                            zIndex: 9999,
+                            animation: `burstFly 1s ${b.delay}s 
+                                cubic-bezier(0.25,0.46,0.45,0.94) forwards`,
+                            "--bx": `${b.bx}px`,
+                            "--by": `${b.by}px`,
+                            "--br": `${b.br}deg`,
+                            userSelect: "none",
+                            transform: "translate(-50%, -50%)",
+                        }}>{config.clickEmoji}</div>
+                    ))}
+                    
+                    <blockquote style={{ 
+                        fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: "clamp(24px,4.5vw,42px)",
+                        lineHeight: 1.4, margin: "0 auto 20px", maxWidth: "680px", color: "rgba(255,255,255,0.95)"
+                    }}>
+                        "{config.heroQuote}"
+                    </blockquote>
+                    <div style={{ fontSize: "16px", color: config.colors.primary, letterSpacing: "2px", fontWeight: "500" }}>
+                        {config.heroSub.toUpperCase()}
+                    </div>
                 </div>
-            </section>
+            </div>
 
             <Divider />
 

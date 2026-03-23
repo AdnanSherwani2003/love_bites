@@ -176,6 +176,17 @@ nav.scrolled {
     }
 }
 
+@keyframes partnerPhotoIn {
+  from {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: var(--partner-opacity, 0.30);
+    transform: scale(1);
+  }
+}
+
 @keyframes blink {
 
     0%,

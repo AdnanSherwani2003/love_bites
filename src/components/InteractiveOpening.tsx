@@ -279,7 +279,7 @@ export default function InteractiveOpening({
                 width="80" height="80" viewBox="0 0 80 80"
                 style={{ 
                   opacity: showRing ? 1 : 0,
-                  transform: showRing ? 'translateY(-12px) scale(1.2)' : 'translateY(18px) scale(0.5)',
+                  transform: showRing ? 'translateY(-22px) scale(1.4)' : 'translateY(18px) scale(0.5)',
                   transition: 'all 0.85s cubic-bezier(.16,1,.3,1)'
                 }}
               >
@@ -540,6 +540,8 @@ export default function InteractiveOpening({
             }}
             transform={`translate(${planeCoords.x}, ${planeCoords.y}) rotate(${planeCoords.angle})`}
           >
+            {/* Click Hitbox */}
+            <circle r="40" fill="transparent" />
             <g transform="translate(-26, -21)" filter="url(#planeGlow)">
               <ellipse cx="28" cy="21" rx="20" ry="7" fill="rgba(255,255,255,0.95)" />
               <path d="M48,21 L34,15 L34,27 Z" fill="rgba(220,235,255,0.9)" />
@@ -665,8 +667,8 @@ export default function InteractiveOpening({
         setShaking(false);
         setOpened(true);
         spawnBurst(containerRef.current, 50, 50, 42, ['#00d4b8', '#34d399', '#ffffff', '#fbbf24', '#a7f3d0']);
-        setTimeout(() => setShowHeart(true), 300);
-        setTimeout(showRevealCard, 1400);
+        setTimeout(() => setShowHeart(true), 250);
+        setTimeout(showRevealCard, 1800);
       }, 550);
     };
 
@@ -768,7 +770,12 @@ export default function InteractiveOpening({
         @keyframes cardIn { from{ opacity:0; transform:scale(.55) rotateY(45deg) } 60%{ transform:scale(1.04) rotateY(-4deg) } to{ opacity:1; transform:scale(1) rotateY(0) } }
         @keyframes giftShake { 0%,100%{ transform:rotate(0) } 20%{ transform:rotate(-5deg) } 40%{ transform:rotate(5deg) } 60%{ transform:rotate(-3deg) } 80%{ transform:rotate(3deg) } }
         @keyframes lidPop { 0%{ transform:translateY(0) rotate(0); opacity:1 } 100%{ transform:translateY(-140px) rotate(20deg); opacity:0 } }
-        @keyframes heartRise { 0%{ opacity:1; transform:translate(-50%,-50%) scale(1) } 100%{ opacity:0; transform:translate(-50%, -250px) scale(1.6) } }
+        @keyframes heartRise { 
+          0%{ opacity:0; transform:translate(-50%, 0) scale(0.5) }
+          20%{ opacity:1; transform:translate(-50%, -50%) scale(1.2) }
+          80%{ opacity:1; transform:translate(-50%, -180px) scale(1.4) }
+          100%{ opacity:0; transform:translate(-50%, -260px) scale(1.6) }
+        }
         @keyframes burstFly { 0% { opacity: 1; transform: translate(0,0) scale(1) rotate(0deg); } 100% { opacity: 0; transform: translate(var(--bx),var(--by)) scale(0.4) rotate(var(--br)); } }
         
         .hint-text {
