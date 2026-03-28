@@ -434,8 +434,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
     }}>
       {/* Occasion-specific background elements */}
       {renderBgElements(occasion)}
-      {/* Floating particles */}
-      {bgParticles.map(particle => renderParticle(particle))}
+      {/* Floating particles removed as requested */}
       
       {/* Keyframes */}
       <style>{`

@@ -5,6 +5,7 @@ import SweetStart49 from '@/components/plan49/SweetStart49';
 import { LockScreen, Preview99 } from '@/components/plan99/LoveBites99';
 import { dataURLtoFile } from '@/utils/file';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/lib/analytics';
 
 export default function Create49Page() {
     const [currentView, setCurrentView] = useState("create"); // "create" | "lock" | "preview" | "success"
@@ -12,6 +13,25 @@ export default function Create49Page() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shareSlug, setShareSlug] = useState("");
     const [submitError, setSubmitError] = useState("");
+    const [features, setFeatures] = useState({ ai_magic: true });
+    const [moods, setMoods] = useState<any[]>([]);
+    const [occasions, setOccasions] = useState<any[]>([]);
+
+    React.useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.features) setFeatures(data.features);
+                if (data.moods) setMoods(data.moods.value);
+                if (data.occasions) setOccasions(data.occasions.value);
+            } catch (err) {
+                console.error("Failed to load features:", err);
+            }
+        };
+        fetchSettings();
+        trackEvent('page_view', { tier: '49' }, '49');
+    }, []);
     const router = useRouter();
 
     const handleComplete = (data: any) => {
@@ -92,6 +112,7 @@ export default function Create49Page() {
 
             const result = await res.json();
             if (result.success) {
+                trackEvent('letter_created', { tier: '49' }, '49');
                 setShareSlug(result.share_slug);
                 setCurrentView("success");
             } else {
@@ -143,7 +164,12 @@ export default function Create49Page() {
             )}
 
             {currentView === "create" && (
-                <SweetStart49 onComplete={handleComplete} />
+                <SweetStart49 
+                    onComplete={handleComplete} 
+                    features={features} 
+                    moods={moods as any} 
+                    occasions={occasions as any} 
+                />
             )}
 
             {currentView === "lock" && (

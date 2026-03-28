@@ -74,8 +74,28 @@ function Toast({ message, visible, onHide }: { message: string, visible: boolean
 
 export default function PricingPage() {
     useScrollReveal()
+    const [pricing, setPricing] = useState({ tier_49: 49, tier_99: 99, tier_149: 149 })
+    const [popularTier, setPopularTier] = useState(99)
+    const [loading, setLoading] = useState(true)
     const [toast, setToast] = useState<{ visible: boolean, message: string }>({ visible: false, message: '' })
     const [isGrandAmourHovered, setIsGrandAmourHovered] = useState(false)
+
+    useEffect(() => {
+        fetchSettings()
+    }, [])
+
+    const fetchSettings = async () => {
+        try {
+            const response = await fetch('/api/settings')
+            const data = await response.json()
+            if (data.pricing) setPricing(data.pricing)
+            if (data.content?.popular_tier) setPopularTier(data.content.popular_tier)
+        } catch (err) {
+            console.error('Failed to load dynamic pricing:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const showComingSoon = () => {
         setToast({ visible: true, message: 'True Love & Forever plans are coming soon! Stay tuned.' })
@@ -102,12 +122,13 @@ export default function PricingPage() {
                         </div>
 
                         <div className="plans-grid">
-                            <div className="plan-card">
+                            <div className={`plan-card ${popularTier === 49 ? 'popular' : ''}`}>
+                                {popularTier === 49 && <div className="popular-badge">⭐ Most Popular</div>}
                                 <div className="plan-name">Sweet Start</div>
                                 <p className="plan-tagline">Perfect for a first gesture — simple, sweet, and heartfelt.</p>
                                 <div className="plan-price-wrap">
                                     <span className="plan-currency">₹</span>
-                                    <span className="plan-amount">49</span>
+                                    <span className="plan-amount">{pricing.tier_49}</span>
                                 </div>
                                 <p className="plan-once">one-time payment</p>
                                 <div className="plan-divider"></div>
@@ -123,13 +144,13 @@ export default function PricingPage() {
                                 <Link href="/create-49" className="plan-btn outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
                             </div>
 
-                            <div className="plan-card popular">
-                                <div className="popular-badge">⭐ Most Popular</div>
+                            <div className={`plan-card ${popularTier === 99 ? 'popular' : ''}`}>
+                                {popularTier === 99 && <div className="popular-badge">⭐ Most Popular</div>}
                                 <div className="plan-name">True Love</div>
                                 <p className="plan-tagline">The full experience — made for moments that deserve to be remembered forever.</p>
                                 <div className="plan-price-wrap">
                                     <span className="plan-currency">₹</span>
-                                    <span className="plan-amount">99</span>
+                                    <span className="plan-amount">{pricing.tier_99}</span>
                                 </div>
                                 <p className="plan-once">one-time payment</p>
                                 <div className="plan-divider"></div>
@@ -161,20 +182,7 @@ export default function PricingPage() {
                             }}
                             onMouseEnter={() => setIsGrandAmourHovered(true)}
                             onMouseLeave={() => setIsGrandAmourHovered(false)}>
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-12px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    background: 'linear-gradient(135deg, #8b0038, #c4304f)',
-                                    color: 'white',
-                                    padding: '6px 20px',
-                                    borderRadius: '9999px',
-                                    fontSize: '11px',
-                                    fontWeight: 'bold',
-                                    letterSpacing: '0.5px',
-                                    zIndex: 10
-                                }}>✨ MOST PREMIUM</div>
+                                {popularTier === 149 && <div className="popular-badge" style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>⭐ Most Popular</div>}
                                 <div className="plan-name" style={{
                                     background: 'linear-gradient(135deg, #8b0038, #c4304f)',
                                     WebkitBackgroundClip: 'text',
@@ -185,7 +193,7 @@ export default function PricingPage() {
                                 <p className="plan-tagline">The ultimate love experience — crafted for those who believe love deserves to be extraordinary.</p>
                                 <div className="plan-price-wrap">
                                     <span className="plan-currency" style={{ color: '#8b0038' }}>₹</span>
-                                    <span className="plan-amount" style={{ color: '#8b0038' }}>149</span>
+                                    <span className="plan-amount" style={{ color: '#8b0038' }}>{pricing.tier_149}</span>
                                 </div>
                                 <p className="plan-once">one-time payment</p>
                                 <div className="plan-divider"></div>

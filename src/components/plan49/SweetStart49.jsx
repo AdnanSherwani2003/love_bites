@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import LoveBitesLogo from "../LoveBitesLogo";
+import { trackEvent } from "../../lib/analytics";
 
 /**
  * Sweet Start ₹49 Plan Component
  * Features 5 steps, inline styles, maroon & rose theme.
  */
 
-const SweetStart49 = ({ onComplete }) => {
+const SweetStart49 = ({ 
+    onComplete, 
+    features = { ai_magic: true },
+    moods: externalMoods = [],
+    occasions: externalOccasions = []
+}) => {
   // --- THEME ---
   const THEME = {
     bg: "linear-gradient(160deg, #0d0008 0%, #1a0010 40%, #0d0005 100%)",
@@ -20,7 +26,7 @@ const SweetStart49 = ({ onComplete }) => {
   };
 
   // --- DATA ---
-  const MOODS = [
+  const MOODS = externalMoods.length > 0 ? externalMoods.map(m => ({...m, sub: m.subtitle, cat: m.category})) : [
     { id: "deeply_in_love", emoji: "❤️", label: "Deeply in Love", sub: "I feel completely in love with you", cat: "Romantic" },
     { id: "adoring", emoji: "🥰", label: "Adoring", sub: "I adore everything about you", cat: "Romantic" },
     { id: "affectionate", emoji: "💞", label: "Affectionate", sub: "I feel warm and affectionate toward you", cat: "Romantic" },
@@ -37,7 +43,7 @@ const SweetStart49 = ({ onComplete }) => {
     { id: "passionate", emoji: "🔥", label: "Passionate", sub: "My love for you burns intensely", cat: "Deep" }
   ];
 
-  const OCCASIONS = [
+  const OCCASIONS = externalOccasions.length > 0 ? externalOccasions : [
     { id: "anniversary", label: "Anniversary", emoji: "💑" },
     { id: "birthday", label: "Birthday", emoji: "🎂" },
     { id: "valentines", label: "Valentine's Day", emoji: "💝" },
@@ -189,6 +195,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
       
       if (data.message) {
         setGeneratedMessage(data.message);
+        trackEvent('ai_generate', { tier: '49' }, '49');
       } else {
         throw new Error("Invalid response format from API");
       }
@@ -280,6 +287,19 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.3); cursor: pointer; }
         @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+        @media (max-width: 768px) {
+          .lb49-side-text { display: none !important; }
+          .lb49-container { padding: 12px !important; max-width: 100% !important; }
+          .lb49-progress-grid { grid-template-columns: repeat(7, 1fr) !important; gap: 4px !important; }
+          .lb49-heading { font-size: clamp(1.5rem, 7vw, 2rem) !important; }
+          .lb49-footer { padding: 14px !important; }
+          .lb49-nav-inner { padding: 0 !important; }
+          .lb49-btn-next { padding: 12px 24px !important; font-size: 0.9rem !important; }
+          .lb49-btn-back { padding: 12px 20px !important; font-size: 0.9rem !important; }
+        }
+        @media (max-width: 480px) {
+          .lb49-container { padding: 8px !important; }
+        }
       `}</style>
 
       <div style={styles.orbTop} />
@@ -577,24 +597,40 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 </div>
 
                 {!generatedMessage ? (
-                  <div style={{ textAlign: 'center' }}>
-                    <button 
-                      onClick={generateMessage}
-                      disabled={isGenerating}
-                      style={{ 
-                        background: isGenerating ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #9b1a3a, #c4304f)",
-                        borderRadius: "50px", padding: "16px 44px", color: "white", fontSize: "15px", 
-                        fontFamily: THEME.serif, fontStyle: "italic", cursor: isGenerating ? "not-allowed" : "pointer",
-                        boxShadow: isGenerating ? "none" : "0 6px 24px rgba(155,26,58,0.4)", border: "none", transition: "0.3s"
-                      }}
-                    >
-                      {isGenerating ? (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>✨</span>
-                          Writing your message...
-                        </span>
-                      ) : "✨ Generate My Message"}
-                    </button>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", padding: "40px 0", width: '100%' }}>
+                    {features.ai_magic ? (
+                      <>
+                        <button
+                          onClick={generateMessage}
+                          disabled={isGenerating}
+                          style={{ 
+                            background: isGenerating ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #9b1a3a, #c4304f)",
+                            borderRadius: "50px", padding: "16px 44px", color: "white", fontSize: "15px", 
+                            fontFamily: THEME.serif, fontStyle: "italic", cursor: isGenerating ? "not-allowed" : "pointer",
+                            boxShadow: isGenerating ? "none" : "0 6px 24px rgba(155,26,58,0.4)", border: "none", transition: "0.3s"
+                          }}
+                        >
+                          {isGenerating ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>✨</span>
+                              Writing your message...
+                            </span>
+                          ) : "✨ Generate My Message"}
+                        </button>
+                        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>Powered by Groq AI</p>
+                      </>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px dashed rgba(255,107,138,0.3)', width: '100%', maxWidth: '400px' }}>
+                        <p style={{ color: '#ff6b8a', fontSize: '14px', marginBottom: '8px' }}>✨ AI Magic is currently resting.</p>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>Please write your message manually below.</p>
+                        <button 
+                          onClick={() => setGeneratedMessage("My Dearest, ")}
+                          style={{ marginTop: '16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                        >
+                          Write Manually
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div style={{ width: '100%', maxWidth: '600px' }}>

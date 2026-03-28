@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import LoveBitesLogo from "../LoveBitesLogo";
+import { trackEvent } from "../../lib/analytics";
 
 /**
  * Grand Amour ₹149 Plan Component
  * Features 9 steps, inline styles, maroon & rose theme.
  */
 
-const GrandAmour149 = ({ onComplete }) => {
+const GrandAmour149 = ({ 
+    onComplete, 
+    features = { ai_magic: true },
+    moods: externalMoods = [],
+    occasions: externalOccasions = []
+}) => {
   // --- THEME ---
   const THEME = {
     bg: "linear-gradient(160deg, #0d0008 0%, #1a0010 40%, #0d0005 100%)",
@@ -60,7 +66,7 @@ const GrandAmour149 = ({ onComplete }) => {
   const musicRef = useRef(null);
 
   // --- DATA ---
-  const moodsData = [
+  const moodsData = externalMoods.length > 0 ? externalMoods : [
     { id: "deeply_in_love", label: "Deeply in Love", subtitle: "I feel completely in love with you", emoji: "❤️", category: "Romantic" },
     { id: "adoring", label: "Adoring", subtitle: "I adore everything about you", emoji: "🥰", category: "Romantic" },
     { id: "affectionate", label: "Affectionate", subtitle: "I feel warm and affectionate toward you", emoji: "💞", category: "Romantic" },
@@ -85,7 +91,7 @@ const GrandAmour149 = ({ onComplete }) => {
     { id: "anniversary_occ", label: "Anniversary", subtitle: "Another year of us", emoji: "🥂", category: "Occasion" },
   ];
 
-  const occasions = [
+  const occasions = externalOccasions.length > 0 ? externalOccasions : [
     { id: "anniversary", label: "Anniversary", emoji: "💑" },
     { id: "birthday", label: "Birthday", emoji: "🎂" },
     { id: "valentine", label: "Valentine's Day", emoji: "💝" },
@@ -289,6 +295,7 @@ const GrandAmour149 = ({ onComplete }) => {
       
       if (data.message) {
         setGeneratedMessage(data.message);
+        trackEvent('ai_generate', { tier: '149' }, '149');
       } else {
         throw new Error("Invalid response format from API");
       }
@@ -399,6 +406,17 @@ const GrandAmour149 = ({ onComplete }) => {
         ::-webkit-scrollbar-thumb { background: rgba(155,26,58,0.3); border-radius: 2px; }
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
+        @media (max-width: 768px) {
+          .lb149-side-text { display: none !important; }
+          .lb149-container { max-width: 100% !important; padding: 0 12px !important; }
+          .lb149-progress { gap: 4px !important; }
+          .lb149-footer { padding: 14px !important; }
+          .lb149-btn-next, .lb149-btn-back { padding: 12px 20px !important; font-size: 0.88rem !important; }
+        }
+        @media (max-width: 480px) {
+          .lb149-container { padding: 0 8px !important; }
+          .lb149-btn-next, .lb149-btn-back { padding: 10px 14px !important; font-size: 0.8rem !important; }
+        }
       `}</style>
 
       <div style={styles.orbTop} />
@@ -878,14 +896,31 @@ const GrandAmour149 = ({ onComplete }) => {
                        <div style={{ color: THEME.rose, fontWeight: "bold" }}>Generating your message...</div>
                      </div>
                    ) : (
-                    <button 
-                      onClick={generateAI} 
-                      style={{ padding: "20px 48px", borderRadius: "40px", background: "linear-gradient(135deg, #9b1a3a, #c4304f)", border: "none", color: "white", fontWeight: "bold", cursor: "pointer", fontSize: "18px", boxShadow: "0 8px 30px rgba(155,26,58,0.5)" }}
-                    >
-                      Generate AI Message ✨
-                    </button>
+                    <>
+                      {features.ai_magic ? (
+                        <>
+                          <button 
+                            onClick={generateAI} 
+                            style={{ padding: "20px 48px", borderRadius: "40px", background: "linear-gradient(135deg, #9b1a3a, #c4304f)", border: "none", color: "white", fontWeight: "bold", cursor: "pointer", fontSize: "18px", boxShadow: "0 8px 30px rgba(155,26,58,0.5)" }}
+                          >
+                            Generate AI Message ✨
+                          </button>
+                          <p style={{ marginTop: "24px", fontSize: "12px", color: "rgba(255,248,240,0.3)" }}>Powered by Groq LLAMA-3</p>
+                        </>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '30px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px dashed rgba(255,107,138,0.3)', maxWidth: '400px', margin: '0 auto' }}>
+                          <p style={{ color: '#ff6b8a', fontSize: '16px', marginBottom: '12px', fontWeight: 'bold' }}>✨ AI Magic is currently resting.</p>
+                          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: '1.6' }}>The Grand Amour AI is offline for maintenance. Please pen your beautiful message manually.</p>
+                          <button 
+                            onClick={() => setGeneratedMessage("My Dearest, ")}
+                            style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '10px 24px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold' }}
+                          >
+                            Write Manually
+                          </button>
+                        </div>
+                      )}
+                    </>
                    )}
-                   <p style={{ marginTop: "24px", fontSize: "12px", color: "rgba(255,248,240,0.3)" }}>Powered by Groq LLAMA-3</p>
                 </div>
               )}
             </div>

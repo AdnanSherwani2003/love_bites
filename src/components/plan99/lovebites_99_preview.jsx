@@ -657,7 +657,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
             padding: "40px 20px 120px"
         }}>
             <OccasionBackground occasion={(occId === 'birthday' && birthdayStage === 'ceremony') ? 'birthday_ceremony' : occId} />
-            {occId !== 'birthday' && <FloatingParticles />}
+            {/* FloatingParticles removed as requested */}
             
             {(occId === 'birthday' && birthdayStage === 'ceremony') ? (
                 <div style={{ padding: "100px 0" }}>

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import TrueLovePlan from '@/components/TrueLovePlan';
 import { LockScreen, Preview99 } from '@/components/plan99/LoveBites99';
 import { dataURLtoFile } from '@/utils/file';
+import { trackEvent } from '@/lib/analytics';
 
 export default function Create99Page() {
     const [currentView, setCurrentView] = useState("create"); // "create" | "lock" | "preview" | "success"
@@ -11,6 +12,25 @@ export default function Create99Page() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [shareSlug, setShareSlug] = useState("");
     const [submitError, setSubmitError] = useState("");
+    const [features, setFeatures] = useState({ ai_magic: true });
+    const [moods, setMoods] = useState<any[]>([]);
+    const [occasions, setOccasions] = useState<any[]>([]);
+
+    React.useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.features) setFeatures(data.features);
+                if (data.moods) setMoods(data.moods.value);
+                if (data.occasions) setOccasions(data.occasions.value);
+            } catch (err) {
+                console.error("Failed to load features:", err);
+            }
+        };
+        fetchSettings();
+        trackEvent('page_view', { tier: '99' }, '99');
+    }, []);
 
     const handleComplete = async (data: any) => {
         setFormData(data);
@@ -55,6 +75,7 @@ export default function Create99Page() {
 
             const result = await res.json();
             if (result.success) {
+                trackEvent('letter_created', { tier: '99' }, '99');
                 setShareSlug(result.share_slug);
                 setCurrentView("success");
             } else {
@@ -106,7 +127,12 @@ export default function Create99Page() {
             )}
             
             {currentView === "create" && (
-                <TrueLovePlan onComplete={handleComplete} />
+                <TrueLovePlan 
+                    onComplete={handleComplete} 
+                    features={features} 
+                    moods={moods as any} 
+                    occasions={occasions as any} 
+                />
             )}
 
             {currentView === "lock" && (

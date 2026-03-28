@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import LoveBitesLogo from "./LoveBitesLogo";
 import { removeBackground } from "../lib/removeBackground";
+import { trackEvent } from "../lib/analytics";
 
-const TrueLovePlan = ({ onComplete }) => {
+const TrueLovePlan = ({ 
+    onComplete, 
+    features = { ai_magic: true }, 
+    moods: externalMoods = [], 
+    occasions: externalOccasions = [] 
+}) => {
     // --- STATE VARIABLES ---
     const [step, setStep] = useState(0);
     const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
@@ -61,7 +67,7 @@ const TrueLovePlan = ({ onComplete }) => {
         { id: "cherry_blossom", label: "Cherry Blossom", gradient: "linear-gradient(135deg, #f8a5c2, #f78fb3)", border: "#f78fb3" },
     ];
 
-    const moodsData = [
+    const moodsData = externalMoods.length > 0 ? externalMoods : [
         { id: "deeply_in_love", label: "Deeply in Love", subtitle: "I feel completely in love with you", emoji: "❤️", category: "Romantic" },
         { id: "adoring", label: "Adoring", subtitle: "I adore everything about you", emoji: "🥰", category: "Romantic" },
         { id: "affectionate", label: "Affectionate", subtitle: "I feel warm and affectionate toward you", emoji: "💞", category: "Romantic" },
@@ -78,7 +84,7 @@ const TrueLovePlan = ({ onComplete }) => {
         { id: "passionate", label: "Passionate", subtitle: "My love for you burns intensely", emoji: "🔥", category: "Deep" }
     ];
 
-    const occasions = [
+    const occasions = externalOccasions.length > 0 ? externalOccasions : [
         { id: "anniversary", label: "Anniversary", emoji: "💑" },
         { id: "birthday", label: "Birthday", emoji: "🎂" },
         { id: "valentine", label: "Valentine's Day", emoji: "💝" },
@@ -297,6 +303,7 @@ const TrueLovePlan = ({ onComplete }) => {
             }
 
             setGeneratedMessage(data.message);
+            trackEvent('ai_generate', { tier: '99' }, '99');
         } catch (error) {
             console.error("Error generating message:", error);
             setGeneratedMessage("My dearest, words cannot fully capture the depth of my love for you, but please know that you are my heart's greatest joy and my soul's eternal partner. Every moment with you is a gift I cherish more than words can say. (Error generating message, but our love remains true!)");
@@ -946,8 +953,26 @@ const TrueLovePlan = ({ onComplete }) => {
     // --- RENDERING ---
     return (
         <div style={s.wrapper}>
+            <style>{`
+                @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+                @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+                * { box-sizing: border-box; }
+                @media (max-width: 768px) {
+                    .lb99-side-text { display: none !important; }
+                    .lb99-container { max-width: 100% !important; padding: 0 12px !important; }
+                    .lb99-progress { gap: 4px !important; }
+                    .lb99-footer { padding: 14px !important; }
+                    .lb99-nav-inner { padding: 0 !important; flex-direction: row !important; }
+                    .lb99-btn-next, .lb99-btn-back { padding: 12px 22px !important; font-size: 0.88rem !important; }
+                }
+                @media (max-width: 480px) {
+                    .lb99-container { padding: 0 8px !important; }
+                    .lb99-btn-next, .lb99-btn-back { padding: 10px 16px !important; font-size: 0.82rem !important; }
+                }
+            `}</style>
             {/* Hidden Inputs */}
             <input type="file" hidden ref={photoRef} accept="image/*" multiple onChange={(e) => handleFileChange(e, 'photo')} />
+
             <input type="file" hidden ref={partnerPhotoRef} accept="image/*" onChange={handlePartnerPhotoSelect} />
             <input type="file" hidden ref={videoPhotoRef} accept="image/*" multiple onChange={(e) => handleFileChange(e, 'video')} />
 
@@ -1539,21 +1564,36 @@ const TrueLovePlan = ({ onComplete }) => {
 
                         {!generatedMessage ? (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", padding: "48px 0" }}>
-                                <button
-                                    onClick={generateAIMessage}
-                                    disabled={isGenerating}
-                                    style={s.btnAIGenerate(isGenerating)}
-                                >
-                                    {isGenerating ? (
-                                        <>
-                                            <div style={s.spinner} />
-                                            AI is writing...
-                                        </>
-                                    ) : (
-                                        <>💌 Generate My Message</>
-                                    )}
-                                </button>
-                                <p style={s.poweredBy}>Powered by Groq AI</p>
+                                {features.ai_magic ? (
+                                    <>
+                                        <button
+                                            onClick={generateAIMessage}
+                                            disabled={isGenerating}
+                                            style={s.btnAIGenerate(isGenerating)}
+                                        >
+                                            {isGenerating ? (
+                                                <>
+                                                    <div style={s.spinner} />
+                                                    AI is writing...
+                                                </>
+                                            ) : (
+                                                <>💌 Generate My Message</>
+                                            )}
+                                        </button>
+                                        <p style={s.poweredBy}>Powered by Groq AI</p>
+                                    </>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px dashed rgba(255,107,138,0.3)' }}>
+                                        <p style={{ color: '#ff6b8a', fontSize: '14px', marginBottom: '8px' }}>✨ AI Magic is currently resting.</p>
+                                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>Please write your message manually below.</p>
+                                        <button 
+                                            onClick={() => setGeneratedMessage("My Dearest, ")}
+                                            style={{ marginTop: '16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                                        >
+                                            Write Manually
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div>

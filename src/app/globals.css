@@ -4528,3 +4528,237 @@ body.menu-open .toast-container {
     .gifts-hero h1 { font-size: 2.2rem; }
     .gifts-grid { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ♥ LOVE BITES — COMPREHENSIVE MOBILE RESPONSIVE STYLES ♥
+   For screens ≤ 768px (phones and small tablets)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+    /* ── GENERAL ── */
+    .container {
+        padding: 0 1rem;
+    }
+
+    /* ── FOOTER ── */
+    .lb-footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem 1.5rem;
+    }
+
+    .lb-footer-body {
+        padding: 3rem 0 2rem;
+    }
+
+    .lb-bottom-inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    /* ── PRICING PAGE ── */
+    .pricing-section {
+        padding: 0 1rem;
+    }
+
+    .pricing-header {
+        padding: 0 0.5rem;
+        margin-bottom: 40px;
+    }
+
+    .plans-grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        gap: 16px;
+        padding: 0 0.5rem;
+        margin-bottom: 48px;
+    }
+
+    .plan-card {
+        padding: 28px 22px 24px;
+    }
+
+    .plan-card.popular {
+        transform: none !important;
+        padding-top: 40px;
+    }
+
+    .plan-card.popular.revealed {
+        transform: none !important;
+    }
+
+    .plan-amount {
+        font-size: 2.6rem;
+    }
+
+    .faq-wrap {
+        padding: 0 0.25rem;
+    }
+
+    .faq-q {
+        padding: 16px 18px;
+    }
+
+    .faq-q-text {
+        font-size: 0.92rem;
+    }
+
+    .faq-a {
+        padding: 0 18px;
+    }
+
+    .pricing-trust {
+        font-size: 0.74rem;
+        margin-bottom: 40px;
+        line-height: 1.8;
+    }
+
+    /* ── JOURNEY SECTION ── */
+    .jrn-gateway {
+        padding: 3rem 1.2rem 2.5rem;
+        min-height: 30vh;
+    }
+
+    .jrn-gw-q {
+        font-size: clamp(1.5rem, 6vw, 2rem);
+    }
+
+    .jrn-head {
+        padding: 2rem 1rem 1.5rem;
+    }
+
+    .jrn-title {
+        font-size: clamp(1.8rem, 7vw, 2.5rem);
+    }
+
+    .jrn-img {
+        height: 300px;
+    }
+
+    .jrn-story {
+        padding: 1.8rem 1.4rem;
+    }
+
+    .jrn-story-title {
+        font-size: 1.1rem;
+    }
+
+    .jrn-story-body {
+        font-size: 0.95rem;
+    }
+
+    .jrn-sb {
+        padding: 2rem 1.2rem;
+    }
+
+    .jrn-sb-q {
+        font-size: clamp(1.4rem, 6vw, 2rem);
+    }
+
+    .jrn-cta {
+        padding: 3rem 1.2rem 4rem;
+    }
+
+    .jrn-cta-t {
+        font-size: clamp(1.5rem, 6vw, 2.2rem);
+    }
+
+    .jrn-cta-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.9rem 1.5rem;
+    }
+
+    /* ── OCCASIONS SECTION ── */
+    .occasions-section {
+        padding: 70px 16px;
+    }
+
+    .occasions-header {
+        margin-bottom: 40px;
+    }
+
+    /* ── ABOUT PAGE ── */
+    .about-section {
+        padding: 70px 16px;
+    }
+
+    .about-hero {
+        margin-bottom: 60px;
+    }
+
+    /* ── AI MAGIC PAGE ── */
+    .ai-magic-section {
+        padding: 70px 1rem 90px;
+    }
+
+    .ai-magic-header {
+        margin-bottom: 36px;
+    }
+
+    /* ── HERO ── */
+    .hero-content {
+        padding: 0 1rem;
+        padding-top: 0.5rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Extra small phones ≤ 480px
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+    /* ── FOOTER ── */
+    .lb-footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1.8rem;
+    }
+
+    /* ── PRICING ── */
+    .plan-card {
+        padding: 24px 18px 20px;
+        border-radius: 20px;
+    }
+
+    .plan-amount {
+        font-size: 2.4rem;
+    }
+
+    .pricing-header h1 .h1-bottom {
+        font-size: clamp(1.8rem, 9vw, 2.6rem);
+    }
+
+    /* ── JOURNEY ── */
+    .jrn-img {
+        height: 240px;
+    }
+
+    .jrn-story {
+        padding: 1.4rem 1.1rem;
+    }
+
+    /* ── GENERAL ── */
+    .container {
+        padding: 0 0.85rem;
+    }
+
+    /* ── HERO ── */
+    .hero-cta,
+    .btn-outline-hero {
+        padding: 0.75rem 1.2rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* ── ABOUT ── */
+    .about-section {
+        padding: 60px 14px;
+    }
+
+    /* ── OCCASIONS ── */
+    .occasions-section {
+        padding: 60px 14px;
+    }
+}
+
