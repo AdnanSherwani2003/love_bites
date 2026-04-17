@@ -39,15 +39,11 @@ export default function Create149Page() {
             senderName: data.yourName,
             recipientName: data.partnerName,
             partnerDesc: data.theirStory,
+            relationship: data.relationship || 'partner', // Use selected relationship or default to partner
             selectedMoods: data.selectedMoods, // Already objects in 149
             occasion: data.selectedOccasion, // Already object in 149
             generatedMessage: data.generatedMessage,
             photos: data.photos,
-            videoPhotos: data.videoPhotos,
-            unlockCode: data.unlockCode,
-            hintMessage: data.hintMessage,
-            deliveryMethod: data.deliveryMethod,
-            recipientContact: data.recipientContact
         };
         setFormData(mappedData);
         setCurrentView("lock");
@@ -62,6 +58,7 @@ export default function Create149Page() {
             body.append('yourName', formData.senderName || '');
             body.append('partnerName', formData.recipientName || '');
             body.append('partnerDesc', formData.partnerDesc || '');
+            body.append('relationship', formData.relationship || 'partner');
             body.append('occasion', JSON.stringify(formData.occasion || {}));
             body.append('moods', JSON.stringify(formData.selectedMoods || []));
             body.append('aiMessage', formData.generatedMessage || '');
@@ -89,6 +86,11 @@ export default function Create149Page() {
                         if (file) body.append(`videoPhoto_${i}`, file);
                     }
                 });
+            }
+
+            // Handle Photo Memories
+            if (formData.photoMemories && Array.isArray(formData.photoMemories)) {
+                body.append('photoMemories', JSON.stringify(formData.photoMemories));
             }
 
             const res = await fetch('/api/love-code', {

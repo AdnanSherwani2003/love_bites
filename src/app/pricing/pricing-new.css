@@ -1,0 +1,416 @@
+/* New Pricing Section Styles for LoveBites */
+
+:root {
+    --lb-primary: #c0314f;
+    --lb-primary-grad: linear-gradient(135deg, #c0314f, #e8445a);
+    --lb-dark-accent: #8b0a2a;
+    --lb-darker-accent: #6b0820;
+    --lb-bg-grad: linear-gradient(135deg, #fff5f7 0%, #fdf0f3 40%, #fce4ec 100%);
+    --lb-check-bg: #fce8ed;
+    --lb-check-bg-premium: #fce0e6;
+    --lb-text: #5a2030;
+    --lb-muted: #b07a8a;
+    --lb-hint: #c9a0aa;
+    
+    --font-playfair: 'Playfair Display', serif;
+    --font-dm-sans: 'DM Sans', sans-serif;
+}
+
+.pricing-body-page {
+    background: var(--lb-bg-grad);
+    min-height: 100vh;
+    color: var(--lb-text);
+    font-family: var(--font-dm-sans);
+}
+
+.pricing-section-new {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 24px;
+}
+
+.pricing-header-new {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.pill-tag {
+    display: inline-block;
+    background: #fce8ed;
+    color: var(--lb-primary);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.pricing-header-new h1 {
+    font-family: var(--font-playfair);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.pricing-header-new h1 span {
+    display: block;
+}
+
+.subtitle-it {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--lb-muted);
+}
+
+.title-bold-it {
+    font-style: italic;
+    font-weight: 700;
+    color: var(--lb-dark-accent);
+}
+
+.pricing-header-new p {
+    font-size: 1.1rem;
+    color: var(--lb-muted);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Grid Layout */
+.plans-grid-new {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    align-items: stretch;
+}
+
+.plan-card-new {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(192, 49, 79, 0.1);
+    box-shadow: 0 10px 30px rgba(90, 32, 48, 0.05);
+}
+
+.plan-card-new:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(90, 32, 48, 0.1);
+}
+
+.plan-card-new.popular {
+    border: 2px solid var(--lb-primary);
+    box-shadow: 0 20px 40px rgba(192, 49, 79, 0.15);
+}
+
+.plan-card-new.premium {
+    border: 2px solid var(--lb-dark-accent);
+}
+
+/* Badges */
+.card-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.badge-popular {
+    background: var(--lb-primary-grad);
+    color: white;
+    border: 2px solid var(--lb-primary);
+}
+
+.badge-premium {
+    background: var(--lb-dark-accent);
+    color: white;
+    border: 2px solid var(--lb-dark-accent);
+}
+
+/* Card Sections */
+.plan-card-new .top {
+    margin-bottom: 30px;
+}
+
+.plan-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.plan-name-new {
+    font-family: var(--font-playfair);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.plan-desc-new {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--lb-muted);
+    min-height: 3em; /* Will be equalized by JS */
+    margin-bottom: 20px;
+}
+
+.plan-price-new {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.currency {
+    font-family: var(--font-playfair);
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.amount {
+    font-family: var(--font-playfair);
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.payment-note {
+    font-size: 0.85rem;
+    color: var(--lb-hint);
+    margin-bottom: 24px;
+}
+
+/* Buttons */
+.get-started-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-outline-red {
+    background: transparent;
+    border: 1.5px solid rgba(192, 49, 79, 0.4);
+    color: var(--lb-primary);
+}
+
+.btn-outline-red:hover {
+    background: rgba(192, 49, 79, 0.05);
+    border-color: var(--lb-primary);
+}
+
+.btn-filled-red {
+    background: var(--lb-primary-grad);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(192, 49, 79, 0.3);
+}
+
+.btn-filled-red:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(192, 49, 79, 0.4);
+}
+
+.btn-premium-grad {
+    background: linear-gradient(135deg, #8b0a2a, #c0314f);
+    color: white;
+    border: none;
+}
+
+.btn-premium-grad:hover {
+    transform: scale(1.02);
+}
+
+.divider {
+    height: 1.5px;
+    background: rgba(90, 32, 48, 0.08);
+    margin: 24px 0;
+}
+
+/* Mid Section (Features) */
+.plan-card-new .mid {
+    flex: 1;
+}
+
+.feature-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--lb-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    color: var(--lb-text);
+}
+
+.feature-item .check {
+    width: 20px;
+    height: 20px;
+    background: var(--lb-check-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.premium .feature-item .check {
+    background: var(--lb-check-bg-premium);
+}
+
+.feature-item .check svg {
+    width: 12px;
+    height: 12px;
+    stroke: var(--lb-primary);
+    stroke-width: 3;
+}
+
+.premium .feature-item .check svg {
+    stroke: var(--lb-dark-accent);
+}
+
+.hidden-features {
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 0;
+}
+
+.hidden-features.expanded {
+    max-height: 800px;
+}
+
+/* Bot Section */
+.plan-card-new .bot {
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.more-features-toggle {
+    background: transparent;
+    border: none;
+    color: var(--lb-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.more-features-toggle .circle-plus {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--lb-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.more-features-toggle .circle-plus::before {
+    content: '';
+    position: absolute;
+    background: var(--lb-primary);
+    width: 10px;
+    height: 1.5px;
+    transition: opacity 0.3s ease;
+}
+
+.more-features-toggle .circle-plus::after {
+    content: '';
+    position: absolute;
+    background: var(--lb-primary);
+    width: 1.5px;
+    height: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.more-features-toggle.expanded .circle-plus::before {
+    opacity: 0;
+}
+
+.more-features-toggle.expanded .circle-plus {
+    transform: rotate(180deg);
+}
+
+/* Footer Section */
+.pricing-footer-new {
+    text-align: center;
+    margin-top: 80px;
+    color: var(--lb-muted);
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-trust-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.dot-sep {
+    width: 4px;
+    height: 4px;
+    background: var(--lb-hint);
+    border-radius: 50%;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .plans-grid-new {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .plans-grid-new {
+        grid-template-columns: 1fr;
+    }
+    
+    .pricing-header-new h1 {
+        font-size: 2.2rem;
+    }
+    
+    .plan-card-new {
+        padding: 24px;
+    }
+}

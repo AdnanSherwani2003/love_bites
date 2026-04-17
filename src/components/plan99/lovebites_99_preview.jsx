@@ -3,6 +3,17 @@ import LoveBitesLogo from "@/components/LoveBitesLogo";
 import OccasionBackground from "@/components/OccasionBackground";
 import InteractiveCake from "@/components/plan49/effects/InteractiveCake";
 import InteractiveOpening from "@/components/InteractiveOpening";
+import StringLights from "@/components/StringLights";
+import MemoriesStringLights from "@/components/MemoriesStringLights";
+
+// Animations
+import AnniversaryAnimation from "@/components/animations/AnniversaryAnimation";
+import BirthdayAnimation from "@/components/animations/BirthdayAnimation";
+import BirthdayAnimation_Confetti from "@/components/animations/BirthdayAnimation"; // Alias if needed, but same component
+import JustBecauseAnimation from "@/components/animations/JustBecauseAnimation";
+import ApologyAnimation from "@/components/animations/ApologyAnimation";
+import ValentinesAnimation from "@/components/animations/ValentinesAnimation";
+import LongDistanceAnimation from "@/components/animations/LongDistanceAnimation";
 
 // --- GOOGLE FONTS LOADING ---
 const loadFonts = () => {
@@ -289,6 +300,14 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
             @keyframes letterReveal {
                 from { opacity:0; transform:translateY(24px) scale(0.97); }
                 to   { opacity:1; transform:translateY(0) scale(1); }
+            }
+            @keyframes stringLightPulse {
+                0%, 100% { opacity: 0.8; }
+                50% { opacity: 1; }
+            }
+            @keyframes stringLightGlow {
+                0%, 100% { opacity: 0.2; }
+                50% { opacity: 0.4; }
             }
             
             /* Background Floating */
@@ -653,10 +672,30 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
             minHeight: "100vh", 
             background: getOccasionBackground(occId),
             color: "#fff",
-            fontFamily: "'Helvetica Neue', sans-serif", position: "relative", overflowX: "hidden",
+            fontFamily: "'Helvetica Neue', sans-serif", position: "relative", overflow: "hidden",
             padding: "40px 20px 120px"
         }}>
-            <OccasionBackground occasion={(occId === 'birthday' && birthdayStage === 'ceremony') ? 'birthday_ceremony' : occId} />
+            {(resolvedData.themPhoto || resolvedData.partnerPhoto) && (
+                <div style={{
+                    position: "absolute", top: 0, left: 0, width: "100%", height: "100vh",
+                    backgroundImage: `url(${resolvedData.themPhoto || resolvedData.partnerPhoto})`,
+                    backgroundSize: "cover", backgroundPosition: "center top",
+                    opacity: 0.18, mixBlendMode: "overlay",
+                    maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%)",
+                    WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%)",
+                    pointerEvents: "none", zIndex: 1
+                }} />
+            )}
+            {/* Canvas Animations */}
+            {occId === 'anniversary' && <AnniversaryAnimation />}
+            {occId === 'birthday' && <BirthdayAnimation />}
+            {occId === 'just_because' && <JustBecauseAnimation />}
+            {(occId === 'valentine' || occId === 'valentines') && <ValentinesAnimation />}
+            {occId === 'long_distance' && <LongDistanceAnimation />}
+            {(occId === 'proposal' || occId === 'apology') && <ApologyAnimation />}
+
+            {/* StringLights removed as requested */}
+            {/* OccasionBackground removed as requested */}
             {/* FloatingParticles removed as requested */}
             
             {(occId === 'birthday' && birthdayStage === 'ceremony') ? (
@@ -869,6 +908,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
 
             {/* POLAROID MEMORIES */}
             <section style={{ maxWidth: "1000px", margin: "0 auto", position: "relative", zIndex: 5 }}>
+                {phase === "preview" && <MemoriesStringLights />}
                 {resolvedData.photos.map((src, i) => {
                     const isLeft = i % 2 === 0;
                     const ROTATIONS = [-4.5, 3.2, -2.8, 4.0, -3.5];

@@ -12,6 +12,8 @@ const TrueLovePlan = ({
     // --- STATE VARIABLES ---
     const [step, setStep] = useState(0);
     const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
+    const [relationship, setRelationship] = useState(null); // 'partner', 'family', 'relative', 'friend', or custom string
+    const [customRelationship, setCustomRelationship] = useState(""); // for custom relationship input
     const [selectedMoods, setSelectedMoods] = useState([]); // max 3
     const [selectedOccasion, setSelectedOccasion] = useState(null);
     const [yourName, setYourName] = useState("");
@@ -45,6 +47,15 @@ const TrueLovePlan = ({
     const photoRef = useRef(null);
     const partnerPhotoRef = useRef(null);
     const videoPhotoRef = useRef(null);
+
+    const THEME = {
+        bg: "linear-gradient(160deg, #0d0008 0%, #1a0010 40%, #0d0005 100%)",
+        maroon: "#9b1a3a",
+        rose: "#c4304f",
+        cream: "#fff8f0",
+        serif: "Georgia, serif",
+        sans: "sans-serif",
+    };
 
     useEffect(() => {
         const style = document.createElement("style");
@@ -104,19 +115,20 @@ const TrueLovePlan = ({
         if (bgRemoving) return false;
         switch (step) {
             case 0: return createFor !== null;
-            case 1: return selectedMoods.length > 0;
-            case 2: return selectedOccasion !== null;
-            case 3: return theirStory.trim().length > 10 && yourName.trim().length > 0 && partnerName.trim().length > 0;
-            case 4: return photos.some(p => p !== null);
-            case 5: return true; // skippable
-            case 6: return generatedMessage.length > 0;
-            case 7: return unlockCode.length === 4 && deliveryMethod !== null;
+            case 1: return relationship !== null && (relationship !== 'custom' || customRelationship.trim() !== '');
+            case 2: return selectedMoods.length > 0;
+            case 3: return selectedOccasion !== null;
+            case 4: return theirStory.trim().length > 10 && yourName.trim().length > 0 && partnerName.trim().length > 0;
+            case 5: return photos.some(p => p !== null);
+            case 6: return true; // skippable
+            case 7: return generatedMessage.length > 0;
+            case 8: return unlockCode.length === 4 && deliveryMethod !== null;
             default: return false;
         }
     };
 
     const handleNext = async () => {
-        if (step === 5 && partnerPhoto && !processedPhotoUrl) {
+        if (step === 6 && partnerPhoto && !processedPhotoUrl) {
             setBgRemoving(true);
             setProcessingStatus("removing background");
             
@@ -143,10 +155,11 @@ const TrueLovePlan = ({
             return;
         }
 
-        if (step === 7 && canProceed()) {
+        if (step === 8 && canProceed()) {
             if (onComplete) {
                 onComplete({
                     createFor,
+                    relationship,
                     recipientName: partnerName,
                     senderName: yourName,
                     selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id)),
@@ -357,9 +370,9 @@ const TrueLovePlan = ({
     const s = {
         wrapper: {
             minHeight: "100vh",
-            background: "linear-gradient(160deg, #0d0d1a 0%, #1a0a14 50%, #0d0d1a 100%)",
-            color: "#fff",
-            fontFamily: "sans-serif",
+            background: THEME.bg,
+            color: THEME.cream,
+            fontFamily: THEME.sans,
             position: "relative",
             display: "flex",
             flexDirection: "column",
@@ -376,54 +389,36 @@ const TrueLovePlan = ({
             zIndex: 10
         },
         logo: {
-            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontFamily: THEME.serif,
             fontStyle: "italic",
             fontSize: "24px",
             fontWeight: "bold",
-            color: "#ff6b8a",
+            color: THEME.rose,
             cursor: "pointer"
         },
         badge: {
-            background: "rgba(233, 69, 96, 0.2)",
-            border: "1px solid rgba(233, 69, 96, 0.4)",
+            background: "linear-gradient(135deg, #9b1a3a, #c4304f)",
             padding: "4px 12px",
             borderRadius: "9999px",
             fontSize: "10px",
             letterSpacing: "2px",
             fontWeight: "bold",
-            color: "#ff6b8a"
+            color: "#fff",
+            boxShadow: "0 4px 15px rgba(155,26,58,0.3)"
         },
-        progressContainer: {
-            width: "100%",
-            maxWidth: "780px",
-            padding: "0 20px",
-            marginBottom: "40px",
-            zIndex: 10
+        progressBox: {
+            marginBottom: "40px", width: "100%", maxWidth: "780px", padding: "0 20px", zIndex: 10
         },
-        progressHeader: {
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px"
+        progressGrid: {
+            display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "6px", marginBottom: "8px"
         },
-        progressLabel: {
-            fontSize: "11px",
-            color: "rgba(255, 255, 255, 0.4)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            fontWeight: "semibold"
-        },
-        progressStepCount: {
-            fontSize: "11px",
-            color: "rgba(255, 255, 255, 0.6)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            fontWeight: "semibold"
-        },
-        progressBarGrid: {
-            display: "grid",
-            gridTemplateColumns: "repeat(8, 1fr)",
-            gap: "8px"
+        stepBar: (idx) => ({
+            height: "4px", borderRadius: "2px",
+            background: idx <= step ? "linear-gradient(90deg, #9b1a3a, #c4304f)" : "rgba(255,255,255,0.1)",
+            transition: "all 0.5s ease"
+        }),
+        stepCounter: {
+            textAlign: "right", fontSize: "12px", color: "rgba(255,248,240,0.5)", textTransform: "uppercase", letterSpacing: "1px"
         },
         main: {
             width: "100%",
@@ -441,25 +436,25 @@ const TrueLovePlan = ({
             pointerEvents: "none",
             zIndex: 0
         },
-        stepLabel: {
-            color: "#ff6b8a",
+        stepTag: {
+            color: THEME.rose,
             letterSpacing: "3px",
-            fontSize: "11px",
+            fontSize: "12px",
             fontWeight: "bold",
-            marginBottom: "12px",
+            marginBottom: "8px",
             display: "block",
             textTransform: "uppercase"
         },
         heading: {
-            fontSize: "clamp(2rem, 8vw, 3rem)",
+            fontSize: "clamp(24px, 5vw, 40px)",
             marginBottom: "16px",
             lineHeight: 1.2,
             color: "#fff",
-            fontFamily: "'Georgia', 'Times New Roman', serif"
+            fontFamily: THEME.serif
         },
-        subtext: {
-            color: "rgba(255, 255, 255, 0.5)",
-            fontSize: "18px",
+        subheading: {
+            color: "rgba(255,248,240,0.5)",
+            fontSize: "16px",
             marginBottom: "32px"
         },
         tabContainer: {
@@ -554,11 +549,11 @@ const TrueLovePlan = ({
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            background: isEnabled ? "linear-gradient(90deg, #e94560, #ff6b8a)" : "rgba(255, 255, 255, 0.05)",
+            background: isEnabled ? `linear-gradient(90deg, ${THEME.maroon}, ${THEME.rose})` : "rgba(255, 255, 255, 0.05)",
             color: isEnabled ? "#fff" : "rgba(255, 255, 255, 0.2)",
             cursor: isEnabled ? "pointer" : "not-allowed",
             border: "none",
-            boxShadow: isEnabled ? "0 8px 30px rgba(233, 69, 96, 0.4)" : "none",
+            boxShadow: isEnabled ? `0 8px 30px rgba(155, 26, 58, 0.4)` : "none",
             fontFamily: "inherit"
         }),
         input: {
@@ -1031,8 +1026,8 @@ const TrueLovePlan = ({
       `}</style>
 
             {/* Ambient Orbs */}
-            <div style={{ ...s.orb, top: "-10%", right: "-10%", background: "rgba(233, 69, 96, 0.1)" }} />
-            <div style={{ ...s.orb, bottom: "-10%", left: "-10%", background: "rgba(255, 107, 138, 0.08)" }} />
+            <div style={{ ...s.orb, top: "-10%", right: "-10%", background: "rgba(155, 26, 58, 0.15)" }} />
+            <div style={{ ...s.orb, bottom: "-10%", left: "-10%", background: "rgba(196, 48, 79, 0.12)" }} />
 
             {/* Header */}
             <header style={s.header}>
@@ -1045,35 +1040,25 @@ const TrueLovePlan = ({
             </header>
 
             {/* Progress Bar */}
-            <div style={s.progressContainer}>
-                <div style={s.progressHeader}>
-                    <div style={s.progressLabel}>Progress</div>
-                    <div style={s.progressStepCount}>{step + 1} of 8 steps</div>
-                </div>
-                <div style={s.progressBarGrid}>
-                    {[...Array(8)].map((_, i) => (
-                        <div key={i} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                            <div style={{
-                                height: "2px",
-                                borderRadius: "9999px",
-                                transition: "all 0.5s",
-                                background: i <= step ? "linear-gradient(90deg, #e94560, #ff6b8a)" : "rgba(255,255,255,0.1)"
-                            }} />
-                        </div>
+            {/* Progress Bar */}
+            <div style={s.progressBox}>
+                <div style={s.progressGrid}>
+                    {Array(8).fill(0).map((_, i) => (
+                        <div key={i} style={s.stepBar(i)} />
                     ))}
                 </div>
+                <div style={s.stepCounter}>{step + 1} of 8 steps</div>
             </div>
 
             {/* Main Content Area */}
             <main style={s.main}>
                 {step === 0 && (
                     <div>
-                        <label style={s.stepLabel}>Beginning</label>
-                        <h1 style={s.heading}>
-                            Who are you <br />
-                            <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>creating this for?</span>
-                        </h1>
-                        <p style={s.subtext}>Let's personalize the experience</p>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>BEGINNING</div>
+                            <h1 style={s.heading}>Who are you <i style={{ color: THEME.rose }}>creating this for?</i></h1>
+                            <p style={s.subheading}>Let's personalize the experience</p>
+                        </div>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "340px", margin: "0 auto" }}>
                             {[
@@ -1104,12 +1089,100 @@ const TrueLovePlan = ({
 
                 {step === 1 && (
                     <div>
-                        <label style={s.stepLabel}>Step One</label>
-                        <h1 style={s.heading}>
-                            How does your heart <br />
-                            <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>feel right now?</span>
-                        </h1>
-                        <p style={s.subtext}>Choose up to 3 moods that capture this moment</p>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>RELATIONSHIP</div>
+                            <h1 style={s.heading}>What's your <i style={{ color: THEME.rose }}>relationship?</i></h1>
+                            <p style={s.subheading}>Help us personalize this experience</p>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", maxWidth: "400px", margin: "0 auto" }}>
+                            {[
+                                { id: 'partner', label: 'Partner', sub: '(girlfriend/boyfriend/wife/husband)' },
+                                { id: 'family', label: 'Family', sub: '(parents/siblings)' },
+                                { id: 'relative', label: 'Relative', sub: '(cousins, etc.)' },
+                                { id: 'friend', label: 'Friend', sub: '' }
+                            ].map(rel => (
+                                <div
+                                    key={rel.id}
+                                    onClick={() => {
+                                        setRelationship(rel.id);
+                                        setCustomRelationship('');
+                                    }}
+                                    style={{
+                                        background: relationship === rel.id ? "rgba(155,26,58,0.25)" : "rgba(155,26,58,0.08)",
+                                        border: relationship === rel.id ? `1px solid ${THEME.rose}` : "1px solid rgba(196,48,79,0.25)",
+                                        borderRadius: "16px",
+                                        padding: "20px 16px",
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        transition: "all 0.2s ease"
+                                    }}
+                                >
+                                    <div style={{ fontWeight: "bold", fontSize: "16px", color: relationship === rel.id ? "white" : "rgba(255,248,240,0.8)", marginBottom: "4px" }}>
+                                        {rel.label}
+                                    </div>
+                                    {rel.sub && (
+                                        <div style={{ fontSize: "12px", color: "rgba(255,248,240,0.5)", fontStyle: "italic" }}>
+                                            {rel.sub}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            
+                            {/* Custom option - full width */}
+                            <div
+                                onClick={() => {
+                                    setRelationship('custom');
+                                }}
+                                style={{
+                                    gridColumn: "1 / -1",
+                                    background: relationship === 'custom' ? "rgba(155,26,58,0.25)" : "rgba(155,26,58,0.08)",
+                                    border: relationship === 'custom' ? `1px solid ${THEME.rose}` : "1px solid rgba(196,48,79,0.25)",
+                                    borderRadius: "16px",
+                                    padding: "20px 16px",
+                                    cursor: "pointer",
+                                    textAlign: "center",
+                                    transition: "all 0.2s ease"
+                                }}
+                            >
+                                <div style={{ fontWeight: "bold", fontSize: "16px", color: relationship === 'custom' ? "white" : "rgba(255,248,240,0.8)" }}>
+                                    Custom
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Custom input field */}
+                        {relationship === 'custom' && (
+                            <div style={{ marginTop: "12px", maxWidth: "400px", margin: "12px auto 0" }}>
+                                <input
+                                    type="text"
+                                    value={customRelationship}
+                                    onChange={(e) => setCustomRelationship(e.target.value)}
+                                    placeholder="Describe your relationship..."
+                                    style={{
+                                        width: "100%",
+                                        background: "rgba(255,248,240,0.05)",
+                                        border: `1px solid rgba(196,48,79,0.3)`,
+                                        borderRadius: "12px",
+                                        padding: "12px 16px",
+                                        color: "#fff8f0",
+                                        fontSize: "14px",
+                                        outline: "none",
+                                        boxSizing: "border-box"
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {step === 2 && (
+                    <div>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>STEP TWO</div>
+                            <h1 style={s.heading}>How does your heart feel?</h1>
+                            <p style={s.subheading}>Choose up to 3 moods that capture this moment</p>
+                        </div>
 
                         {/* Tabs */}
                         <div style={s.tabContainer}>
@@ -1161,13 +1234,15 @@ const TrueLovePlan = ({
                     </div>
                 )}
 
-                {step === 2 && (
+                {step === 3 && (
                     <div>
-                        <label style={s.stepLabel}>Step Two</label>
-                        <h1 style={s.heading}>
-                            What's the <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>occasion?</span>
-                        </h1>
-                        <p style={s.subtext}>Pick one occasion for your Love Code</p>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>STEP THREE</div>
+                            <h1 style={s.heading}>
+                                What's the <i style={{ color: THEME.rose }}>occasion?</i>
+                            </h1>
+                            <p style={s.subheading}>Pick one occasion for your Love Code</p>
+                        </div>
 
                         <div style={s.gridOccasion}>
                             {occasions.map(occ => (
@@ -1187,13 +1262,15 @@ const TrueLovePlan = ({
                     </div>
                 )}
 
-                {step === 3 && (
+                {step === 4 && (
                     <div style={{ animation: "fadeInUp 0.6s both" }}>
-                        <label style={s.stepLabel}>Step Three</label>
-                        <h1 style={s.heading}>
-                            Their <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>beautiful story</span>
-                        </h1>
-                        <p style={s.subtext}>Tell us about your connection and what makes them special</p>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>STEP FOUR</div>
+                            <h1 style={s.heading}>
+                                Their <i style={{ color: THEME.rose }}>beautiful story</i>
+                            </h1>
+                            <p style={s.subheading}>Tell us about your connection and what makes them special</p>
+                        </div>
 
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(1, 1fr)", gap: "16px", marginBottom: "24px" }}>
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -1234,13 +1311,13 @@ const TrueLovePlan = ({
                     </div>
                 )}
 
-                {step === 4 && (
-                    <div>
-                        <label style={s.stepLabel}>Step Four</label>
-                        <h1 style={s.heading}>
-                            Your <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>precious moments</span>
-                        </h1>
-                        <p style={s.subtext}>Upload up to 5 photos — they'll appear in your chosen frame</p>
+                {step === 5 && (
+                    <div style={{ animation: "fadeInUp 0.6s both" }}>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>STEP FIVE</div>
+                            <h1 style={s.heading}>Add your <i style={{ color: THEME.rose }}>precious moments</i></h1>
+                            <p style={s.subheading}>Upload up to 5 photos — they'll appear in your chosen frame</p>
+                        </div>
 
                         <div style={{
                             display: window.innerWidth < 600 ? "grid" : "flex",
@@ -1412,9 +1489,9 @@ const TrueLovePlan = ({
                     </div>
                 )}
 
-                {step === 5 && (
+                {step === 6 && (
                     <div style={{ animation: "fadeInUp 0.6s both", textAlign: 'center', padding: '40px 0' }}>
-                        <label style={s.stepLabel}>Step Five
+                        <label style={s.stepLabel}>Step Six
                             <span style={{
                                 fontSize: "9px", letterSpacing: "1.5px",
                                 color: 'rgba(255,255,255,0.2)',
@@ -1538,9 +1615,9 @@ const TrueLovePlan = ({
                     </div>
                 )}
 
-                {step === 6 && (
+                {step === 7 && (
                     <div>
-                        <label style={s.stepLabel}>Step Six</label>
+                        <label style={s.stepLabel}>Step Seven</label>
                         <h1 style={s.heading}>
                             Words written <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>by the heart</span>
                         </h1>
@@ -1630,13 +1707,14 @@ const TrueLovePlan = ({
                         )}
                     </div>
                 )}
-                {step === 7 && (
+                {step === 8 && (
                     <div>
-                        <label style={s.stepLabel}>Step Seven</label>
-                        <h1 style={s.heading}>
-                            Make it <br />
-                            <span style={{ color: "#ff6b8a", fontStyle: "italic" }}>personally yours</span>
-                        </h1>
+                        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+                            <div style={s.stepTag}>FINAL STEP</div>
+                            <h1 style={s.heading}>
+                                Make it <i style={{ color: THEME.rose }}>personally yours</i>
+                            </h1>
+                        </div>
 
                         <div style={{ marginBottom: "40px" }}>
                             <p style={s.frameHeader}>1. Set your Unlock Code</p>
@@ -1649,7 +1727,7 @@ const TrueLovePlan = ({
                                         placeholder="0000"
                                         value={unlockCode}
                                         onChange={(e) => setUnlockCode(e.target.value.replace(/\D/g, ""))}
-                                        style={{ ...s.input, textAlign: "center", letterSpacing: "8px", fontSize: "24px", fontWeight: "bold", color: "#ff6b8a" }}
+                                        style={{ ...s.input, textAlign: "center", letterSpacing: "8px", fontSize: "24px", fontWeight: "bold", color: THEME.rose }}
                                     />
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -1760,9 +1838,9 @@ const TrueLovePlan = ({
                         style={{
                             ...s.btnNext(canProceed()),
                             ...(hoveredBtn === 'next' && canProceed() && {
-                                background: "linear-gradient(135deg, #ff2d55, #ff6b8a)",
+                                background: `linear-gradient(135deg, ${THEME.maroon}, ${THEME.rose})`,
                                 transform: "translateY(-2px) scale(1.02)",
-                                boxShadow: "0 12px 35px rgba(233,69,96,0.55)"
+                                boxShadow: `0 12px 35px rgba(155, 26, 58, 0.55)`
                             }),
                             minWidth: "160px",
                             justifyContent: "center"
@@ -1780,7 +1858,7 @@ const TrueLovePlan = ({
                                 <span style={{ fontSize: "9px", textTransform: "uppercase" }}>Processing...</span>
                             </div>
                         ) : (
-                            step === 7 ? "Preview & Pay ₹99 💗" : "Next →"
+                            step === 8 ? "Preview & Pay ₹99 💗" : "Next →"
                         )}
                     </button>
                     {bgRemoving && (

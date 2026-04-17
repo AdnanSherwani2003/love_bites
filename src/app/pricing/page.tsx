@@ -1,84 +1,170 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
-import { useScrollReveal } from '@/hooks/useScrollReveal'
+import '@/app/pricing/pricing-new.css'
 
-function FaqItem({ question, answer }: { question: string, answer: string }) {
-    const [isOpen, setIsOpen] = useState(false)
-    const itemRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (itemRef.current && !itemRef.current.contains(event.target as Node)) {
-                setIsOpen(false)
-            }
-        }
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside)
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-    }, [isOpen])
-
-    return (
-        <div className={`faq-item ${isOpen ? 'open' : ''}`} ref={itemRef}>
-            <button className="faq-q" onClick={() => setIsOpen(!isOpen)}>
-                <span className="faq-q-text">{question}</span>
-                <span className="faq-icon">+</span>
-            </button>
-            <div className="faq-a">
-                <p>{answer}</p>
-            </div>
-        </div>
-    )
+interface Feature {
+  text: string;
 }
 
-function Toast({ message, visible, onHide }: { message: string, visible: boolean, onHide: () => void }) {
-    useEffect(() => {
-        if (visible) {
-            const timer = setTimeout(onHide, 3000)
-            return () => clearTimeout(timer)
-        }
-    }, [visible, onHide])
+interface PlanProps {
+  name: string;
+  price: number;
+  tagline: string;
+  iconColor: string;
+  buttonType: 'outline' | 'filled' | 'premium';
+  label: string;
+  visibleFeatures: string[];
+  hiddenFeatures: string[];
+  badge?: string;
+  badgeClass?: string;
+  cardClass?: string;
+  href: string;
+  descRef: React.RefObject<HTMLParagraphElement | null>;
+}
 
-    if (!visible) return null
+const SweetStartIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 44 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 8 C22 8 14 4 14 10 C14 14 18 15 22 15 C26 15 30 14 30 10 C30 4 22 8 22 8Z" fill="#9b1a3a" opacity="0.7"/>
+    <path d="M22 8 C22 8 14 12 22 15" stroke="#c4304f" strokeWidth="1" fill="none" strokeLinecap="round"/>
+    <path d="M22 8 C22 8 30 12 22 15" stroke="#c4304f" strokeWidth="1" fill="none" strokeLinecap="round"/>
+    <rect x="8" y="15" width="28" height="18" rx="2" fill="none" stroke="#9b1a3a" strokeWidth="1.2"/>
+    <line x1="22" y1="15" x2="22" y2="33" stroke="#c4304f" strokeWidth="1.2"/>
+    <line x1="8" y1="21" x2="36" y2="21" stroke="#c4304f" strokeWidth="1.2"/>
+  </svg>
+);
 
-    return (
-        <div style={{
-            position: 'fixed',
-            bottom: '30px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'var(--crimson)',
-            color: 'white',
-            padding: '12px 24px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 30px rgba(192, 49, 79, 0.3)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            animation: 'reveal-up 0.4s ease-out'
-        }}>
-            <span style={{ fontSize: '1.2rem' }}>✨</span>
-            <span style={{ fontWeight: 500 }}>{message}</span>
+const TrueLoveIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 48 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="18" width="36" height="22" rx="3" fill="none" stroke="#c0314f" strokeWidth="1.3"/>
+    <rect x="6" y="14" width="36" height="8" rx="2" fill="none" stroke="#c0314f" strokeWidth="1.3"/>
+    <line x1="24" y1="14" x2="24" y2="40" stroke="#c0314f" strokeWidth="1.3"/>
+    <path d="M24 14 C24 14 34 10 34 6 C34 3 31 2 28 4 C26 5.5 24 8 24 8Z" fill="#c0314f" opacity="0.8"/>
+    <path d="M24 14 C24 14 14 10 14 6 C14 3 17 2 20 4 C22 5.5 24 9 24 9Z" fill="#c0314f" opacity="0.85"/>
+    <circle cx="38" cy="10" r="2.5" fill="#c0314f"/>
+    <circle cx="10" cy="8" r="1.8" fill="#fff8f0" opacity="0.5"/>
+    <circle cx="44" cy="32" r="1" fill="#c0314f" opacity="0.3"/>
+    <circle cx="6" cy="34" r="1" fill="#c0314f" opacity="0.3"/>
+  </svg>
+);
+
+const GrandAmourIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 50 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="20" width="40" height="22" rx="3" fill="none" stroke="#8b0a2a" strokeWidth="1.3"/>
+    <rect x="5" y="15" width="40" height="8" rx="2" fill="none" stroke="#8b0a2a" strokeWidth="1.3"/>
+    <line x1="25" y1="15" x2="25" y2="42" stroke="#8b0a2a" strokeWidth="1.3"/>
+    <path d="M25 15 C25 15 13 10 13 5 C13 2 16 1 19 3 C21.5 4.5 25 9 25 9Z" fill="#8b0a2a" opacity="0.85"/>
+    <path d="M25 15 C25 15 37 10 37 5 C37 2 34 1 31 3 C28.5 4.5 25 9 25 9Z" fill="#8b0a2a" opacity="0.85"/>
+    <circle cx="25" cy="20" r="3.5" fill="#8b0a2a"/>
+    <circle cx="25" cy="20" r="1.8" fill="#fff8f0" opacity="0.5"/>
+    <path d="M5 23 C5 23 15 25.5 25 23 C35 21 45 23 45 23" stroke="#8b0a2a" strokeWidth="0.7" fill="none" opacity="0.4"/>
+    <circle cx="42" cy="12" r="1.5" fill="#8b0a2a" opacity="0.45"/>
+    <circle cx="8" cy="11" r="1.5" fill="#8b0a2a" opacity="0.45"/>
+    <circle cx="44" cy="32" r="1" fill="#8b0a2a" opacity="0.3"/>
+    <circle cx="6" cy="34" r="1" fill="#8b0a2a" opacity="0.3"/>
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 13L9 17L19 7" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+function PlanCard({ 
+  name, price, tagline, iconColor, buttonType, label, 
+  visibleFeatures, hiddenFeatures, badge, badgeClass, cardClass, href, descRef 
+}: PlanProps) {
+  const allFeatures = [...visibleFeatures, ...hiddenFeatures];
+
+  return (
+    <div 
+      className={`plan-card-new ${cardClass || ''} ${badge ? 'popular' : ''}`}
+      style={{
+        padding: '24px',
+        borderRadius: '16px'
+      }}
+    >
+      {badge && <div className={`card-badge ${badgeClass}`} style={{ fontSize: '11px', padding: '3px 10px' }}>{badge}</div>}
+      
+      <div className="top">
+        <div className="plan-icon-container" style={{ marginBottom: '16px' }}>
+          {name === 'Sweet Start' ? <SweetStartIcon /> : name === 'True Love' ? <TrueLoveIcon /> : <GrandAmourIcon />}
         </div>
-    )
+        <h2 className="plan-name-new" style={{ fontSize: '22px', fontWeight: '700', marginBottom: '4px' }}>{name}</h2>
+        <p className="plan-desc-new" ref={descRef} style={{ fontSize: '13px', marginBottom: '16px' }}>{tagline}</p>
+        <div className="plan-price-new" style={{ marginBottom: '4px' }}>
+          <span className="currency" style={{ fontSize: '44px', fontWeight: '700' }}>₹</span>
+          <span className="amount" style={{ fontSize: '44px', fontWeight: '700' }}>{price}</span>
+        </div>
+        <p className="payment-note" style={{ fontSize: '12px', marginBottom: '16px' }}>one-time payment</p>
+        <Link 
+          href={href} 
+          className={`get-started-btn ${
+            buttonType === 'outline' ? 'btn-outline-red' : 
+            buttonType === 'filled' ? 'btn-filled-red' : 'btn-premium-grad'
+          }`}
+          style={{
+            padding: '16px 32px',
+            fontSize: '16px',
+            fontWeight: '700',
+            marginBottom: '-18px',
+            display: 'inline-block',
+            borderRadius: '12px',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: buttonType === 'outline' ? '0 4px 12px rgba(192, 49, 79, 0.15)' : 
+                       buttonType === 'filled' ? '0 8px 24px rgba(192, 49, 79, 0.3)' : 
+                       '0 8px 24px rgba(139, 10, 42, 0.3)',
+            transform: 'scale(1)',
+            border: buttonType === 'outline' ? '2px solid rgba(192, 49, 79, 0.6)' : 'none',
+            letterSpacing: '0.5px'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05) translateY(-2px)';
+            e.currentTarget.style.boxShadow = buttonType === 'outline' ? '0 8px 20px rgba(192, 49, 79, 0.25)' : 
+                                       buttonType === 'filled' ? '0 12px 32px rgba(192, 49, 79, 0.4)' : 
+                                       '0 12px 32px rgba(139, 10, 42, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = buttonType === 'outline' ? '0 4px 12px rgba(192, 49, 79, 0.15)' : 
+                                       buttonType === 'filled' ? '0 8px 24px rgba(192, 49, 79, 0.3)' : 
+                                       '0 8px 24px rgba(139, 10, 42, 0.3)';
+          }}
+        >
+          ♥ Get Started
+        </Link>
+      </div>
+
+      <div className="divider"></div>
+
+      <div className="mid">
+        <span className="feature-label" style={{ fontSize: '11px', letterSpacing: '0.12em', marginBottom: '10px', display: 'block' }}>{label}</span>
+        <ul className="feature-list" style={{ fontSize: '13px', lineHeight: '1.45', marginBottom: '0' }}>
+          {allFeatures.map((f, i) => (
+            <li key={i} className="feature-item" style={{ marginBottom: '10px' }}>
+              <span className="check"><CheckIcon /></span>
+              {f}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
 export default function PricingPage() {
-    useScrollReveal()
     const [pricing, setPricing] = useState({ tier_49: 49, tier_99: 99, tier_149: 149 })
-    const [popularTier, setPopularTier] = useState(99)
     const [loading, setLoading] = useState(true)
-    const [toast, setToast] = useState<{ visible: boolean, message: string }>({ visible: false, message: '' })
-    const [isGrandAmourHovered, setIsGrandAmourHovered] = useState(false)
+    
+    const descRefs = [
+      useRef<HTMLParagraphElement | null>(null),
+      useRef<HTMLParagraphElement | null>(null),
+      useRef<HTMLParagraphElement | null>(null)
+    ];
 
     useEffect(() => {
         fetchSettings()
@@ -89,7 +175,6 @@ export default function PricingPage() {
             const response = await fetch('/api/settings')
             const data = await response.json()
             if (data.pricing) setPricing(data.pricing)
-            if (data.content?.popular_tier) setPopularTier(data.content.popular_tier)
         } catch (err) {
             console.error('Failed to load dynamic pricing:', err)
         } finally {
@@ -97,186 +182,129 @@ export default function PricingPage() {
         }
     }
 
-    const showComingSoon = () => {
-        setToast({ visible: true, message: 'True Love & Forever plans are coming soon! Stay tuned.' })
-    }
+    useLayoutEffect(() => {
+      const equalizeHeights = () => {
+        // Reset heights first
+        descRefs.forEach(ref => {
+          if (ref.current) ref.current.style.height = 'auto';
+        });
+
+        // Find max height
+        let maxHeight = 0;
+        descRefs.forEach(ref => {
+          if (ref.current) {
+            maxHeight = Math.max(maxHeight, ref.current.offsetHeight);
+          }
+        });
+
+        // Set all to max height
+        descRefs.forEach(ref => {
+          if (ref.current) {
+            ref.current.style.height = `${maxHeight}px`;
+          }
+        });
+      };
+
+      equalizeHeights();
+      window.addEventListener('resize', equalizeHeights);
+      return () => window.removeEventListener('resize', equalizeHeights);
+    }, [loading]); // Run when loading finishes and content is rendered
 
     return (
         <div className="pricing-body-page">
             <Navbar forceScrolled />
 
-            <main>
-                <div className="pricing-page" style={{ paddingTop: '100px' }}>
-                    <section id="pricing" className="pricing-section">
-                        <span className="wm" style={{ top: '3%', left: '-4%', transform: 'rotate(-10deg)' }}>yours</span>
-                        <span className="wm" style={{ bottom: '5%', right: '-4%', transform: 'rotate(7deg)' }}>always</span>
-                        <span className="wm" style={{ top: '38%', left: '52%', transform: 'rotate(-4deg)', fontSize: '3.5rem' }}>forever</span>
+            <main className="pricing-section-new">
+                <header className="pricing-header-new" style={{ paddingTop: '100px' }}>
+                    <span className="pill-tag">♥ Pricing</span>
+                    <h1>
+                        <span className="subtitle-it">One moment. One payment.</span>
+                        <span className="title-bold-it">No subscriptions ever.</span>
+                    </h1>
+                    <p>Pay once, love forever. Pick the plan that fits your moment.</p>
+                </header>
 
-                        <div className="pricing-header">
-                            <span className="badge">♥ Pricing</span>
-                            <h1>
-                                <span className="h1-top">One moment. One payment.</span>
-                                <span className="h1-bottom">No subscriptions ever.</span>
-                            </h1>
-                            <p>Pay once, love forever. Pick the plan that fits your moment.</p>
-                        </div>
+                <div className="plans-grid-new" style={{ gap: '20px' }}>
+                    <PlanCard 
+                      name="Sweet Start"
+                      price={pricing.tier_49}
+                      tagline="Perfect for a first gesture — simple, sweet, and heartfelt."
+                      iconColor="#c0314f"
+                      buttonType="outline"
+                      label="Included"
+                      href="/create-49"
+                      descRef={descRefs[0]}
+                      visibleFeatures={[
+                        "1 Love Code creation",
+                        "Choose mood & occasion",
+                        "AI-written personal message",
+                        "Up to 5 photo uploads"
+                      ]}
+                      hiddenFeatures={[
+                        "Secret unlock code & hint",
+                        "Custom unlock hint message",
+                        "Shareable private link"
+                      ]}
+                    />
 
-                        <div className="plans-grid">
-                            <div className={`plan-card ${popularTier === 49 ? 'popular' : ''}`}>
-                                {popularTier === 49 && <div className="popular-badge">⭐ Most Popular</div>}
-                                <div className="plan-name">Sweet Start</div>
-                                <p className="plan-tagline">Perfect for a first gesture — simple, sweet, and heartfelt.</p>
-                                <div className="plan-price-wrap">
-                                    <span className="plan-currency">₹</span>
-                                    <span className="plan-amount">{pricing.tier_49}</span>
-                                </div>
-                                <p className="plan-once">one-time payment</p>
-                                <div className="plan-divider"></div>
-                                <ul className="plan-features">
-                                    <li>1 Love Code creation</li>
-                                    <li>Choose your mood & occasion</li>
-                                    <li>AI-written personal message</li>
-                                    <li>Up to 5 photo uploads</li>
-                                    <li>Secret 4-digit unlock code</li>
-                                    <li>Custom unlock hint message</li>
-                                    <li>Shareable private link</li>
-                                </ul>
-                                <Link href="/create-49" className="plan-btn outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
-                            </div>
+                    <PlanCard 
+                      name="True Love"
+                      price={pricing.tier_99}
+                      tagline="The full experience — made for moments that deserve to be remembered forever."
+                      iconColor="#c0314f"
+                      buttonType="filled"
+                      label="Everything in Sweet Start, plus"
+                      badge="⭐ Most Popular"
+                      badgeClass="badge-popular"
+                      href="/create-99"
+                      descRef={descRefs[1]}
+                      visibleFeatures={[
+                        "3 moods & 1 occasion selection",
+                        "5 premium photo frames",
+                        "Cinematic video by our team",
+                        "Secret 4-digit unlock code + hint"
+                      ]}
+                      hiddenFeatures={[
+                        "Email WhatsApp or Instagram delivery",
+                        "Scheduled delivery (date & time)"
+                      ]}
+                    />
 
-                            <div className={`plan-card ${popularTier === 99 ? 'popular' : ''}`}>
-                                {popularTier === 99 && <div className="popular-badge">⭐ Most Popular</div>}
-                                <div className="plan-name">True Love</div>
-                                <p className="plan-tagline">The full experience — made for moments that deserve to be remembered forever.</p>
-                                <div className="plan-price-wrap">
-                                    <span className="plan-currency">₹</span>
-                                    <span className="plan-amount">{pricing.tier_99}</span>
-                                </div>
-                                <p className="plan-once">one-time payment</p>
-                                <div className="plan-divider"></div>
-                                <ul className="plan-features">
-                                    <li>1 Love Code creation</li>
-                                    <li>3 moods & 1 occasion selection</li>
-                                    <li>AI-written personal message</li>
-                                    <li>Up to 5 photo uploads</li>
-                                    <li>5 premium photo frames (auto-curated)</li>
-                                    <li>One cinematic video (crafted by our team)</li>
-                                    <li>Secret 4-digit unlock code</li>
-                                    <li>Custom unlock hint message</li>
-                                    <li>Shareable private link</li>
-                                    <li>Delivered via Email, WhatsApp or Instagram</li>
-                                    <li>Scheduled delivery (date & time)</li>
-                                </ul>
-                                <Link href="/create-99" className="plan-btn filled" style={{ width: '100%', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>♥ Get Started</Link>
-                            </div>
-
-                            <div className="plan-card" style={{
-                                border: '2px solid rgba(139,0,56,0.3)',
-                                background: 'white',
-                                boxShadow: isGrandAmourHovered ? '0 28px 64px rgba(139,0,56,0.25)' : '0 8px 40px rgba(139,0,56,0.15)',
-                                transform: isGrandAmourHovered ? 'scale(1.02) translateY(-14px)' : 'scale(1.02)',
-                                position: 'relative',
-                                zIndex: 2,
-                                transition: 'all 0.3s ease',
-                                cursor: 'pointer'
-                            }}
-                            onMouseEnter={() => setIsGrandAmourHovered(true)}
-                            onMouseLeave={() => setIsGrandAmourHovered(false)}>
-                                {popularTier === 149 && <div className="popular-badge" style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>⭐ Most Popular</div>}
-                                <div className="plan-name" style={{
-                                    background: 'linear-gradient(135deg, #8b0038, #c4304f)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                    fontFamily: 'Playfair Display, serif'
-                                }}>Grand Amour</div>
-                                <p className="plan-tagline">The ultimate love experience — crafted for those who believe love deserves to be extraordinary.</p>
-                                <div className="plan-price-wrap">
-                                    <span className="plan-currency" style={{ color: '#8b0038' }}>₹</span>
-                                    <span className="plan-amount" style={{ color: '#8b0038' }}>{pricing.tier_149}</span>
-                                </div>
-                                <p className="plan-once">one-time payment</p>
-                                <div className="plan-divider"></div>
-                                <ul className="plan-features" style={{ color: '#8b0038' }}>
-                                    <li>Unlimited Love Code creations</li>
-                                    <li>All moods & all occasions</li>
-                                    <li>AI-written personal message</li>
-                                    <li>Up to 10 photo uploads</li>
-                                    <li>5 premium photo frames (auto-curated)</li>
-                                    <li>1 cinematic video — crafted by our team</li>
-                                    <li>Secret 4-digit unlock code + hint</li>
-                                    <li>Optional background music</li>
-                                    <li>Choose two delivery option via WhatsApp, email or Instagram</li>
-                                    <li>Scheduled delivery (date & time)</li>
-                                    <li>You'll know the moment they open your love code</li>
-                                    <li>See how long they spent with your love code</li>
-                                    <li>The can reply back with attached photo</li>
-                                    <li>Get an instant email for every update</li>
-                                </ul>
-                                <Link href="/create-149" className="plan-btn filled" style={{ 
-                                    width: '100%', 
-                                    cursor: 'pointer', 
-                                    fontFamily: 'inherit',
-                                    background: 'linear-gradient(135deg, #8b0038, #c4304f)',
-                                    border: 'none',
-                                    color: 'white',
-                                    textDecoration: 'none',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>♛ Get Started</Link>
-                            </div>
-                        </div>
-
-                        <p className="pricing-trust">
-                            <span>500+</span> Love Codes sent &nbsp;·&nbsp;
-                            <span>4.9★</span> rating &nbsp;·&nbsp;
-                            Secure payment &nbsp;·&nbsp;
-                            End-to-end encrypted
-                        </p>
-
-                        <div className="faq-wrap">
-                            <div className="faq-header">
-                                <h2>Questions? We&apos;ve got <em>answers.</em></h2>
-                                <p>Everything you need to know before creating your Love Code.</p>
-                            </div>
-
-                            <FaqItem
-                                question="Is this really a one-time payment?"
-                                answer="Yes — absolutely. You pay once and your digital love experience is yours to keep. No monthly fees, no renewals, no hidden charges. Just a single payment for a moment that will be cherished a lifetime."
-                            />
-                            <FaqItem
-                                question="What exactly is a Love Code?"
-                                answer="Think of it as a private digital time capsule. It's a beautifully animated experience built from your shared memories, AI-tailored messages, and custom visuals. It blooms into life only when your partner enters the secret code you've set."
-                            />
-                            <FaqItem
-                                question="Can I upgrade my plan later?"
-                                answer="Of course! Our True Love and Forever plans are launching very soon. You'll be able to upgrade seamlessly by just paying the difference. Your existing memories and Love Codes will always remain safe and preserved."
-                            />
-                            <FaqItem
-                                question="How does the secret unlock code work?"
-                                answer="When you create your Love Code, you'll set a 4-digit key — something only the two of you know (like your anniversary or the date of your first kiss). You can add a playful hint to guide them. It adds that perfect layer of shared intimacy."
-                            />
-                            <FaqItem
-                                question="Is my data and privacy protected?"
-                                answer="Your privacy is our highest priority. Every Love Code, photo, and message is end-to-end encrypted. We never share your data — it's a private world built only for you and your partner to explore."
-                            />
-                            <FaqItem
-                                question="What payment methods can I use?"
-                                answer="We want your experience to be as smooth as possible. We accept all major UPI apps (GPay, PhonePe, Paytm), along with all Indian and international Debit/Credit cards and Net Banking options."
-                            />
-
-                        </div>
-                    </section>
+                    <PlanCard 
+                      name="Grand Amour"
+                      price={pricing.tier_149}
+                      tagline="The ultimate love experience — crafted for those who believe love deserves to be extraordinary."
+                      iconColor="#8b0a2a"
+                      buttonType="premium"
+                      label="Everything in True Love, plus"
+                      badge="✦ Most Premium"
+                      badgeClass="badge-premium"
+                      cardClass="premium"
+                      href="/create-149"
+                      descRef={descRefs[2]}
+                      visibleFeatures={[
+                        "Unlimited Love Code creations",
+                        "Up to 10 photo uploads",
+                        "Optional background music",
+                        "Read receipts & time spent tracking"
+                      ]}
+                      hiddenFeatures={[
+                        "Reply with voice note or photo",
+                        "Instant email for every update",
+                        "Two delivery channels of your choice",
+                        "All moods & occasions unlocked"
+                      ]}
+                    />
                 </div>
+
+                <footer className="pricing-footer-new">
+                  <div className="footer-trust-line">
+                    Sent officially from Love Bites <span className="dot-sep"></span> No subscription <span className="dot-sep"></span> Pay once
+                  </div>
+                </footer>
             </main>
 
             <Footer />
-            <Toast
-                message={toast.message}
-                visible={toast.visible}
-                onHide={() => setToast({ ...toast, visible: false })}
-            />
         </div>
     )
 }

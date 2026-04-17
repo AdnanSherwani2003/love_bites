@@ -40,6 +40,7 @@ export default function Create49Page() {
             senderName: data.yourName,
             recipientName: data.partnerName,
             partnerDesc: data.theirStory,
+            relationship: data.relationship || 'partner', // Use selected relationship or default to partner
             selectedMoods: [{ emoji: "❤️", label: data.selectedMood || "Love" }],
             occasion: { 
                 id: data.selectedOccasion, 
@@ -53,8 +54,10 @@ export default function Create49Page() {
             },
             generatedMessage: data.generatedMessage,
             photos: data.photos,
+            photoMemories: data.photoMemories,
             unlockCode: data.unlockCode,
-            hintMessage: data.hintMessage
+            hintMessage: data.hintMessage,
+            partnerPhotoUrl: data.partnerPhotoUrl
         };
         
         // Save to localStorage for the preview route
@@ -79,6 +82,11 @@ export default function Create49Page() {
     };
 
     const handleFinalSubmit = async () => {
+        if (!formData) {
+            setSubmitError("Please complete the form first before submitting.");
+            return;
+        }
+        
         setIsSubmitting(true);
         setSubmitError("");
         try {
@@ -103,6 +111,11 @@ export default function Create49Page() {
                         if (file) body.append(`framePhoto_${i}`, file);
                     }
                 });
+            }
+
+            // Handle Photo Memories
+            if (formData.photoMemories && Array.isArray(formData.photoMemories)) {
+                body.append('photoMemories', JSON.stringify(formData.photoMemories));
             }
 
             const res = await fetch('/api/love-code', {

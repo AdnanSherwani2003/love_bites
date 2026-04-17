@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function GET(
     request: Request,
-    context: { params: { code: string } }
+    context: { params: Promise<{ code: string }> }
 ) {
     try {
         const supabase = await createClient()

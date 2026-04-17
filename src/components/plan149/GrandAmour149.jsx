@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import LoveBitesLogo from "../LoveBitesLogo";
 import { trackEvent } from "../../lib/analytics";
+import { removeBackground } from "../../lib/removeBackground";
 
 /**
  * Grand Amour ₹149 Plan Component
@@ -28,12 +29,20 @@ const GrandAmour149 = ({
   // --- STATE VARIABLES ---
   const [step, setStep] = useState(0);
   const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
+  const [relationship, setRelationship] = useState(null); // 'partner', 'family', 'relative', 'friend', or custom string
+  const [customRelationship, setCustomRelationship] = useState(""); // for custom relationship input
   const [selectedMoods, setSelectedMoods] = useState([]); // max 5
   const [selectedOccasion, setSelectedOccasion] = useState(null);
   const [yourName, setYourName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [theirStory, setTheirStory] = useState("");
   const [photos, setPhotos] = useState(Array(10).fill(null));
+  const [photoMemories, setPhotoMemories] = useState(Array(10).fill(''));
+  const [themPhoto, setThemPhoto] = useState(null);
+  const [bgRemoving, setBgRemoving] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState("");
+  const [partnerPhotoFile, setPartnerPhotoFile] = useState(null);
+  const [processedPhotoUrl, setProcessedPhotoUrl] = useState(null);
   const [videoPhotos, setVideoPhotos] = useState(Array(5).fill(null));
   const [activePhotoSlot, setActivePhotoSlot] = useState(null);
   const [activeVideoSlot, setActiveVideoSlot] = useState(null);
@@ -126,16 +135,19 @@ const GrandAmour149 = ({
 
   // --- HELPERS ---
   const canProceed = () => {
+    if (bgRemoving) return false;
     if (step === 0) return createFor !== null;
-    if (step === 1) return selectedMoods.length > 0;
-    if (step === 2) return selectedOccasion !== null;
-    if (step === 3) return theirStory.trim().length > 10;
-    if (step === 4) return photos.some(p => p !== null);
-    if (step === 5) return true; // video skippable
-    if (step === 6) return true; // music optional
-    if (step === 7) return destructMode !== null;
-    if (step === 8) return generatedMessage.length > 0;
-    if (step === 9) return unlockCode.every(c => c !== "") && deliveryMethod !== null && notifyEmail.length > 0;
+    if (step === 1) return relationship !== null && (relationship !== 'custom' || customRelationship.trim() !== '');
+    if (step === 2) return selectedMoods.length > 0;
+    if (step === 3) return selectedOccasion !== null;
+    if (step === 4) return theirStory.trim().length > 10;
+    if (step === 5) return photos.some(p => p !== null);
+    if (step === 6) return true; // video skippable
+    if (step === 7) return true; // Add a photo of them is optional
+    if (step === 8) return true; // music optional
+    if (step === 9) return destructMode !== null;
+    if (step === 10) return generatedMessage.length > 0;
+    if (step === 11) return unlockCode.every(c => c !== "") && deliveryMethod !== null && notifyEmail.length > 0;
     return true;
   };
 
@@ -153,16 +165,44 @@ const GrandAmour149 = ({
     }
   };
 
-  const handleNext = () => {
-    if (step === 9 && canProceed()) {
+  const handleNext = async () => {
+    if (step === 7 && themPhoto && !processedPhotoUrl) {
+        setBgRemoving(true);
+        setProcessingStatus("removing background");
+        
+        const statusTimer = setInterval(() => {
+            setProcessingStatus(prev => {
+                if (prev === "removing background") return "almost ready...";
+                if (prev === "almost ready...") return "finishing up...";
+                return prev;
+            });
+        }, 3000);
+
+        try {
+            const resultUrl = await removeBackground(partnerPhotoFile);
+            setProcessedPhotoUrl(resultUrl);
+            setStep(s => s + 1);
+        } catch (error) {
+            console.error("Background removal failed:", error);
+            setProcessedPhotoUrl(themPhoto); // fallback
+            setStep(s => s + 1);
+        } finally {
+            clearInterval(statusTimer);
+            setBgRemoving(false);
+        }
+        return;
+    }
+
+    if (step === 11 && canProceed()) {
       if (onComplete) {
         onComplete({
           createFor,
+          relationship,
           step, 
           selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id) || { id, label: id, emoji: "❤️" }), 
           selectedOccasion: occasions.find(o => o.id === selectedOccasion) || { id: "anniversary", label: "Anniversary", emoji: "💑" },
           yourName, partnerName, theirStory,
-          photos, videoPhotos, selectedFrame, musicEnabled, musicTab, selectedTrack,
+          photos, photoMemories, themPhoto, partnerPhotoUrl: processedPhotoUrl, videoPhotos, selectedFrame, musicEnabled, musicTab, selectedTrack,
           uploadedMusic, destructMode, generatedMessage, unlockCode: unlockCode.join(""), hintMessage,
           deliveryMethod, recipientContact, deliveryDate, deliveryTime, notifyEmail,
           notifOpen, notifView, notifReply
@@ -193,9 +233,29 @@ const GrandAmour149 = ({
     }
   };
 
+  const handleFileUploadForThem = () => {
+    photoRef.current.click();
+  };
+
   const handleFileChange = async (e, type) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+
+    // Handle 'them' photo upload (step 6)
+    if (type === 'them_photo') {
+      const file = files[0];
+      if (file) {
+        setPartnerPhotoFile(file);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setThemPhoto(event.target.result);
+        };
+        reader.readAsDataURL(file);
+        setProcessedPhotoUrl(null);
+      }
+      if (photoRef.current) photoRef.current.value = "";
+      return;
+    }
 
     if (type === 'music') {
       const file = files[0];
@@ -258,6 +318,11 @@ const GrandAmour149 = ({
       const newPhotos = [...photos];
       newPhotos[index] = null;
       setPhotos(newPhotos);
+      
+      // Also reset the memory when photo is removed
+      const newMemories = [...photoMemories];
+      newMemories[index] = '';
+      setPhotoMemories(newMemories);
     } else if (type === 'video') {
       const newVideoPhotos = [...videoPhotos];
       newVideoPhotos[index] = null;
@@ -265,6 +330,28 @@ const GrandAmour149 = ({
     } else if (type === 'music') {
       setUploadedMusic(null);
     }
+  };
+
+  const updateMemory = (index, value) => {
+    const updated = [...photoMemories];
+    updated[index] = value.slice(0, 120);
+    setPhotoMemories(updated);
+  };
+
+  const getPlaceholder = (index) => {
+    const placeholders = [
+      "Where it all began...",
+      "A moment I'll never forget.",
+      "This day felt like magic.",
+      "Our favourite place.",
+      "I wish we could go back.",
+      "The way you looked at me...",
+      "That perfect day together.",
+      "When I knew you were the one.",
+      "Our secret special place.",
+      "A memory I'll always treasure."
+    ];
+    return placeholders[index] || "A precious memory...";
   };
 
   const generateAI = async () => {
@@ -346,7 +433,7 @@ const GrandAmour149 = ({
       marginBottom: "40px", width: "100%"
     },
     progressGrid: {
-      display: "grid", gridTemplateColumns: "repeat(10, 1fr)", gap: "6px", marginBottom: "8px"
+      display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "6px", marginBottom: "8px"
     },
     stepBar: (idx) => ({
       height: "4px", borderRadius: "2px",
@@ -467,14 +554,14 @@ const GrandAmour149 = ({
           <div style={styles.pill}>GRAND AMOUR ₹149</div>
         </header>
 
-        {/* PROGRESS BAR */}
+        {/* PROGRESS */}
         <div style={styles.progressBox}>
           <div style={styles.progressGrid}>
-            {Array(10).fill(0).map((_, i) => (
+            {Array(12).fill(0).map((_, i) => (
               <div key={i} style={styles.stepBar(i)} />
             ))}
           </div>
-          <div style={styles.stepCounter}>{step + 1} of 10 steps</div>
+          <div style={styles.stepCounter}>{step + 1} of 12 steps</div>
         </div>
 
         {/* MAIN STEPS */}
@@ -516,11 +603,101 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 1: MOOD */}
+          {/* STEP 1: RELATIONSHIP */}
           {step === 1 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step One</div>
+                <div style={styles.stepTag}>Relationship</div>
+                <h1 style={styles.heading}>What's your <i style={{ color: THEME.rose }}>relationship?</i></h1>
+                <p style={styles.subheading}>Help us personalize this experience</p>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", maxWidth: "400px", margin: "0 auto" }}>
+                {[
+                  { id: 'partner', label: 'Partner', sub: '(girlfriend/boyfriend/wife/husband)' },
+                  { id: 'family', label: 'Family', sub: '(parents/siblings)' },
+                  { id: 'relative', label: 'Relative', sub: '(cousins, etc.)' },
+                  { id: 'friend', label: 'Friend', sub: '' }
+                ].map(rel => (
+                  <div
+                    key={rel.id}
+                    onClick={() => {
+                      setRelationship(rel.id);
+                      setCustomRelationship('');
+                    }}
+                    style={{
+                      background: relationship === rel.id ? "rgba(155,26,58,0.25)" : "rgba(155,26,58,0.08)",
+                      border: relationship === rel.id ? "1px solid #c4304f" : "1px solid rgba(196,48,79,0.25)",
+                      borderRadius: "16px",
+                      padding: "20px 16px",
+                      cursor: "pointer",
+                      textAlign: "center",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold", fontSize: "16px", color: relationship === rel.id ? "white" : "rgba(255,248,240,0.8)", marginBottom: "4px" }}>
+                      {rel.label}
+                    </div>
+                    {rel.sub && (
+                      <div style={{ fontSize: "12px", color: "rgba(255,248,240,0.5)", fontStyle: "italic" }}>
+                        {rel.sub}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {/* Custom option - full width */}
+                <div
+                  onClick={() => {
+                    setRelationship('custom');
+                  }}
+                  style={{
+                    gridColumn: "1 / -1",
+                    background: relationship === 'custom' ? "rgba(155,26,58,0.25)" : "rgba(155,26,58,0.08)",
+                    border: relationship === 'custom' ? "1px solid #c4304f" : "1px solid rgba(196,48,79,0.25)",
+                    borderRadius: "16px",
+                    padding: "20px 16px",
+                    cursor: "pointer",
+                    textAlign: "center",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <div style={{ fontWeight: "bold", fontSize: "16px", color: relationship === 'custom' ? "white" : "rgba(255,248,240,0.8)" }}>
+                    Custom
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom input field */}
+              {relationship === 'custom' && (
+                <div style={{ marginTop: "12px", maxWidth: "400px", margin: "12px auto 0" }}>
+                  <input
+                    type="text"
+                    value={customRelationship}
+                    onChange={(e) => setCustomRelationship(e.target.value)}
+                    placeholder="Describe your relationship..."
+                    style={{
+                      width: "100%",
+                      background: "rgba(255,248,240,0.05)",
+                      border: "1px solid rgba(196,48,79,0.3)",
+                      borderRadius: "12px",
+                      padding: "12px 16px",
+                      color: "#fff8f0",
+                      fontSize: "14px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STEP 2: MOOD */}
+          {step === 2 && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={styles.stepHeader}>
+                <div style={styles.stepTag}>Step Two</div>
                 <h1 style={styles.heading}>How does your heart feel?</h1>
                 <p style={styles.subheading}>Select up to 5 moods that capture your feelings</p>
               </div>
@@ -585,8 +762,8 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 2: OCCASION */}
-          {step === 2 && (
+          {/* STEP 3: OCCASION */}
+          {step === 3 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Two</div>
@@ -624,11 +801,11 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 3: STORY */}
-          {step === 3 && (
+          {/* STEP 4: STORY */}
+          {step === 4 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step Three</div>
+                <div style={styles.stepTag}>Step Four</div>
                 <h1 style={styles.heading}>Tell us your story</h1>
                 <p style={styles.subheading}>The more we know, the better the AI message</p>
               </div>
@@ -666,38 +843,75 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 4: PHOTOS */}
-          {step === 4 && (
+          {/* STEP 5: PHOTOS */}
+          {step === 5 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step Four</div>
+                <div style={styles.stepTag}>Step Five</div>
                 <h1 style={styles.heading}>Your precious memories</h1>
                 <p style={styles.subheading}>Upload up to 10 photos — more moments, more love</p>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gridTemplateRows: "repeat(2, 1fr)", gap: "10px", marginBottom: "20px" }}>
                 {photos.map((photo, i) => (
-                  <div 
-                    key={i} 
-                    onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i, 'photo')}
-                    style={{ 
-                      aspectRatio: "1/1", borderRadius: "12px", background: photo ? "none" : "rgba(255,255,255,0.03)",
-                      border: photo ? `2px solid ${frames[i % 5].border}` : "1px dashed rgba(255,255,255,0.1)",
-                      cursor: "pointer", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: photo ? frames[i % 5].shadow : "none"
-                    }}
-                  >
-                    {photo ? (
+                  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div 
+                      onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i, 'photo')}
+                      style={{ 
+                        aspectRatio: "1/1", borderRadius: "12px", background: photo ? "none" : "rgba(255,255,255,0.03)",
+                        border: photo ? `2px solid ${frames[i % 5].border}` : "1px dashed rgba(255,255,255,0.1)",
+                        cursor: "pointer", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: photo ? frames[i % 5].shadow : "none"
+                      }}
+                    >
+                      {photo ? (
+                        <>
+                          <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <div onClick={(e) => { e.stopPropagation(); removeFile(i, 'photo'); }} style={{ position: "absolute", top: "4px", right: "4px", background: "rgba(0,0,0,0.5)", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "12px" }}>×</div>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: "20px", opacity: 0.2 }}>+</span>
+                      )}
+                    </div>
+                    
+                    {/* Memory field below each photo */}
+                    {photo && (
                       <>
-                        <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        <div onClick={(e) => { e.stopPropagation(); removeFile(i, 'photo'); }} style={{ position: "absolute", top: "4px", right: "4px", background: "rgba(0,0,0,0.5)", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "12px" }}>✕</div>
+                        <textarea
+                          value={photoMemories[i]}
+                          onChange={e => updateMemory(i, e.target.value)}
+                          placeholder={getPlaceholder(i)}
+                          maxLength={120}
+                          style={{
+                            width: "100%", 
+                            minHeight: "45px", 
+                            background: "rgba(255,255,255,0.04)", 
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            borderRadius: "8px", 
+                            padding: "8px", 
+                            color: "#fff8f0", 
+                            fontSize: "11px",
+                            fontFamily: THEME.sans,
+                            outline: "none",
+                            resize: "none",
+                            boxSizing: "border-box"
+                          }}
+                        />
+                        <div style={{
+                          fontSize: "9px",
+                          color: "rgba(255,248,240,0.3)",
+                          textAlign: "right",
+                          fontFamily: THEME.sans,
+                          marginTop: "2px"
+                        }}>
+                          {photoMemories[i].length}/120
+                        </div>
                       </>
-                    ) : (
-                      <span style={{ fontSize: "20px", opacity: 0.2 }}>+</span>
                     )}
                   </div>
                 ))}
               </div>
+
               <p style={{ textAlign: "center", fontSize: "11px", color: "rgba(255,248,240,0.3)", fontStyle: "italic" }}>
                 * Frames are automatically curated based on your mood & occasion
               </p>
@@ -705,11 +919,11 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 5: VIDEO */}
-          {step === 5 && (
+          {/* STEP 6: VIDEO */}
+          {step === 6 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step Five</div>
+                <div style={styles.stepTag}>Step Six</div>
                 <h1 style={styles.heading}>Cinematic Tribute</h1>
                 <p style={styles.subheading}>Upload 5 specific clips or photos for your video</p>
               </div>
@@ -748,11 +962,11 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 6: BACKGROUND MUSIC */}
-          {step === 6 && (
+          {/* STEP 8: BACKGROUND MUSIC */}
+          {step === 8 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step Six</div>
+                <div style={styles.stepTag}>Step Eight</div>
                 <h1 style={styles.heading}>Set the mood with music</h1>
                 <p style={styles.subheading}>Choose a track that plays when they open your Love Code</p>
               </div>
@@ -823,11 +1037,119 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 7: SELF-DESTRUCT */}
+          {/* STEP 7: ADD A PHOTO OF THEM */}
           {step === 7 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>Step Seven</div>
+                <h1 style={styles.heading}>
+                  Add a <span style={{ color: THEME.rose, fontStyle: "italic" }}>photo of them</span> ✦
+                </h1>
+                <p style={{
+                    fontSize: 16,
+                    color: 'rgba(255,248,240,0.5)',
+                    fontFamily: THEME.serif,
+                    fontStyle: 'italic',
+                    maxWidth: '480px',
+                    margin: '0 auto 48px',
+                    lineHeight: 1.6
+                }}>
+                  We'll remove the background and place them as a beautiful, subtle presence in the background of your LoveBite
+                </p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div 
+                  onClick={() => themPhoto ? setPreviewImage(themPhoto) : photoRef.current.click()}
+                  onMouseEnter={(e) => {
+                      if (!themPhoto) {
+                          e.currentTarget.style.border = "1.5px dashed rgba(196,48,79,0.55)";
+                          e.currentTarget.style.background = "rgba(196,48,79,0.04)";
+                          e.currentTarget.style.transform = "translateY(-4px)";
+                      }
+                  }}
+                  onMouseLeave={(e) => {
+                      if (!themPhoto) {
+                          e.currentTarget.style.border = "1.5px dashed rgba(196,48,79,0.3)";
+                          e.currentTarget.style.background = "rgba(255,255,255,0.025)";
+                          e.currentTarget.style.transform = "translateY(0)";
+                      }
+                  }}
+                  style={{ 
+                    width: "280px", height: "340px", borderRadius: "24px", cursor: "pointer", 
+                    position: "relative", 
+                    background: "rgba(255,255,255,0.025)",
+                    border: themPhoto ? "1.5px solid rgba(196,48,79,0.5)" : "1.5px dashed rgba(196,48,79,0.3)",
+                    boxShadow: themPhoto ? "0 25px 50px -12px rgba(0,0,0,0.5)" : "none",
+                    overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    gap: "10px"
+                  }}
+                >
+                  {themPhoto ? (
+                    <>
+                      <img src={themPhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "22px" }} />
+                      <div 
+                        onClick={(e) => { e.stopPropagation(); setThemPhoto(null); }} 
+                        style={{ 
+                            position: "absolute", top: "14px", right: "14px", 
+                            background: "rgba(0,0,0,0.75)", backdropFilter: 'blur(8px)', 
+                            borderRadius: "50%", width: "32px", height: "32px", 
+                            display: "flex", alignItems: "center", justifyContent: "center", 
+                            color: "white", fontSize: "16px", cursor: "pointer", zIndex: 10
+                        }}
+                      >×</div>
+                    </>
+                  ) : (
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: "56px", opacity: 0.25, marginBottom: "16px" }}>👤</div>
+                      <div style={{ fontSize: "13px", letterSpacing: "3px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", fontWeight: 'bold' }}>Choose Photo</div>
+                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", letterSpacing: "1px", marginTop: "8px" }}>JPG, PNG or WEBP</div>
+                    </div>
+                  )}
+                </div>
+
+                {themPhoto && (
+                    <div style={{
+                        display: 'flex', alignItems: 'center',
+                        gap: "10px", marginTop: "32px",
+                        padding: '10px 20px', borderRadius: '24px',
+                        background: 'rgba(34,197,94,0.08)',
+                        border: '1px solid rgba(34,197,94,0.15)',
+                        animation: 'fadeIn 0.5s ease both'
+                    }}>
+                        <div style={{
+                            width: "8px", height: "8px", borderRadius: '50%',
+                            background: '#22c55e',
+                            boxShadow: '0 0 12px #22c55e'
+                        }}/>
+                        <span style={{
+                            fontSize: "11px", letterSpacing: "2px",
+                            color: 'rgba(34,197,94,0.9)',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold'
+                        }}>
+                            background will be auto-removed
+                        </span>
+                    </div>
+                )}
+
+                <div style={{ marginTop: '40px', opacity: 0.3 }}>
+                     <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                         ✦ skippable ✦
+                     </p>
+                </div>
+              </div>
+
+              <input type="file" ref={photoRef} onChange={(e) => handleFileChange(e, 'them_photo')} style={{ display: "none" }} accept="image/*" />
+            </div>
+          )}
+
+          {/* STEP 9: SELF-DESTRUCT */}
+          {step === 9 && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={styles.stepHeader}>
+                <div style={styles.stepTag}>Step Nine</div>
                 <h1 style={styles.heading}>How long should this last?</h1>
                 <p style={styles.subheading}>Choose the lifetime of your Love Code</p>
               </div>
@@ -866,11 +1188,11 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 8: AI MESSAGE */}
-          {step === 8 && (
+          {/* STEP 10: AI MESSAGE */}
+          {step === 10 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step Eight</div>
+                <div style={styles.stepTag}>Step Ten</div>
                 <h1 style={styles.heading}>Your Love Message</h1>
                 <p style={styles.subheading}>Crafted by AI, inspired by your heart</p>
               </div>
@@ -926,11 +1248,11 @@ const GrandAmour149 = ({
             </div>
           )}
 
-          {/* STEP 9: DELIVERY */}
-          {step === 9 && (
+          {/* STEP 11: DELIVERY */}
+          {step === 11 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>Step Nine</div>
+                <div style={styles.stepTag}>Final Step</div>
                 <h1 style={styles.heading}>How shall we deliver your love?</h1>
               </div>
 
@@ -1011,7 +1333,7 @@ const GrandAmour149 = ({
                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                      <div>
                         <div style={{ fontSize: "13px", color: "white" }}>📬 Opening notification</div>
-                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>"When they open your Love Code"</div>
+                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>&quot;When they open your Love Code&quot;</div>
                      </div>
                      <div onClick={() => setNotifOpen(!notifOpen)} style={{ width: "40px", height: "20px", background: notifOpen ? THEME.rose : "rgba(255,255,255,0.1)", borderRadius: "10px", position: "relative", cursor: "pointer" }}>
                        <div style={{ width: "16px", height: "16px", background: "white", borderRadius: "50%", position: "absolute", top: "2px", left: notifOpen ? "22px" : "2px", transition: "0.2s" }} />
@@ -1020,7 +1342,7 @@ const GrandAmour149 = ({
                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                      <div>
                         <div style={{ fontSize: "13px", color: "white" }}>⏱ View time report</div>
-                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>"How long they spent with it"</div>
+                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>&quot;How long they spent with it&quot;</div>
                      </div>
                      <div onClick={() => setNotifView(!notifView)} style={{ width: "40px", height: "20px", background: notifView ? THEME.rose : "rgba(255,255,255,0.1)", borderRadius: "10px", position: "relative", cursor: "pointer" }}>
                        <div style={{ width: "16px", height: "16px", background: "white", borderRadius: "50%", position: "absolute", top: "2px", left: notifView ? "22px" : "2px", transition: "0.2s" }} />
@@ -1029,7 +1351,7 @@ const GrandAmour149 = ({
                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                      <div>
                         <div style={{ fontSize: "13px", color: "white" }}>💌 Reply notifications</div>
-                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>"When they send you a reply"</div>
+                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>&quot;When they send you a reply&quot;</div>
                      </div>
                      <div onClick={() => setNotifReply(!notifReply)} style={{ width: "40px", height: "20px", background: notifReply ? THEME.rose : "rgba(255,255,255,0.1)", borderRadius: "10px", position: "relative", cursor: "pointer" }}>
                        <div style={{ width: "16px", height: "16px", background: "white", borderRadius: "50%", position: "absolute", top: "2px", left: notifReply ? "22px" : "2px", transition: "0.2s" }} />
@@ -1069,12 +1391,12 @@ const GrandAmour149 = ({
             <div style={{ flex: 1 }} />
             
             {/* Conditional Skip Label */}
-            {(step === 5 || (step === 6 && !musicEnabled)) && (
+            {(step === 7 || (step === 8 && !musicEnabled)) && (
               <button 
                 onClick={handleNext} 
                 style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", marginRight: "20px", fontWeight: "bold" }}
               >
-                Skip →
+                Skip &rarr;
               </button>
             )}
 
@@ -1084,7 +1406,7 @@ const GrandAmour149 = ({
               onMouseLeave={() => setHoveredBtn(null)}
               style={styles.btnNext(canProceed())}
             >
-                {step === 9 ? "Review Grand Amour ₹149 💗" : "Continue Checkout →"}
+                {bgRemoving ? processingStatus : (step === 11 ? "Review Grand Amour ₹149 💗" : "Continue Checkout →")}
             </button>
           </div>
         </footer>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 
 interface Particle {
   id: string;
@@ -10,6 +10,9 @@ interface Particle {
   delay: number;
   opacity: number;
   type: "float" | "balloon" | "conf" | "star" | "plane" | "butterfly";
+  color?: string;
+  rotation?: number;
+  top?: string;
 }
 
 interface OccasionBackgroundProps {
@@ -17,15 +20,18 @@ interface OccasionBackgroundProps {
 }
 
 export default function OccasionBackground({ occasion }: OccasionBackgroundProps) {
-  const bgParticles = useMemo(() => generateParticles(occasion), [occasion]);
+  const [bgParticles, setBgParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    // Component mounted
+    setBgParticles(generateParticles(occasion));
   }, [occasion]);
 
   function generateParticles(occasion: string): Particle[] {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
+    if (typeof window === 'undefined') return [];
+    
+    const isMobile = window.innerWidth < 600;
     const multiplier = isMobile ? 0.5 : 1;
+    const colors = ['#ff6b8a','#ffd166','#06d6a0','#118ab2','#ef476f','#ffc8dd','#b5e48c'];
     
     switch (occasion) {
       case "anniversary":
@@ -49,7 +55,9 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           duration: 10 + Math.random() * 8,
           delay: Math.random() * 10,
           opacity: 0.15 + Math.random() * 0.23,
-          type: "balloon"
+          type: "balloon",
+          color: colors[Math.floor(Math.random() * 6)],
+          rotation: Math.random() * 360
         }));
         
         const confetti = Array.from({ length: Math.floor(40 * multiplier) }, (_, i) => ({
@@ -60,10 +68,12 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           duration: 3 + Math.random() * 4,
           delay: Math.random() * 6,
           opacity: 0.28 + Math.random() * 0.32,
-          type: "conf"
+          type: "conf",
+          color: colors[Math.floor(Math.random() * 7)],
+          rotation: Math.random() * 360
         }));
         
-        return [...balloons, ...confetti];
+        return [...balloons, ...confetti] as Particle[];
       
       case "valentines":
         return Array.from({ length: Math.floor(32 * multiplier) }, (_, i) => ({
@@ -86,7 +96,8 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           duration: 2 + Math.random() * 5,
           delay: Math.random() * 5,
           opacity: 0.3 + Math.random() * 0.6,
-          type: "star"
+          type: "star",
+          top: `${Math.random() * 100}%`
         }));
         
         const props = Array.from({ length: Math.floor(18 * multiplier) }, (_, i) => ({
@@ -100,7 +111,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           type: "float"
         }));
         
-        return [...stars, ...props];
+        return [...stars, ...props] as Particle[];
       
       case "just_because":
         const butterflies = Array.from({ length: Math.floor(6 * multiplier) }, (_, i) => ({
@@ -111,7 +122,8 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           duration: 10 + Math.random() * 8,
           delay: Math.random() * 8,
           opacity: 0.16 + Math.random() * 0.22,
-          type: "butterfly"
+          type: "butterfly",
+          top: `${20 + Math.random() * 70}%`
         }));
         
         const petals = Array.from({ length: Math.floor(24 * multiplier) }, (_, i) => ({
@@ -125,7 +137,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           type: "float"
         }));
         
-        return [...butterflies, ...petals];
+        return [...butterflies, ...petals] as Particle[];
       
       case "long_distance":
         const planes = Array.from({ length: Math.floor(4 * multiplier) }, (_, i) => ({
@@ -136,7 +148,8 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           duration: 12 + Math.random() * 10,
           delay: i * 5,
           opacity: 0.18 + Math.random() * 0.22,
-          type: "plane"
+          type: "plane",
+          top: `${10 + Math.random() * 40}%`
         }));
         
         const spaceParticles = Array.from({ length: Math.floor(20 * multiplier) }, (_, i) => ({
@@ -150,7 +163,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           type: "float"
         }));
         
-        return [...planes, ...spaceParticles];
+        return [...planes, ...spaceParticles] as Particle[];
       
       default:
         return [];
@@ -182,6 +195,28 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           </div>
         );
       
+      case "conf":
+        return (
+          <div
+            key={particle.id}
+            style={{
+              position: "fixed",
+              zIndex: 1,
+              pointerEvents: "none",
+              width: `${particle.size}px`,
+              height: `${particle.size * 1.5}px`,
+              borderRadius: "2px",
+              background: particle.color,
+              opacity: particle.opacity,
+              animation: `confFall ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.delay}s`,
+              transform: `rotate(${particle.rotation}deg)`,
+              left: particle.left,
+              top: "-20px",
+            }}
+          />
+        );
+      
       case "balloon":
         return (
           <div
@@ -193,11 +228,11 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
               width: `${particle.size}px`,
               height: `${particle.size * 1.5}px`,
               borderRadius: "2px",
-              background: ['#ff6b8a','#ffd166','#06d6a0','#118ab2','#ef476f','#ffc8dd','#b5e48c'][Math.floor(Math.random() * 6)],
+              background: particle.color,
               opacity: particle.opacity,
               animation: `confFall ${particle.duration}s ease-in-out infinite`,
               animationDelay: `${particle.delay}s`,
-              transform: `rotate(${Math.random() * 360}deg)`,
+              transform: `rotate(${particle.rotation}deg)`,
               left: particle.left,
               bottom: "-10px",
             }}
@@ -216,6 +251,8 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
               height: `${particle.size}px`,
               borderRadius: "50%",
               background: "#ffffff",
+              left: particle.left,
+              top: particle.top || "0px",
               animation: `starTwinkle ${particle.duration}s ease-in-out infinite`,
               animationDelay: `${particle.delay}s`,
             }}
@@ -228,7 +265,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
             key={particle.id}
             style={{
               ...baseStyle,
-              top: `${10 + Math.random() * 40}%`,
+              top: particle.top,
               animation: `planeFly ${particle.duration}s ease-in-out infinite`,
               animationDelay: `${particle.delay}s`,
             }}
@@ -243,7 +280,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
             key={particle.id}
             style={{
               ...baseStyle,
-              top: `${20 + Math.random() * 70}%`,
+              top: particle.top,
               animation: `butterflyFly ${particle.duration}s ease-in-out infinite`,
               animationDelay: `${particle.delay}s`,
             }}
@@ -419,6 +456,23 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           </>
         );
       
+      case "proposal":
+         return (
+          <>
+            {/* Large dim ring */}
+            <div style={{
+              position: "fixed",
+              bottom: "10%", left: "50%",
+              transform: "translateX(-50%)",
+              fontSize: "clamp(60px,10vw,100px)",
+              opacity: 0.07,
+              animation: "ringPulse 5s ease-in-out infinite",
+              filter: "blur(0.5px)",
+              zIndex: 0,
+            }}>💍</div>
+          </>
+         );
+      
       default:
         return null;
     }
@@ -434,8 +488,8 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
     }}>
       {/* Occasion-specific background elements */}
       {renderBgElements(occasion)}
-      {/* Floating particles removed as requested */}
-      
+      {/* Floating particles populated only on client */}
+      {bgParticles.map(renderParticle)}
       {/* Keyframes */}
       <style>{`
         @keyframes floatUp {
@@ -444,12 +498,6 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           88%  { opacity: 0.2; }
           100% { transform: translateY(-60px) rotate(360deg); opacity: 0; }
         }
-        @keyframes balloonRise {
-          0%   { transform: translateY(0) rotate(-3deg);       opacity: 0; }
-          8%   { opacity: 0.22; }
-          85%  { opacity: 0.18; }
-          100% { transform: translateY(-110vh) rotate(3deg);   opacity: 0; }
-        }
         @keyframes confFall {
           0%   { transform: translateY(-10px) rotate(0deg);   opacity: 0; }
           5%   { opacity: 0.45; }
@@ -457,32 +505,32 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
         @keyframes starTwinkle {
-          0%,100% { opacity: 0;              transform: scale(1);   }
+          0%,100% { opacity: 0; transform: scale(1); }
           50%     { opacity: 0.8; transform: scale(1.5); }
         }
         @keyframes planeFly {
-          0%   { left: -15%;  opacity: 0;                    }
-          8%   { opacity: 0.22;                   }
-          45%  { transform: translateY(-20px);               }
-          55%  { transform: translateY(10px);                }
-          92%  { opacity: 0.18;                   }
+          0%   { left: -15%;  opacity: 0; }
+          8%   { opacity: 0.22; }
+          45%  { transform: translateY(-20px); }
+          55%  { transform: translateY(10px); }
+          92%  { opacity: 0.18; }
           100% { left: 115%; opacity: 0; transform: translateY(-10px); }
         }
         @keyframes butterflyFly {
-          0%   { opacity: 0;  transform: translate(0,0) rotate(0deg);        }
-          5%   { opacity: 0.2;                                     }
-          25%  { transform: translate(80px,-60px) rotate(20deg);             }
-          50%  { transform: translate(-40px,-120px) rotate(-15deg);          }
-          75%  { transform: translate(100px,-180px) rotate(25deg);           }
-          95%  { opacity: 0.15;                                    }
+          0%   { opacity: 0;  transform: translate(0,0) rotate(0deg); }
+          5%   { opacity: 0.2; }
+          25%  { transform: translate(80px,-60px) rotate(20deg); }
+          50%  { transform: translate(-40px,-120px) rotate(-15deg); }
+          75%  { transform: translate(100px,-180px) rotate(25deg); }
+          95%  { opacity: 0.15; }
           100% { opacity: 0;  transform: translate(50px,-250px) rotate(10deg); }
         }
         @keyframes ringPulse {
           0%,100% { transform: translate(-50%,-50%) scale(1);   opacity: 0.5; }
-          50%     { transform: translate(-50%,-50%) scale(1.5); opacity: 1;   }
+          50%     { transform: translate(-50%,-50%) scale(1.5); opacity: 1; }
         }
         @keyframes coupleFloat {
-          0%,100% { transform: translateX(-50%) translateY(0);    }
+          0%,100% { transform: translateX(-50%) translateY(0); }
           50%     { transform: translateX(-50%) translateY(-12px); }
         }
         @keyframes moonGlow {
@@ -490,7 +538,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           50%     { filter: blur(0.5px) drop-shadow(0 0 28px rgba(200,210,255,0.5)); }
         }
         @keyframes flowerSpin {
-          from { transform: rotate(0deg);   }
+          from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }
         @keyframes arrowFly {
@@ -505,7 +553,7 @@ export default function OccasionBackground({ occasion }: OccasionBackgroundProps
           50%     { transform: translateX(-50%) rotate(3deg); }
         }
         @keyframes cakePulse {
-          0%,100% { transform: translateX(-50%) scale(1);    }
+          0%,100% { transform: translateX(-50%) scale(1); }
           50%     { transform: translateX(-50%) scale(1.05); }
         }
       `}</style>

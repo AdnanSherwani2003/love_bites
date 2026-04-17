@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import LoveBitesLogo from "../LoveBitesLogo";
 import { trackEvent } from "../../lib/analytics";
+import { removeBackground } from "../../lib/removeBackground";
 
 /**
  * Sweet Start ₹49 Plan Component
@@ -56,12 +57,20 @@ const SweetStart49 = ({
   // --- STATE ---
   const [step, setStep] = useState(0);
   const [createFor, setCreateFor] = useState(null); // 'her' or 'him'
+  const [relationship, setRelationship] = useState(null); // 'partner', 'family', 'relative', 'friend', or custom string
+  const [customRelationship, setCustomRelationship] = useState(""); // for custom relationship input
   const [selectedMood, setSelectedMood] = useState(null); // only 1 mood
   const [selectedOccasion, setSelectedOccasion] = useState(null);
   const [yourName, setYourName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [theirStory, setTheirStory] = useState("");
   const [photos, setPhotos] = useState([null, null, null, null, null]);
+  const [photoMemories, setPhotoMemories] = useState(['', '', '', '', '']);
+  const [themPhoto, setThemPhoto] = useState(null);
+  const [bgRemoving, setBgRemoving] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState("");
+  const [partnerPhotoFile, setPartnerPhotoFile] = useState(null);
+  const [processedPhotoUrl, setProcessedPhotoUrl] = useState(null);
   const [activePhotoSlot, setActivePhotoSlot] = useState(null);
   const [selectedFrame] = useState(0);
   const [unlockCode, setUnlockCode] = useState("");
@@ -76,13 +85,16 @@ const SweetStart49 = ({
 
   // --- HELPERS ---
   const canProceed = () => {
+    if (bgRemoving) return false;
     if (step === 0) return createFor !== null;
-    if (step === 1) return selectedMood !== null;
-    if (step === 2) return selectedOccasion !== null;
-    if (step === 3) return yourName.trim() && partnerName.trim() && theirStory.trim().length > 10;
-    if (step === 4) return true; // Photos are optional
-    if (step === 5) return generatedMessage.length > 0;
-    if (step === 6) return unlockCode.length === 4;
+    if (step === 1) return relationship !== null && (relationship !== 'custom' || customRelationship.trim() !== '');
+    if (step === 2) return selectedMood !== null;
+    if (step === 3) return selectedOccasion !== null;
+    if (step === 4) return yourName.trim() && partnerName.trim() && theirStory.trim().length > 10;
+    if (step === 5) return true; // Photos are optional
+    if (step === 6) return true; // Add a photo of them is optional
+    if (step === 7) return generatedMessage.length > 0;
+    if (step === 8) return unlockCode.length === 4;
     return true;
   };
 
@@ -90,12 +102,39 @@ const SweetStart49 = ({
     setSelectedMood(prev => prev === id ? null : id);
   };
 
-  const handleNext = () => {
-    if (step === 6 && canProceed()) {
+  const handleNext = async () => {
+    if (step === 5 && themPhoto && !processedPhotoUrl) {
+        setBgRemoving(true);
+        setProcessingStatus("removing background");
+        
+        const statusTimer = setInterval(() => {
+            setProcessingStatus(prev => {
+                if (prev === "removing background") return "almost ready...";
+                if (prev === "almost ready...") return "finishing up...";
+                return prev;
+            });
+        }, 3000);
+
+        try {
+            const resultUrl = await removeBackground(partnerPhotoFile);
+            setProcessedPhotoUrl(resultUrl);
+            setStep(s => s + 1);
+        } catch (error) {
+            console.error("Background removal failed:", error);
+            setProcessedPhotoUrl(themPhoto); // fallback
+            setStep(s => s + 1);
+        } finally {
+            clearInterval(statusTimer);
+            setBgRemoving(false);
+        }
+        return;
+    }
+
+    if (step === 8 && canProceed()) {
       if (onComplete) {
         onComplete({
-          createFor, selectedMood, selectedOccasion, yourName, partnerName, theirStory,
-          photos, selectedFrame, unlockCode, hintMessage,
+          createFor, relationship, selectedMood, selectedOccasion, yourName, partnerName, theirStory,
+          photos, photoMemories, themPhoto, partnerPhotoUrl: processedPhotoUrl, selectedFrame, unlockCode, hintMessage,
           generatedMessage
         });
       }
@@ -111,10 +150,31 @@ const SweetStart49 = ({
     photoRef.current.click();
   };
 
+  const handleFileUploadForThem = () => {
+    photoRef.current.click();
+  };
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     
+    // Handle 'them' photo upload (step 5)
+    if (step === 5) {
+      const file = files[0];
+      if (file) {
+        setPartnerPhotoFile(file);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setThemPhoto(event.target.result);
+        };
+        reader.readAsDataURL(file);
+        setProcessedPhotoUrl(null);
+      }
+      if (photoRef.current) photoRef.current.value = "";
+      return;
+    }
+    
+    // Handle regular photos upload (step 4)
     const newPhotos = [...photos];
     let slotsFilled = 0;
 
@@ -156,6 +216,28 @@ const SweetStart49 = ({
     const newPhotos = [...photos];
     newPhotos[index] = null;
     setPhotos(newPhotos);
+    
+    // Also reset the memory when photo is removed
+    const newMemories = [...photoMemories];
+    newMemories[index] = '';
+    setPhotoMemories(newMemories);
+  };
+
+  const updateMemory = (index, value) => {
+    const updated = [...photoMemories];
+    updated[index] = value.slice(0, 120);
+    setPhotoMemories(updated);
+  };
+
+  const getPlaceholder = (index) => {
+    const placeholders = [
+      "Where it all began...",
+      "A moment I'll never forget.",
+      "This day felt like magic.",
+      "Our favourite place.",
+      "I wish we could go back."
+    ];
+    return placeholders[index] || "A precious memory...";
   };
 
   const generateMessage = async () => {
@@ -320,10 +402,10 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
         <div style={styles.progressBox}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
             <div style={{ fontSize: "11px", fontFamily: THEME.sans, color: "rgba(255,255,255,0.3)", letterSpacing: "2px" }}>PROGRESS</div>
-            <div style={styles.stepCounter}>{step + 1} of 7 steps</div>
+            <div style={styles.stepCounter}>{step + 1} of 9 steps</div>
           </div>
           <div style={styles.progressGrid}>
-            {Array(7).fill(0).map((_, i) => (
+            {Array(9).fill(0).map((_, i) => (
               <div key={i} style={{
                 height: "4px", borderRadius: "2px",
                 background: i <= step ? "linear-gradient(90deg, #9b1a3a, #c4304f)" : "rgba(255,255,255,0.08)",
@@ -372,11 +454,101 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 1: MOOD */}
+          {/* STEP 1: RELATIONSHIP */}
           {step === 1 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>STEP ONE</div>
+                <div style={styles.stepTag}>RELATIONSHIP</div>
+                <h1 style={styles.heading}>What's your <i style={{ color: THEME.rose }}>relationship?</i></h1>
+                <p style={{ color: "rgba(255,248,240,0.5)", fontSize: "16px" }}>Help us personalize this experience</p>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", maxWidth: "400px", margin: "0 auto" }}>
+                {[
+                  { id: 'partner', label: 'Partner', sub: '(girlfriend/boyfriend/wife/husband)' },
+                  { id: 'family', label: 'Family', sub: '(parents/siblings)' },
+                  { id: 'relative', label: 'Relative', sub: '(cousins, etc.)' },
+                  { id: 'friend', label: 'Friend', sub: '' }
+                ].map(rel => (
+                  <div
+                    key={rel.id}
+                    onClick={() => {
+                      setRelationship(rel.id);
+                      setCustomRelationship('');
+                    }}
+                    style={{
+                      background: relationship === rel.id ? "rgba(155,26,58,0.25)" : "rgba(155,26,58,0.08)",
+                      border: relationship === rel.id ? "1px solid #c4304f" : "1px solid rgba(196,48,79,0.25)",
+                      borderRadius: "16px",
+                      padding: "20px 16px",
+                      cursor: "pointer",
+                      textAlign: "center",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold", fontSize: "16px", color: relationship === rel.id ? "white" : "rgba(255,248,240,0.8)", marginBottom: "4px" }}>
+                      {rel.label}
+                    </div>
+                    {rel.sub && (
+                      <div style={{ fontSize: "12px", color: "rgba(255,248,240,0.5)", fontStyle: "italic" }}>
+                        {rel.sub}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                {/* Custom option - full width */}
+                <div
+                  onClick={() => {
+                    setRelationship('custom');
+                  }}
+                  style={{
+                    gridColumn: "1 / -1",
+                    background: relationship === 'custom' ? "rgba(155,26,58,0.25)" : "rgba(155,26,58,0.08)",
+                    border: relationship === 'custom' ? "1px solid #c4304f" : "1px solid rgba(196,48,79,0.25)",
+                    borderRadius: "16px",
+                    padding: "20px 16px",
+                    cursor: "pointer",
+                    textAlign: "center",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <div style={{ fontWeight: "bold", fontSize: "16px", color: relationship === 'custom' ? "white" : "rgba(255,248,240,0.8)" }}>
+                    Custom
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom input field */}
+              {relationship === 'custom' && (
+                <div style={{ marginTop: "12px", maxWidth: "400px", margin: "12px auto 0" }}>
+                  <input
+                    type="text"
+                    value={customRelationship}
+                    onChange={(e) => setCustomRelationship(e.target.value)}
+                    placeholder="Describe your relationship..."
+                    style={{
+                      width: "100%",
+                      background: "rgba(255,248,240,0.05)",
+                      border: "1px solid rgba(196,48,79,0.3)",
+                      borderRadius: "12px",
+                      padding: "12px 16px",
+                      color: "#fff8f0",
+                      fontSize: "14px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STEP 2: MOOD */}
+          {step === 2 && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={styles.stepHeader}>
+                <div style={styles.stepTag}>STEP TWO</div>
                 <h1 style={styles.heading}>How does your heart <i style={{ color: THEME.rose }}>feel right now?</i></h1>
                 <p style={{ color: "rgba(255,248,240,0.5)", fontSize: "16px" }}>Choose 1 mood that captures this moment</p>
               </div>
@@ -445,11 +617,11 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 2: OCCASION */}
-          {step === 2 && (
+          {/* STEP 3: OCCASION */}
+          {step === 3 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>STEP TWO</div>
+                <div style={styles.stepTag}>STEP THREE</div>
                 <h1 style={styles.heading}>What's the <i style={{ color: THEME.rose }}>occasion?</i></h1>
                 <p style={{ color: "rgba(255,248,240,0.5)", fontSize: "16px" }}>Pick one occasion for your Love Code</p>
               </div>
@@ -480,11 +652,11 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 3: STORY */}
-          {step === 3 && (
+          {/* STEP 4: STORY */}
+          {step === 4 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>STEP THREE</div>
+                <div style={styles.stepTag}>STEP FOUR</div>
                 <h1 style={styles.heading}>Tell us your <i style={{ color: THEME.rose }}>love story</i></h1>
                 <p style={{ color: "rgba(255,248,240,0.5)", fontSize: "16px" }}>The more you share, the more personal your AI message will be</p>
               </div>
@@ -520,43 +692,79 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 4: PHOTOS */}
-          {step === 4 && (
+          {/* STEP 5: PHOTOS */}
+          {step === 5 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>STEP FOUR</div>
+                <div style={styles.stepTag}>STEP FIVE</div>
                 <h1 style={styles.heading}>Your <i style={{ color: THEME.rose }}>precious moments</i></h1>
                 <p style={{ color: "rgba(255,248,240,0.5)", fontSize: "16px" }}>Upload up to 5 photos</p>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px", marginBottom: "24px" }}>
                 {photos.map((photo, i) => (
-                  <div 
-                    key={i} 
-                    onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i)}
-                    style={{ 
-                      aspectRatio: "1", borderRadius: "16px", cursor: "pointer", position: "relative",
-                      background: photo ? "none" : "rgba(255,255,255,0.06)",
-                      border: photo ? `2px solid ${THEME.maroon}` : "none",
-                      boxShadow: photo ? `0 0 16px rgba(155,26,58,0.3)` : "none",
-                      overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
-                      flexDirection: "column", gap: "8px"
-                    }}
-                  >
-                    {photo ? (
+                  <div key={i} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div 
+                      onClick={() => photo ? setPreviewImage(photo) : handleFileUpload(i)}
+                      style={{ 
+                        aspectRatio: "1", borderRadius: "16px", cursor: "pointer", position: "relative",
+                        background: photo ? "none" : "rgba(255,255,255,0.06)",
+                        border: photo ? `2px solid ${THEME.maroon}` : "none",
+                        boxShadow: photo ? `0 0 16px rgba(155,26,58,0.3)` : "none",
+                        overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center",
+                        flexDirection: "column", gap: "8px"
+                      }}
+                    >
+                      {photo ? (
+                        <>
+                          <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <div style={{ 
+                            position: "absolute", bottom: 0, left: 0, width: "100%", height: "30%", 
+                            background: "linear-gradient(to top, rgba(155,26,58,0.4), transparent)",
+                            pointerEvents: "none"
+                          }} />
+                          <div onClick={(e) => { e.stopPropagation(); removePhoto(i); }} style={{ position: "absolute", top: "4px", right: "4px", background: "rgba(0,0,0,0.5)", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "12px" }}>×</div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ fontSize: "22px", color: "rgba(255,255,255,0.3)" }}>+</div>
+                          <div style={{ fontSize: "10px", letterSpacing: "1.5px", fontFamily: THEME.sans, color: "rgba(255,255,255,0.25)", fontWeight: "600" }}>PHOTO {i+1}</div>
+                        </>
+                      )}
+                    </div>
+                    
+                    {/* Memory field below each photo */}
+                    {photo && (
                       <>
-                        <img src={photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        <div style={{ 
-                          position: "absolute", bottom: 0, left: 0, width: "100%", height: "30%", 
-                          background: "linear-gradient(to top, rgba(155,26,58,0.4), transparent)",
-                          pointerEvents: "none"
-                        }} />
-                        <div onClick={(e) => { e.stopPropagation(); removePhoto(i); }} style={{ position: "absolute", top: "4px", right: "4px", background: "rgba(0,0,0,0.5)", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "12px" }}>✕</div>
-                      </>
-                    ) : (
-                      <>
-                        <div style={{ fontSize: "22px", color: "rgba(255,255,255,0.3)" }}>+</div>
-                        <div style={{ fontSize: "10px", letterSpacing: "1.5px", fontFamily: THEME.sans, color: "rgba(255,255,255,0.25)", fontWeight: "600" }}>PHOTO {i+1}</div>
+                        <textarea
+                          value={photoMemories[i]}
+                          onChange={e => updateMemory(i, e.target.value)}
+                          placeholder={getPlaceholder(i)}
+                          maxLength={120}
+                          style={{
+                            width: "100%", 
+                            minHeight: "45px", 
+                            background: "rgba(255,255,255,0.04)", 
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            borderRadius: "8px", 
+                            padding: "8px", 
+                            color: "#fff8f0", 
+                            fontSize: "11px",
+                            fontFamily: THEME.sans,
+                            outline: "none",
+                            resize: "none",
+                            boxSizing: "border-box"
+                          }}
+                        />
+                        <div style={{
+                          fontSize: "9px",
+                          color: "rgba(255,248,240,0.3)",
+                          textAlign: "right",
+                          fontFamily: THEME.sans,
+                          marginTop: "2px"
+                        }}>
+                          {photoMemories[i].length}/120
+                        </div>
                       </>
                     )}
                   </div>
@@ -567,11 +775,119 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 5: MESSAGE */}
-          {step === 5 && (
+          {/* STEP 6: ADD A PHOTO OF THEM */}
+          {step === 6 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
-                <div style={styles.stepTag}>STEP FIVE</div>
+                <div style={styles.stepTag}>STEP SIX</div>
+                <h1 style={styles.heading}>
+                  Add a <span style={{ color: THEME.rose, fontStyle: "italic" }}>photo of them</span> ✦
+                </h1>
+                <p style={{
+                    fontSize: 16,
+                    color: 'rgba(255,255,255,0.5)',
+                    fontFamily: THEME.serif,
+                    fontStyle: 'italic',
+                    maxWidth: '480px',
+                    margin: '0 auto 48px',
+                    lineHeight: 1.6
+                }}>
+                  We'll remove the background and place them as a beautiful, subtle presence in the background of your LoveBite
+                </p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                <div 
+                  onClick={() => themPhoto ? setPreviewImage(themPhoto) : photoRef.current.click()}
+                  onMouseEnter={(e) => {
+                      if (!themPhoto) {
+                          e.currentTarget.style.border = "1.5px dashed rgba(196,48,79,0.55)";
+                          e.currentTarget.style.background = "rgba(196,48,79,0.04)";
+                          e.currentTarget.style.transform = "translateY(-4px)";
+                      }
+                  }}
+                  onMouseLeave={(e) => {
+                      if (!themPhoto) {
+                          e.currentTarget.style.border = "1.5px dashed rgba(196,48,79,0.3)";
+                          e.currentTarget.style.background = "rgba(255,255,255,0.025)";
+                          e.currentTarget.style.transform = "translateY(0)";
+                      }
+                  }}
+                  style={{ 
+                    width: "280px", height: "340px", borderRadius: "24px", cursor: "pointer", 
+                    position: "relative", 
+                    background: "rgba(255,255,255,0.025)",
+                    border: themPhoto ? "1.5px solid rgba(196,48,79,0.5)" : "1.5px dashed rgba(196,48,79,0.3)",
+                    boxShadow: themPhoto ? "0 25px 50px -12px rgba(0,0,0,0.5)" : "none",
+                    overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    gap: "10px"
+                  }}
+                >
+                  {themPhoto ? (
+                    <>
+                      <img src={themPhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "22px" }} />
+                      <div 
+                        onClick={(e) => { e.stopPropagation(); setThemPhoto(null); }} 
+                        style={{ 
+                            position: "absolute", top: "14px", right: "14px", 
+                            background: "rgba(0,0,0,0.75)", backdropFilter: 'blur(8px)', 
+                            borderRadius: "50%", width: "32px", height: "32px", 
+                            display: "flex", alignItems: "center", justifyContent: "center", 
+                            color: "white", fontSize: "16px", cursor: "pointer", zIndex: 10
+                        }}
+                      >×</div>
+                    </>
+                  ) : (
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: "56px", opacity: 0.25, marginBottom: "16px" }}>👤</div>
+                      <div style={{ fontSize: "13px", letterSpacing: "3px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", fontWeight: 'bold' }}>Choose Photo</div>
+                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", letterSpacing: "1px", marginTop: "8px" }}>JPG, PNG or WEBP</div>
+                    </div>
+                  )}
+                </div>
+
+                {themPhoto && (
+                    <div style={{
+                        display: 'flex', alignItems: 'center',
+                        gap: "10px", marginTop: "32px",
+                        padding: '10px 20px', borderRadius: '24px',
+                        background: 'rgba(34,197,94,0.08)',
+                        border: '1px solid rgba(34,197,94,0.15)',
+                        animation: 'fadeIn 0.5s ease both'
+                    }}>
+                        <div style={{
+                            width: "8px", height: "8px", borderRadius: '50%',
+                            background: '#22c55e',
+                            boxShadow: '0 0 12px #22c55e'
+                        }}/>
+                        <span style={{
+                            fontSize: "11px", letterSpacing: "2px",
+                            color: 'rgba(34,197,94,0.9)',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold'
+                        }}>
+                            background will be auto-removed
+                        </span>
+                    </div>
+                )}
+
+                <div style={{ marginTop: '40px', opacity: 0.3 }}>
+                     <p style={{ fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase' }}>
+                         ✦ skippable ✦
+                     </p>
+                </div>
+              </div>
+
+              <input type="file" ref={photoRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/*" />
+            </div>
+          )}
+
+          {/* STEP 7: MESSAGE */}
+          {step === 7 && (
+            <div style={{ animation: "fadeIn 0.5s ease" }}>
+              <div style={styles.stepHeader}>
+                <div style={styles.stepTag}>STEP SEVEN</div>
                 <h1 style={{ ...styles.heading, fontSize: "clamp(28px, 5vw, 48px)" }}>
                   Words written <i style={{ color: THEME.rose, fontStyle: "italic" }}>by the heart</i>
                 </h1>
@@ -686,8 +1002,8 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
             </div>
           )}
 
-          {/* STEP 6: DELIVER */}
-          {step === 6 && (
+          {/* STEP 8: DELIVER */}
+          {step === 8 && (
             <div style={{ animation: "fadeIn 0.5s ease" }}>
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>FINAL STEP</div>
@@ -814,7 +1130,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 ...(hoveredBtn === "next" && canProceed() && { filter: "brightness(1.1)", transform: "scale(1.02)" })
               }}
             >
-              {step === 6 ? "Preview & Pay ₹49 💗" : "Continue →"}
+              {bgRemoving ? processingStatus : (step === 8 ? "Preview & Pay ₹49 💗" : "Continue →")}
             </button>
           </div>
         </footer>

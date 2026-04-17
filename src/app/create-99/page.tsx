@@ -33,7 +33,12 @@ export default function Create99Page() {
     }, []);
 
     const handleComplete = async (data: any) => {
-        setFormData(data);
+        // Add relationship to formData if not present
+        const enhancedData = {
+            ...data,
+            relationship: data.relationship || 'partner' // Default to partner if not set
+        };
+        setFormData(enhancedData);
         setCurrentView("lock");
     };
 

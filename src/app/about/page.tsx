@@ -33,7 +33,7 @@ export default function AboutPage() {
                                     "In a world full of emojis and blue ticks,<br />
                                     we wanted to build something that actually <em>felt</em> like something."
                                 </p>
-                                <span className="manifesto-attr">— Adnan & Arbaz, Founders of Love Bites</span>
+                                <span className="manifesto-attr">— Salah & Arbaz, Founders of Love Bites</span>
                             </div>
                         </div>
 
@@ -41,14 +41,14 @@ export default function AboutPage() {
                             <div className="story-text animate-on-scroll">
                                 <span className="section-label">♥ Our Story</span>
                                 <h2>Built by two friends<br />who believed in <em>more.</em></h2>
-                                <p>Love Bites was created by <strong>Adnan and Arbaz</strong> — two founders who believed that expressing love shouldn&apos;t feel ordinary.</p>
+                                <p>Love Bites was created by <strong>Salah and Arbaz</strong> — two founders who believed that expressing love shouldn&apos;t feel ordinary.</p>
                                 <p>In a world where messages and emojis fill every conversation, they wanted to build something different. Something that could turn feelings into meaningful moments — something that could surprise, touch, and stay in someone&apos;s memory long after they first saw it.</p>
                                 <p>Love Bites was built with one simple idea: <strong>love deserves more than just words.</strong></p>
                             </div>
                             <div className="founder-cards animate-on-scroll">
                                 <div className="founder-card">
                                     <div className="founder-avatar">🧠</div>
-                                    <div className="founder-name">Adnan</div>
+                                    <div className="founder-name">Salah</div>
                                     <div className="founder-role">Co-Founder</div>
                                     <p className="founder-quote">"I wanted to build something that could say everything you feel but never know how to say out loud."</p>
                                 </div>

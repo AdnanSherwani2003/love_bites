@@ -49,17 +49,26 @@ function LoginContent() {
         setMsg(null)
         setIsLoading(true)
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        try {
+            console.log('Attempting sign in for:', email);
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            })
 
-        if (error) {
-            setError(error.message)
+            if (error) {
+                console.error('Supabase Sign In Error:', error.message, error);
+                setError(error.message)
+                setIsLoading(false)
+            } else {
+                console.log('Sign in successful:', data.user?.id);
+                router.refresh()
+                router.push(nextPath)
+            }
+        } catch (err: any) {
+            console.error('Unexpected Sign In Error:', err);
+            setError(err.message || 'An unexpected error occurred during sign in.')
             setIsLoading(false)
-        } else {
-            router.refresh()
-            router.push(nextPath)
         }
     }
 
