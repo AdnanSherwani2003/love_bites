@@ -23,7 +23,7 @@ interface PlanProps {
   badgeClass?: string;
   cardClass?: string;
   href: string;
-  descRef: React.RefObject<HTMLParagraphElement | null>;
+  descRef: React.RefObject<HTMLParagraphElement>;
 }
 
 const SweetStartIcon = () => (
@@ -161,9 +161,9 @@ export default function PricingPage() {
     const [loading, setLoading] = useState(true)
     
     const descRefs = [
-      useRef<HTMLParagraphElement | null>(null),
-      useRef<HTMLParagraphElement | null>(null),
-      useRef<HTMLParagraphElement | null>(null)
+      useRef<HTMLParagraphElement>(null),
+      useRef<HTMLParagraphElement>(null),
+      useRef<HTMLParagraphElement>(null)
     ];
 
     useEffect(() => {
