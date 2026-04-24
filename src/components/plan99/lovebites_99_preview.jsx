@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import LoveBitesLogo from "@/components/LoveBitesLogo";
 import OccasionBackground from "@/components/OccasionBackground";

@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect } from 'react';
 import LoveBitesLogo from './LoveBitesLogo';
 import './PaymentPage.css';
@@ -51,18 +52,32 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
         body: JSON.stringify({ amount: selectedPlan }),
       });
 
-      if (!orderRes.ok) throw new Error('Order creation failed');
+      if (!orderRes.ok) {
+        const err = await orderRes.json();
+        console.error("❌ Frontend: Order API failed:", err);
+        throw new Error(err.error || 'Order creation failed');
+      }
       const orderData = await orderRes.json();
+      console.log("✅ Frontend: Order object received from backend:", orderData);
 
       // 2. Open Razorpay Standard Checkout
+      const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      
+      if (!key) {
+        console.error("❌ Frontend: NEXT_PUBLIC_RAZORPAY_KEY_ID is missing!");
+        window.alert("Critical Error: Razorpay Key is missing in frontend! Check your .env.local and restart the server.");
+        setIsLoading(false);
+        return;
+      }
+      
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: key,
         amount: orderData.amount,
-        currency: "INR",
+        currency: orderData.currency,
         name: "LoveBites",
         description: `Premium Digital Gift for ${recipientName}`,
-        image: "https://lovebites.vercel.app/logo.png", // Replace with actual logo URL
-        order_id: orderData.id,
+        image: "https://lovebites.vercel.app/logo.png",
+        order_id: orderData.id, // Using orderData.id as the full object is returned
         prefill: {
           name: customerName,
           email: customerEmail,
@@ -76,66 +91,56 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
           backdropclose: false,
           animation: true,
           ondismiss: function () {
+            console.log("ℹ️ Frontend: Payment modal dismissed by user");
             setIsLoading(false);
           },
         },
         handler: function (response: any) {
-          console.log("🔥 RAZORPAY HANDLER FIRED!", response);
+          console.log("✅ Frontend: Razorpay payment successful!", response);
           setScreen('processing');
-          console.log("[HANDLER] Set screen to processing");
 
-          // 1. Add a 500ms delay before calling verify-payment fetch
-          setTimeout(() => {
-            console.log("[HANDLER] Delay finished, calling verify fetch");
-            
-            // 3. Verify payment on backend
-            fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            }).then(async (verifyRes) => {
-              console.log("[HANDLER] Verify fetch responded with ok:", verifyRes.ok);
-              if (verifyRes.ok) {
-                console.log("[HANDLER] Before setScreen('success')");
-                setScreen('success');
-                console.log("[HANDLER] After setScreen('success'), before onSuccess()");
-                
-                try { 
-                  onSuccess(); 
-                } catch(e) { 
-                  console.error('onSuccess error:', e); 
-                }
-                
-                console.log("[HANDLER] After onSuccess()");
-              } else {
-                const errorText = await verifyRes.text();
-                console.error("Verification failed on backend:", errorText);
-                setScreen('failed');
+          // 3. Verify payment on backend
+          fetch('/api/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          }).then(async (verifyRes) => {
+            console.log("📡 Frontend: Verification response status:", verifyRes.status);
+            if (verifyRes.ok) {
+              console.log("🎉 Frontend: Verification SUCCESSFUL");
+              setScreen('success');
+              try { 
+                onSuccess(); 
+              } catch(e) { 
+                console.error('onSuccess error:', e); 
               }
-            }).catch((err) => {
-              console.error("Verification fetch error:", err);
+            } else {
+              const err = await verifyRes.json();
+              console.error("❌ Frontend: Verification failed:", err.error || err.message);
               setScreen('failed');
-            });
-          }, 500);
+            }
+          }).catch((err) => {
+            console.error("❌ Frontend: Verification fetch error:", err);
+            setScreen('failed');
+          });
         },
       };
 
-      console.log('Razorpay Options:', options);
-      console.log('Order ID from Backend:', orderData.id);
+      console.log("🚀 Frontend: Opening Razorpay with options:", options);
       const rzp = new (window as any).Razorpay(options);
       
       rzp.on('payment.failed', function (response: any) {
-        console.error('Payment failed:', response.error);
+        console.error('❌ Frontend: Payment failed event:', response.error);
         setScreen('failed');
       });
 
       rzp.open();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error('❌ Frontend: Checkout flow error:', error);
       setScreen('failed');
     } finally {
       setIsLoading(false);
