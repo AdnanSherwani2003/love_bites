@@ -473,5 +473,5 @@ const LoveBites99 = ({ data = mockData, isViewer = false, tier }) => {
     );
 };
 
-export { LockScreen, Preview99 };
+export { Preview99 };
 export default LoveBites99;
