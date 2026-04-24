@@ -5,6 +5,7 @@ import InteractiveCake from "@/components/plan49/effects/InteractiveCake";
 import InteractiveOpening from "@/components/InteractiveOpening";
 import StringLights from "@/components/StringLights";
 import MemoriesStringLights from "@/components/MemoriesStringLights";
+import PaymentPage from "@/components/PaymentPage";
 
 // Animations
 import AnniversaryAnimation from "@/components/animations/AnniversaryAnimation";
@@ -146,18 +147,22 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
         
         // Ensure photos is an array of non-null values
         const rawPhotos = Array.isArray(data.photos) ? data.photos : [];
-        const validPhotos = rawPhotos.filter(p => p !== null && p !== '');
+        const validPhotos = rawPhotos.filter(p => !!p);
         
         return {
             ...mockData,
             ...data,
-            photos: validPhotos.length > 0 ? validPhotos : mockData.photos,
+            // If data.photos is provided, use validPhotos (empty or not). 
+            // If completely missing from data, then fallback to mock.
+            photos: ('photos' in data) ? validPhotos : mockData.photos,
             recipientName: data.recipientName || mockData.recipientName,
             senderName: data.senderName || mockData.senderName,
             generatedMessage: data.generatedMessage || mockData.generatedMessage,
             occasion: data.occasion || mockData.occasion,
             selectedMoods: data.selectedMoods || mockData.selectedMoods,
-            photoMemories: Array.isArray(data.photoMemories) ? data.photoMemories : mockData.photoMemories
+            photoMemories: Array.isArray(data.photoMemories) ? data.photoMemories : (('photos' in data) ? [] : mockData.photoMemories),
+            customerEmail: data.customerEmail || "",
+            customerPhone: data.customerPhone || "",
         };
     }, [data]);
 
@@ -174,6 +179,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
     const [typedText, setTypedText] = useState("");
     const [heroBurst, setHeroBurst] = useState([]);
     const [heroClicked, setHeroClicked] = useState(false);
+    const [showPayment, setShowPayment] = useState(false);
     
     // Mobile detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
@@ -614,6 +620,32 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
     };
 
     // --- RENDER ---
+    if (showPayment) {
+        const planMap = {
+            "49": { name: 'Sweet Start', emoji: '🌸' },
+            "99": { name: 'True Love', emoji: '💕' },
+            "149": { name: 'Grand Amour', emoji: '👑' }
+        };
+        const activePlan = planMap[tier] || planMap["49"];
+
+        return (
+            <PaymentPage
+                amount={parseInt(tier)}
+                planName={activePlan.name}
+                planEmoji={activePlan.emoji}
+                recipientName={resolvedData.recipientName}
+                customerName={resolvedData.senderName} // Using senderName as prefill name
+                customerEmail={resolvedData.customerEmail}
+                customerPhone={resolvedData.customerPhone}
+                onSuccess={() => {
+                    setShowPayment(false);
+                    onConfirm();
+                }}
+                onBack={() => setShowPayment(false)}
+            />
+        );
+    }
+
     if (phase === "opening") {
         return (
             <div 
@@ -1344,7 +1376,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                             We'll deliver it to {resolvedData.recipientName} exactly as you see it.
                         </p>
                         <button 
-                            onClick={onConfirm}
+                            onClick={() => setShowPayment(true)}
                             disabled={isSubmitting}
                             style={{
                                 background: `linear-gradient(45deg, ${config.colors.secondary}, ${config.colors.primary}, ${config.colors.secondary})`,
@@ -1355,7 +1387,7 @@ export default function Preview99({ data, tier, onConfirm, isSubmitting }) {
                                 animation: "shimmerPay 3s linear infinite, pulseGlow 2s infinite ease-in-out"
                             }}
                         >
-                            {isSubmitting ? "Processing..." : `💳 Pay ₹${tier} & send to your love ones`}
+                            {isSubmitting ? "Processing..." : `💳 Pay & Continue`}
                         </button>
                     </div>
                 </section>

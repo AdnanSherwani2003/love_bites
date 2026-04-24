@@ -131,13 +131,11 @@ const SweetStart49 = ({
     }
 
     if (step === 8 && canProceed()) {
-      if (onComplete) {
-        onComplete({
-          createFor, relationship, selectedMood, selectedOccasion, yourName, partnerName, theirStory,
-          photos, photoMemories, themPhoto, partnerPhotoUrl: processedPhotoUrl, selectedFrame, unlockCode, hintMessage,
-          generatedMessage
-        });
-      }
+      onComplete({
+        createFor, relationship, selectedMood, selectedOccasion, yourName, partnerName, theirStory,
+        photos, photoMemories, themPhoto, partnerPhotoUrl: processedPhotoUrl, selectedFrame, unlockCode, hintMessage,
+        generatedMessage
+      });
       return;
     }
     if (canProceed()) setStep(s => s + 1);
@@ -158,8 +156,8 @@ const SweetStart49 = ({
     const files = Array.from(e.target.files);
     if (!files.length) return;
     
-    // Handle 'them' photo upload (step 5)
-    if (step === 5) {
+    // Handle 'them' photo upload (step 6)
+    if (step === 6) {
       const file = files[0];
       if (file) {
         setPartnerPhotoFile(file);
@@ -174,7 +172,7 @@ const SweetStart49 = ({
       return;
     }
     
-    // Handle regular photos upload (step 4)
+    // Handle regular photos upload (step 5)
     const newPhotos = [...photos];
     let slotsFilled = 0;
 
@@ -889,10 +887,10 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
               <div style={styles.stepHeader}>
                 <div style={styles.stepTag}>STEP SEVEN</div>
                 <h1 style={{ ...styles.heading, fontSize: "clamp(28px, 5vw, 48px)" }}>
-                  Words written <i style={{ color: THEME.rose, fontStyle: "italic" }}>by the heart</i>
+                  Your <i style={{ color: THEME.rose, fontStyle: "italic" }}>Love Message</i>
                 </h1>
                 <p style={{ color: "rgba(255,255,255,0.4)", fontFamily: THEME.sans, fontSize: "14px" }}>
-                  AI crafts a message based on your mood, occasion & story
+                  Crafted by AI, inspired by your heart
                 </p>
               </div>
 
@@ -913,88 +911,82 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 </div>
 
                 {!generatedMessage ? (
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", padding: "40px 0", width: '100%' }}>
-                    {features.ai_magic ? (
-                      <>
-                        <button
-                          onClick={generateMessage}
-                          disabled={isGenerating}
-                          style={{ 
-                            background: isGenerating ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #9b1a3a, #c4304f)",
-                            borderRadius: "50px", padding: "16px 44px", color: "white", fontSize: "15px", 
-                            fontFamily: THEME.serif, fontStyle: "italic", cursor: isGenerating ? "not-allowed" : "pointer",
-                            boxShadow: isGenerating ? "none" : "0 6px 24px rgba(155,26,58,0.4)", border: "none", transition: "0.3s"
-                          }}
-                        >
-                          {isGenerating ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>✨</span>
-                              Writing your message...
-                            </span>
-                          ) : "✨ Generate My Message"}
-                        </button>
-                        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>Powered by Groq AI</p>
-                      </>
-                    ) : (
-                      <div style={{ textAlign: 'center', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px dashed rgba(255,107,138,0.3)', width: '100%', maxWidth: '400px' }}>
-                        <p style={{ color: '#ff6b8a', fontSize: '14px', marginBottom: '8px' }}>✨ AI Magic is currently resting.</p>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>Please write your message manually below.</p>
-                        <button 
-                          onClick={() => setGeneratedMessage("My Dearest, ")}
-                          style={{ marginTop: '16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
-                        >
-                          Write Manually
-                        </button>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", padding: "60px", width: '100%' }}>
+                    {isGenerating ? (
+                      <div>
+                        <div style={{ width: "40px", height: "40px", border: `3px solid ${THEME.maroon}`, borderTopColor: "white", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 20px" }} />
+                        <div style={{ color: THEME.rose, fontWeight: "bold" }}>Generating your message...</div>
                       </div>
+                    ) : (
+                      <>
+                        {features.ai_magic ? (
+                          <>
+                            <button
+                              onClick={generateMessage}
+                              style={{ 
+                                padding: "20px 48px", borderRadius: "40px", background: "linear-gradient(135deg, #9b1a3a, #c4304f)", border: "none", color: "white", fontWeight: "bold", cursor: "pointer", fontSize: "18px", boxShadow: "0 8px 30px rgba(155,26,58,0.5)"
+                              }}
+                            >
+                              Generate AI Message ✨
+                            </button>
+                            <p style={{ marginTop: "24px", fontSize: "12px", color: "rgba(255,248,240,0.3)" }}>Powered by Groq AI</p>
+                          </>
+                        ) : (
+                          <div style={{ textAlign: 'center', padding: '30px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px dashed rgba(255,107,138,0.3)', maxWidth: '400px', margin: '0 auto' }}>
+                            <p style={{ color: '#ff6b8a', fontSize: '16px', marginBottom: '12px', fontWeight: 'bold' }}>✨ AI Magic is currently resting.</p>
+                            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: '1.6' }}>The AI is offline for maintenance. Please pen your beautiful message manually.</p>
+                            <button 
+                              onClick={() => setGeneratedMessage("My Dearest, ")}
+                              style={{ marginTop: '20px', background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '10px 24px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                              Write Manually
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 ) : (
                   <div style={{ width: '100%', maxWidth: '600px' }}>
                     <div style={{ 
-                      background: "linear-gradient(135deg, rgba(155,26,58,0.08), rgba(196,48,79,0.04))",
-                      border: "1px solid rgba(155,26,58,0.2)", borderRadius: "20px", padding: "32px", 
-                      position: "relative", marginBottom: "20px", animation: "fadeIn 0.5s ease"
+                      position: "relative", background: "rgba(233, 69, 96, 0.05)", border: "1px solid rgba(233, 69, 96, 0.2)", padding: "40px", borderRadius: "32px", animation: "fadeIn 0.5s ease"
                     }}>
-                      <div style={{ position: "absolute", top: "16px", left: "22px", fontSize: "48px", opacity: 0.12, color: THEME.rose, fontFamily: THEME.serif }}>“</div>
+                      <div style={{ position: "absolute", top: "10px", left: "20px", fontSize: "60px", color: "rgba(155,26,58,0.1)", fontFamily: THEME.serif }}>"</div>
                       {isEditing ? (
                         <textarea
                           value={generatedMessage}
                           onChange={(e) => setGeneratedMessage(e.target.value)}
                           autoFocus
                           style={{ 
-                            width: "100%", minHeight: "200px", background: "transparent", border: "none", 
-                            color: "rgba(255,248,240,0.85)", fontSize: "15px", lineHeight: "1.9", fontFamily: THEME.serif, 
-                            outline: "none", resize: "none", whiteSpace: "pre-wrap", paddingTop: "10px"
+                            width: "100%", minHeight: "300px", background: "transparent", border: "none", 
+                            color: "white", fontSize: "17px", lineHeight: "1.8", fontFamily: THEME.serif, 
+                            outline: "none", resize: "none", paddingTop: "10px"
                           }}
                         />
                       ) : (
                         <div style={{ 
-                          color: "rgba(255,248,240,0.85)", fontSize: "15px", lineHeight: "1.9", 
+                          color: "white", fontSize: "17px", lineHeight: "1.8", 
                           fontFamily: THEME.serif, whiteSpace: "pre-wrap", paddingTop: "10px"
                         }}>
                           {generatedMessage}
                         </div>
                       )}
-                    </div>
-                    <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                      <button 
-                        onClick={generateMessage}
-                        style={{ 
-                          padding: "8px 18px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", 
-                          border: "1px solid rgba(255,255,255,0.1)", color: "white", fontSize: "12px", cursor: "pointer" 
-                        }}
-                      >
-                        ↻ Regenerate
-                      </button>
-                      <button 
-                        onClick={() => setIsEditing(!isEditing)}
-                        style={{ 
-                          padding: "8px 18px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", 
-                          border: "1px solid rgba(255,255,255,0.1)", color: "white", fontSize: "12px", cursor: "pointer" 
-                        }}
-                      >
-                        ✏️ {isEditing ? "Done Editing" : "Edit Message"}
-                      </button>
+                      <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+                        <button 
+                          onClick={generateMessage}
+                          style={{ padding: "10px 20px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", cursor: "pointer", fontWeight: "bold", fontSize: "12px" }}
+                        >
+                          ↻ Regenerate
+                        </button>
+                        <button 
+                          onClick={() => setIsEditing(!isEditing)}
+                          style={{ padding: "10px 20px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", cursor: "pointer", fontWeight: "bold", fontSize: "12px" }}
+                        >
+                          ✏️ {isEditing ? "✓ Save" : "Edit"}
+                        </button>
+                        <div style={{ flex: 1 }} />
+                        <span style={{ fontSize: "11px", color: "rgba(255,248,240,0.3)", alignSelf: "center" }}>You can edit this message directly</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1130,7 +1122,7 @@ Keep it simple, genuine, warm. Not too long. Sign from ${yourName}.`;
                 ...(hoveredBtn === "next" && canProceed() && { filter: "brightness(1.1)", transform: "scale(1.02)" })
               }}
             >
-              {bgRemoving ? processingStatus : (step === 8 ? "Preview & Pay ₹49 💗" : "Continue →")}
+              {bgRemoving ? processingStatus : (step === 8 ? "Continue to Preview 💗" : "Continue →")}
             </button>
           </div>
         </footer>

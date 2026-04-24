@@ -156,22 +156,20 @@ const TrueLovePlan = ({
         }
 
         if (step === 8 && canProceed()) {
-            if (onComplete) {
-                onComplete({
-                    createFor,
-                    relationship,
-                    recipientName: partnerName,
-                    senderName: yourName,
-                    selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id)),
-                    occasion: occasions.find(o => o.id === selectedOccasion),
-                    hintMessage: hintMessage,
-                    unlockCode: unlockCode,
-                    generatedMessage: generatedMessage,
-                    photos: photos,
-                    photoMemories: photoMemories,
-                    partnerPhotoUrl: processedPhotoUrl // Pass the processed photo URL
-                });
-            }
+            onComplete({
+                createFor,
+                relationship,
+                recipientName: partnerName,
+                senderName: yourName,
+                selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id)),
+                occasion: occasions.find(o => o.id === selectedOccasion),
+                hintMessage: hintMessage,
+                unlockCode: unlockCode,
+                generatedMessage: generatedMessage,
+                photos: photos,
+                photoMemories: photoMemories,
+                partnerPhotoUrl: processedPhotoUrl // Pass the processed photo URL
+            });
             return;
         }
         if (canProceed()) setStep(s => s + 1);
@@ -1858,7 +1856,7 @@ const TrueLovePlan = ({
                                 <span style={{ fontSize: "9px", textTransform: "uppercase" }}>Processing...</span>
                             </div>
                         ) : (
-                            step === 8 ? "Preview & Pay ₹99 💗" : "Next →"
+                            step === 8 ? "Continue to Preview 💗" : "Next →"
                         )}
                     </button>
                     {bgRemoving && (

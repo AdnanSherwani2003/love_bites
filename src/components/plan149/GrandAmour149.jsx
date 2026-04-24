@@ -69,7 +69,6 @@ const GrandAmour149 = ({
   const [previewImage, setPreviewImage] = useState(null);
 
   const [hoveredBtn, setHoveredBtn] = useState(null);
-
   const photoRef = useRef(null);
   const videoPhotoRef = useRef(null);
   const musicRef = useRef(null);
@@ -194,20 +193,18 @@ const GrandAmour149 = ({
     }
 
     if (step === 11 && canProceed()) {
-      if (onComplete) {
-        onComplete({
-          createFor,
-          relationship,
-          step, 
-          selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id) || { id, label: id, emoji: "❤️" }), 
-          selectedOccasion: occasions.find(o => o.id === selectedOccasion) || { id: "anniversary", label: "Anniversary", emoji: "💑" },
-          yourName, partnerName, theirStory,
-          photos, photoMemories, themPhoto, partnerPhotoUrl: processedPhotoUrl, videoPhotos, selectedFrame, musicEnabled, musicTab, selectedTrack,
-          uploadedMusic, destructMode, generatedMessage, unlockCode: unlockCode.join(""), hintMessage,
-          deliveryMethod, recipientContact, deliveryDate, deliveryTime, notifyEmail,
-          notifOpen, notifView, notifReply
-        });
-      }
+      onComplete({
+        createFor,
+        relationship,
+        step, 
+        selectedMoods: selectedMoods.map(id => moodsData.find(m => m.id === id) || { id, label: id, emoji: "❤️" }), 
+        selectedOccasion: occasions.find(o => o.id === selectedOccasion) || { id: "anniversary", label: "Anniversary", emoji: "💑" },
+        yourName, partnerName, theirStory,
+        photos, photoMemories, themPhoto, partnerPhotoUrl: processedPhotoUrl, videoPhotos, selectedFrame, musicEnabled, musicTab, selectedTrack,
+        uploadedMusic, destructMode, generatedMessage, unlockCode: unlockCode.join(""), hintMessage,
+        deliveryMethod, recipientContact, deliveryDate, deliveryTime, notifyEmail,
+        notifOpen, notifView, notifReply
+      });
       return;
     }
     if (canProceed()) setStep(s => s + 1);
@@ -1406,7 +1403,7 @@ const GrandAmour149 = ({
               onMouseLeave={() => setHoveredBtn(null)}
               style={styles.btnNext(canProceed())}
             >
-                {bgRemoving ? processingStatus : (step === 11 ? "Review Grand Amour ₹149 💗" : "Continue Checkout →")}
+                {bgRemoving ? processingStatus : (step === 11 ? "Continue to Preview 💗" : "Continue Checkout →")}
             </button>
           </div>
         </footer>
